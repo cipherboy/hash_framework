@@ -9,13 +9,13 @@ clause_dedupe_s = {}
 cache_rename = {}
 
 def var_rename_r(expr, eval_table):
-    if type(expr) == type('str'):
+    if type(expr) == str:
         if expr in ['T', 'F']:
             return expr
         if expr in eval_table:
             return eval_table[expr]
         return expr
-    if type(expr) == type((1, 2)) and len(expr) >= 2:
+    if type(expr) == tuple and len(expr) >= 2:
         c = [expr[0]]
         for i in expr[1:]:
             c.append(var_rename(i, eval_table))
@@ -41,7 +41,7 @@ def clause_dedupe_r(expr, prefix):
     if is_var_expr(expr):
         clause_dedupe_s[expr] = expr
         return expr
-    if type(expr) == type((1, 2)) and expr[0] == 'not' and len(expr) == 2:
+    if type(expr) == tuple and expr[0] == 'not' and len(expr) == 2:
         l_v = expr[1]
         if not is_var_expr(l_v):
             l_v = clause_dedupe(expr[1], prefix)
@@ -50,7 +50,7 @@ def clause_dedupe_r(expr, prefix):
         clause_count[prefix] += 1
         return name
 
-    if type(expr) == type((1, 2)) and len(expr) >= 3:
+    if type(expr) == tuple and len(expr) >= 3:
         r = [expr[0]]
         for i in range(1, len(expr)):
             v = expr[i]
@@ -78,7 +78,7 @@ def clause_dedupe(expr, prefix):
     return cache_clause_dedupe[(expr, prefix)]
 
 def clause_reduce_r(expr):
-    if type(expr) != type((1, 2)):
+    if type(expr) != tuple:
         return expr
     result = [expr[0]]
     for c in expr[1:]:
@@ -98,14 +98,13 @@ def clause_reduce(expr):
     return cache_clause_reduce[expr]
 
 def translate_r(expr):
-    if type(expr) != type((1, 2)):
+    if type(expr) != tuple:
         return expr
     if len(expr) == 2 and expr[0] == 'not':
         return "NOT(" + translate(expr[1]) + ")"
     if len(expr) == 3 and expr[0] == 'equal':
         s = "(" + translate(expr[1]) + " == " + translate(expr[2]) + ")"
         return s
-    #expr = clause_reduce(expr)
     if len(expr) >= 2 and expr[0] == 'and':
         s = "AND("
         for c in expr[1:]:

@@ -7,25 +7,26 @@ getcontext().prec = 500
 
 def r_probability(expr, probability_table):
     result = False
-    if type(expr) == type("string") and expr in probability_table:
+    if type(expr) == str and expr in probability_table:
         result = probability_table[expr]
-    elif type(expr) == type("string") and expr == 'F':
+    elif type(expr) == str and expr == 'F':
         result = Decimal(0.0)
-    elif type(expr) == type("string") and expr == 'T':
+    elif type(expr) == str and expr == 'T':
         result = Decimal(1.0)
-    elif type(expr) == type(Decimal(1.0)):
+    elif type(expr) == Decimal:
         result = expr
-    elif type(expr) == type((1, 2)) and len(expr) == 2 and expr[0] == 'not':
+    elif type(expr) == tuple and len(expr) == 2 and expr[0] == 'not':
         result = Decimal(1) - probability(expr[1], probability_table)
-    elif type(expr) == type((1, 2)) and len(expr) == 3 and expr[0] == 'and':
+    elif type(expr) == tuple and len(expr) == 3 and expr[0] == 'and':
         result = probability(expr[1], probability_table)*probability(expr[2], probability_table)
-    elif type(expr) == type((1, 2)) and len(expr) == 3 and expr[0] == 'or':
+    elif type(expr) == tuple and len(expr) == 3 and expr[0] == 'or':
         result = Decimal(1) - ((Decimal(1) - probability(expr[1], probability_table))*(Decimal(1) - probability(expr[2], probability_table)))
-    elif type(expr) == type((1, 2)) and len(expr) == 3 and expr[0] == 'xor':
+    elif type(expr) == tuple and len(expr) == 3 and expr[0] == 'xor':
         result = ((Decimal(1) - probability(expr[1], probability_table))*(probability(expr[2], probability_table))) + ((probability(expr[1], probability_table))*(Decimal(1) - probability(expr[2], probability_table)))
-    elif type(expr) == type((1, 2)) and len(expr) == 3 and expr[0] == 'equal':
+    elif type(expr) == tuple and len(expr) == 3 and expr[0] == 'equal':
         result = probability(expr[1], probability_table)*probability(expr[2], probability_table) + (Decimal(1) - probability(expr[1], probability_table))*(Decimal(1) - probability(expr[2], probability_table))
-    if type(result) == False:
+
+    if result == False:
         return 1//0
     else:
         return result

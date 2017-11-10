@@ -1,10 +1,9 @@
 #!/usr/bin/env python
 
-from hash_simplify import *
-from hash_translate import *
-from hash_variables import *
-from hash_boolean import *
-from hash_output import *
+from hash_framework.boolean.simplify import *
+from hash_framework.boolean.translate import *
+from hash_framework.boolean.variables import *
+from hash_framework.boolean.core import *
 
 def writeyy(f, prefix, yy, ic, eval_table):
     for i in range(0, 32):
@@ -108,4 +107,4 @@ def print_vars(eval_table, prefix, min, max):
     for i in range(min, max):
         name = prefix + str(i)
         aa.append(eval_table[name])
-    print(prefix + "[" + str(min) + "-" + str(max) + "] = " + str(hash_tonum(aa)))
+    print(prefix + "[" + str(min) + "-" + str(max) + "] = " + str(b_tonum(aa)))
