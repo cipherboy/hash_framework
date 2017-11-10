@@ -1,7 +1,4 @@
-
-"""
- * Implements the sha1 algorithm using the hash framework constructs.
-"""
+from hash_framework.boolean import *
 
 def sha1f(t, b, c, d):
     if 0 <= t <= 19:

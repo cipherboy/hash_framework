@@ -1,1 +1,2 @@
 import hash_framework.boolean
+import hash_framework.algorithms

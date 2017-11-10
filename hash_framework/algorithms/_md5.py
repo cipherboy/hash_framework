@@ -1,3 +1,5 @@
+from hash_framework.boolean import *
+
 def md5f(x, y, z):
     #return hash_or(hash_and(x, y), hash_and(hash_not(x), z))
     return hash_xor(hash_and(hash_xor(y, z), x), z)
