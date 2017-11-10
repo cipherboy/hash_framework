@@ -1,3 +1,6 @@
+from hash_framework import attacks
+from hash_framework import models
+
 def analyze(algo, cols):
     count = algo.block_size//algo.int_size
     differentials = []
@@ -10,7 +13,7 @@ def analyze(algo, cols):
     return differentials
 
 def negate(algo, cols, clause="cblocks", name="06-blocks.txt"):
-    differentials = attacks.collision.differentials.analyze(algo, cols)
+    differentials = analyze(algo, cols)
     r = ['and']
     for i in range(0, algo.block_size//algo.int_size):
         print(list(differentials[i]))

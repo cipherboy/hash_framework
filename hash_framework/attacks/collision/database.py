@@ -1,3 +1,5 @@
+from hash_framework.database import database as database
+
 def import_from_other(path, tag):
     db2 = database()
     db2.path=path

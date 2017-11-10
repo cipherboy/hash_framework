@@ -1,3 +1,6 @@
+from hash_framework import attacks
+from hash_framework import models
+
 def find_arbitrary_differential(algo, db, rounds, tag):
     algo.rounds = rounds
     m = models()

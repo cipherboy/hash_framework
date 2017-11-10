@@ -1,3 +1,6 @@
+from hash_framework import attacks
+from hash_framework import models
+
 def analyze(algo, cols, prefix='h1'):
     assert(type(prefix) == str)
     stuck = []

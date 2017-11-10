@@ -1,3 +1,6 @@
+from hash_framework import attacks
+from hash_framework import models
+
 def constraints(algo, cols):
     # Differential Path
     differential = ['and']

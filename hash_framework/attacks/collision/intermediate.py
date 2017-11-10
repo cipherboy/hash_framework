@@ -1,3 +1,6 @@
+from hash_framework import attacks
+from hash_framework import models
+
 def analyze(algo, cols):
     intermediate = []
     for i in range(0, algo.rounds):

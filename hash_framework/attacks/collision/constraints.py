@@ -1,3 +1,5 @@
+from hash_framework import models
+
 def write_constraints(algo, prefixes=['h1', 'h2'], name="98-collision.txt"):
     assert(type(prefixes) == list and len(prefixes) == 2 and type(prefixes[0]) == str and type(prefixes[1]) == str)
     c = ['and']

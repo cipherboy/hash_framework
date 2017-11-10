@@ -1,3 +1,6 @@
+from hash_framework import attacks
+from hash_framework import models
+
 def get_block_round_funcs(algo, index):
     i = int(index)
     result = []

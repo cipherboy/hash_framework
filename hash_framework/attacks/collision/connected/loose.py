@@ -1,3 +1,6 @@
+from hash_framework import models
+from hash_framework import attacks
+
 class database:
     def setup(algo, db):
         # Create target queue
