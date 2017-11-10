@@ -1,3 +1,5 @@
+import hash_framework.attacks as attacks
+
 class visualizations:
     def render_graph(graph, names, filename):
         print("Start render_graph")

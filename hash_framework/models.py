@@ -1,10 +1,13 @@
+from hash_framework.config import config
+
 class models:
-    cms_bin="/home/" + LOCAL_USER + "/cryptominisat5"
-    cms_args=""
-    bc_bin="/home/" + LOCAL_USER + "/Development/hash-framework/tools/BCpackage-0.40/bc2cnf"
-    bc_args=["-nots", "-nocoi", "-nosimplify"]
-    model_dir="/home/" + LOCAL_USER + "/Development/hash-framework/tmpmodels"
-    remote=True
+    def __init__(self):
+        self.cms_bin = config.cms_bin
+        self.cms_args = config.cms_args
+        self.bc_bin = config.bc_bin
+        self.bc_args = config.bc_args
+        self.model_dir = config.model_dir
+        self.remote = True
 
     def get_mapping(self, cnf="problem.cnf"):
         var_mapping = collections.defaultdict(list)

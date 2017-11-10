@@ -1,7 +1,9 @@
+import sqlite3
 
 class database:
-    path = "/home/" + LOCAL_USER + "/Development/hash-framework/results/framework_results.db"
-    conn = sqlite3.connect(path)
+    def __init__(self, path="framework_results.db"):
+        self.path = path
+        self.conn = sqlite3.connect(path)
 
     def execute(self, q, commit=True):
         for i in range(0, 20):
