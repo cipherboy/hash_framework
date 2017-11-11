@@ -78,3 +78,5 @@ def handle_clean(jid):
 
     j.clean()
     return ""
+
+app.run(host="0.0.0.0")

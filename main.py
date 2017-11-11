@@ -4,7 +4,10 @@ def __main__():
     pass
 
 if __name__ == "__main__":
-    cs = hash_framework.manager.build_client_set(["http://localhost:5000"])
+    cset = []
+    for i in range(0,11):
+        cset.append("http://10.1.30." + str(i) + ":5000")
+    cs = hash_framework.manager.build_client_set(cset)
     kernel_name = "second_preimage"
     kernel = hash_framework.kernels.lookup(kernel_name)
     start_state = "FTTFFTTTFTFFFTFTFFTFFFTTFFFFFFFTTTTFTTTTTTFFTTFTTFTFTFTTTFFFTFFTTFFTTFFFTFTTTFTFTTFTTTFFTTTTTTTFFFFTFFFFFFTTFFTFFTFTFTFFFTTTFTTF"
