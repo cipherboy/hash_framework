@@ -12,7 +12,7 @@ from hash_framework.config import config
 
 app = Flask(__name__)
 queues = Jobs(config)
-queues.do_update()
+queues.update_thread()
 
 @app.route("/")
 def handle_overview():
