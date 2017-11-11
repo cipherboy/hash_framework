@@ -1,5 +1,5 @@
 from hash_framework import attacks
-from hash_framework import models
+from hash_framework.models import models
 
 def constraints(algo, cols):
     # Differential Path

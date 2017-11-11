@@ -1,8 +1,9 @@
-import hash_framework.kernels as kernels
+from hash_framework.kernels.abstract import Kernel
+from hash_framework.kernels.second_preimage import SecondPreimage
 
 all_kernels = {
-    'abstract': kernels.Kernel,
-    'second_preimage': kernels.SecondPreimage
+    'abstract': Kernel,
+    'second_preimage': SecondPreimage
 }
 
 def lookup(name):

@@ -1,9 +1,9 @@
-import hash_framework.attacks.collision.constraints
-import hash_framework.attacks.collision.database
-import hash_framework.attacks.collision.differentials
-import hash_framework.attacks.collision.intermediate
-import hash_framework.attacks.collision.loose
-import hash_framework.attacks.collision.reduced
-import hash_framework.attacks.collision.round
-import hash_framework.attacks.collision.stuck
-import hash_framework.attacks.collision.tight
+from hash_framework.attacks.collision.constraints import *
+from hash_framework.attacks.collision.database import *
+from hash_framework.attacks.collision.differentials import *
+from hash_framework.attacks.collision.intermediate import *
+from hash_framework.attacks.collision.loose import *
+from hash_framework.attacks.collision.reduced import *
+from hash_framework.attacks.collision.round import *
+from hash_framework.attacks.collision.stuck import *
+from hash_framework.attacks.collision.tight import *

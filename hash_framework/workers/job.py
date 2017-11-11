@@ -47,7 +47,7 @@ class Job:
         self.ftime = time.time()
 
     def result(self):
-        return {"id": self.id, "return": self.status(), "out": self.ofname}
+        return {"id": self.id, "return": self.status(), "results": self.kernel.post_run(self.status())}
 
     def clean(self):
         try:

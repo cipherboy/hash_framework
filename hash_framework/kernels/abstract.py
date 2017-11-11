@@ -1,11 +1,10 @@
 from hash_framework.config import config
 import os.path
+import json
 
 class Kernel:
-    def __init__(self, args, timeout):
+    def __init__(self, args):
         self.args = args
-        self.timeout = None
-        pass
 
     def cache_dir(self):
         return config.cache_dir
@@ -19,20 +18,19 @@ class Kernel:
     def run_cmd(self):
         return "echo 'Please override Kernel and supply a run_cmd method.'"
 
-    def post_run(self, obj, data):
-        if obj["return"] == 10:
-            return self.run_sat(obj["out"], data, raw=obj)
-        elif obj["return"] == 20:
-            return self.run_unsat(obj["out"], data, raw=obj)
+    def post_run(self, return_code):
+        if return_code == 10:
+            return self.run_sat()
+        elif return_code == 20:
+            return self.run_unsat()
         else:
-            return self.run_error(obj["out"], data, raw=obj)
+            return self.run_error()
 
-    def run_sat(self, path, data, raw=None):
-        pass
+    def run_sat(self):
+        return []
 
-    def run_unsat(self, path, data, raw=None):
-        pass
+    def run_unsat(self):
+        return []
 
-    def run_error(self, path, data, raw=None):
-        print("[Error]")
-        print(raw)
+    def run_error(self):
+        print("[Error running model]: " + json.dumps(self.args))

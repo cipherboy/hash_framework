@@ -1,8 +1,9 @@
 import time, time
 import base64, json
 import subprocess, sys, random
+import threading
 
-from cmsfabric.job import Job
+from hash_framework.workers.job import Job
 
 class Jobs:
     def __init__(self, config):
@@ -15,6 +16,17 @@ class Jobs:
     def update_config(self, config):
         self.config = config
 
+    def update_thread(self):
+        thread = threading.Thread(target=self.do_update)
+        thread.daemon = True
+        thread.start()
+        return thread
+
+
+    def do_update(self):
+        self.update()
+        time.sleep(0.01)
+
     def update(self):
         for jid in self.jq.copy():
             j = self.jobs[jid]
@@ -22,7 +34,7 @@ class Jobs:
                 self.fj.add(jid)
                 self.jq.remove(jid)
 
-        while len(self.jq) < self.config["jobs"] and len(self.wj) > 0:
+        while len(self.jq) < self.config.threads and len(self.wj) > 0:
             jid = self.wj.pop()
             self.jobs[jid].run()
             self.jq.add(jid)

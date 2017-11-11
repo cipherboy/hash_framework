@@ -1,5 +1,5 @@
 from hash_framework import attacks
-from hash_framework import models
+from hash_framework.models import models
 
 def analyze(algo, cols):
     count = algo.block_size//algo.int_size

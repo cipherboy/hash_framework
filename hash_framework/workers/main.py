@@ -5,9 +5,14 @@ import subprocess, sys, random
 from flask import Flask
 from flask import request
 
+from hash_framework.workers.utils import *
+from hash_framework.workers.job import Job
+from hash_framework.workers.jobs import Jobs
+from hash_framework.config import config
+
 app = Flask(__name__)
-config = json.load(open(u_c(), 'r'))
 queues = Jobs(config)
+queues.do_update()
 
 @app.route("/")
 def handle_overview():
@@ -23,11 +28,12 @@ def handle_ready():
 def handle_jobs():
     queues.update()
     if request.method == 'POST':
-        data = request.get_data()
+        data = request.get_json(force=True)
         print(data)
-        j = Job(config)
-        j.set(data)
-        return queues.add(j)
+        j = Job(data['kernel_name'], data['kernel_args'])
+        jid = queues.add(j)
+        queues.update()
+        return jid
     else:
         return queues.all()
 
@@ -59,7 +65,6 @@ def handle_job(jid):
         return queues.result(j), 200
 
     return "", 202
-
 
 @app.route("/kill/<int:jid>")
 def handle_kill(jid):

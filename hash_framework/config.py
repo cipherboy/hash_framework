@@ -9,8 +9,8 @@ class config:
     cms_bin = tools + "/cryptominisat5"
     cms_args = []
 
-    bc2cnf_bin = tools + "/bc2cnf"
-    bc2cnf_args = ["-nots", "-nocoi", "-nosimplify"]
+    bc_bin = tools + "/bc2cnf"
+    bc_args = ["-nots", "-nocoi", "-nosimplify"]
 
     model_dir = base_path + "/models"
     cache_dir = base_path + "/kernel_cache"

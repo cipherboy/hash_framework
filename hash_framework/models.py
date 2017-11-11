@@ -1,4 +1,7 @@
 from hash_framework.config import config
+from hash_framework.boolean.translate import *
+
+import os
 
 class models:
     def __init__(self):
