@@ -11,9 +11,10 @@ class Job:
         # Copy config
         self.id = u_ri()
         self.kernel_type = kernels.lookup(kernel_name)
-        self.kernel = self.kernel_type(kernel_args)
+        self.kernel = self.kernel_type(self.id, kernel_args)
 
         self.of = None
+        self._p = None
 
         self.stime = time.time()
         self.rtime = 0
@@ -52,8 +53,4 @@ class Job:
         return {"id": self.id, "return": self.status(), "results": self.kernel.post_run(self.status())}
 
     def clean(self):
-        try:
-            os.remove(self.cfname)
-            os.remove(self.ofname)
-        except:
-            pass
+        self.kernel.clean()

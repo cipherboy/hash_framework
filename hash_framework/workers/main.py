@@ -26,14 +26,10 @@ def handle_ready():
 
 @app.route("/jobs/", methods=['GET', 'POST'])
 def handle_jobs():
-    queues.update()
     if request.method == 'POST':
         data = request.get_json(force=True)
-        print(data)
         j = Job(data['kernel_name'], data['kernel_args'])
-        jid = queues.add(j)
-        queues.update()
-        return jid
+        return queues.add(j)
     else:
         return queues.all()
 
@@ -44,7 +40,6 @@ def handle_update():
 
 @app.route("/status/<int:jid>")
 def handle_status(jid):
-    queues.update()
     j = queues.get(str(jid))
     if not j:
         return "", 404
@@ -56,7 +51,6 @@ def handle_status(jid):
 
 @app.route("/job/<int:jid>")
 def handle_job(jid):
-    queues.update()
     j = queues.get(str(jid))
     if not j:
         return "", 404
@@ -68,7 +62,6 @@ def handle_job(jid):
 
 @app.route("/kill/<int:jid>")
 def handle_kill(jid):
-    queues.update()
     j = queues.get(str(jid))
     if not j:
         return "", 404
@@ -79,7 +72,6 @@ def handle_kill(jid):
 
 @app.route("/clean/<int:jid>")
 def handle_clean(jid):
-    queues.update()
     j = queues.get(str(jid))
     if not j:
         return "", 404

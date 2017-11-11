@@ -4,7 +4,7 @@ import hash_framework.algorithms as algorithms
 from hash_framework.models import models
 from hash_framework.config import config
 
-import os.path
+import os.path, shutil
 import json, subprocess
 
 class SecondPreimage(Kernel):
@@ -124,3 +124,8 @@ class SecondPreimage(Kernel):
         if '--maxsol' in self.args['cms_args']:
             return self.run_sat()
         return []
+
+    def clean(self):
+        m = models()
+        tag = self.build_tag()
+        shutil.rmtree(m.model_dir + "/" + tag)

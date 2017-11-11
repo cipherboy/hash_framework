@@ -35,3 +35,6 @@ class Kernel:
 
     def run_error(self):
         print("[Error running model]: " + json.dumps(self.args))
+
+    def clean(self):
+        pass
