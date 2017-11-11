@@ -33,7 +33,8 @@ class Job:
             if self.of != None and not self.of.closed:
                 self.of.flush()
                 self.of.close()
-            self.ftime = time.time()
+            if self.ftime == 0:
+                self.ftime = time.time()
             return self._p.returncode
         return None
 
@@ -44,7 +45,8 @@ class Job:
         if self.of != None and not self.of.closed:
             self.of.flush()
             self.of.close()
-        self.ftime = time.time()
+        if self.ftime == 0:
+            self.ftime = time.time()
 
     def result(self):
         return {"id": self.id, "return": self.status(), "results": self.kernel.post_run(self.status())}

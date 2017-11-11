@@ -123,7 +123,7 @@ class Jobs:
 
     def result(self, j):
         assert(type(j) == Job)
-        return json.dumps(j.get())
+        return json.dumps(j.result())
 
     def ready(self):
         self.update()

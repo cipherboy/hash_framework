@@ -3,7 +3,8 @@ import os.path
 import json
 
 class Kernel:
-    def __init__(self, args):
+    def __init__(self, jid, args):
+        self.jid = jid
         self.args = args
 
     def cache_dir(self):

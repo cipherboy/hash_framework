@@ -1,7 +1,8 @@
 from hash_framework.config import config
 from hash_framework.boolean.translate import *
+from hash_framework.utils import *
 
-import os
+import os, collections
 
 class models:
     def __init__(self):

@@ -8,9 +8,11 @@ import os.path
 import json, subprocess
 
 class SecondPreimage(Kernel):
-    def __init__(self, args):
-        super().__init__(args)
-        self.algo = algorithms.lookup(self.args['algo'])
+    def __init__(self, jid, args):
+        super().__init__(jid, args)
+
+        self.algo_type = algorithms.lookup(self.args['algo'])
+        self.algo = self.algo_type()
         self.algo_name = self.args['algo']
         self.cms_args = self.args['cms_args']
         self.rounds = self.args['rounds']
@@ -36,7 +38,7 @@ class SecondPreimage(Kernel):
             self.h2_start_block = ""
 
     def build_tag(self):
-        return self.build_cache_tag() + "-e" + '-'.join(list(map(str, self.places)))
+        return self.jid + self.build_cache_tag() + "-e" + '-'.join(list(map(str, self.places)))
 
     def build_cache_tag(self):
         return "sp-" + self.algo_name + "-r" + str(self.rounds)
@@ -56,7 +58,9 @@ class SecondPreimage(Kernel):
             models.generate(self.algo, ['h1', 'h2'], rounds=self.rounds, bypass=True)
             attacks.collision.write_constraints(self.algo)
             attacks.collision.write_optional_differential(self.algo)
-            models.vars.write_assign(['ccollision', 'cblocks', 'cstate', 'cdifferentials', 'cnegated'])
+            invalid_differentials = models.vars.differentials([['.'*32, 'h1b', 96, 'h2b', 96], ['.'*32, 'h1b', 224, 'h2b', 224], ['.'*32, 'h1b', 352, 'h2b', 352], ['.'*32, 'h1b', 480, 'h2b', 480]])
+            models.vars.write_clause('cinvalid', invalid_differentials, '23-invalid.txt')
+            models.vars.write_assign(['ccollision', 'cblocks', 'cstate', 'cdifferentials', 'cinvalid', 'cnegated'])
             m.collapse(bc="00-combined-model.txt")
 
         m = models()
@@ -84,7 +88,7 @@ class SecondPreimage(Kernel):
     def cnf_path(self):
         m = models()
         tag = self.build_tag()
-        return m.model_dir + "/" + tag + "/problem.out"
+        return m.model_dir + "/" + tag + "/problem.cnf"
 
     def run_cmd(self):
         m = models()
@@ -96,22 +100,27 @@ class SecondPreimage(Kernel):
         return model_files + " | " + compile_model + " | " + run_model
 
     def run_sat(self):
+        m = models()
+        tag = self.build_tag()
+        out_file = self.out_path()
+        cnf_file = self.cnf_path()
+
         model_files = "cat " + m.model_dir + "/" + tag + "/*.txt"
         compile_model = m.bc_bin + " " + " ".join(m.bc_args)
         cmd = model_files + " | " + compile_model
 
-        of = open(self.cnf_path(), 'w')
+        of = open(cnf_file, 'w')
 
         ret = subprocess.call(cmd, shell=True, stdout=of)
         if ret != 0:
             return "An unknown error occurred while compiling the model: " + json.dumps(self.args)
 
-        m = models()
-        tag = self.build_tag()
         m.start(tag, False)
-        rs = m.results(self.algo)
+        rs = m.results(self.algo, out=out_file, cnf=cnf_file)
 
         return rs
 
     def run_unsat(self):
+        if '--maxsol' in self.args['cms_args']:
+            return self.run_sat()
         return []
