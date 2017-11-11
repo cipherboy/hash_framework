@@ -6,6 +6,7 @@ from hash_framework.config import config
 
 import os.path, shutil
 import json, subprocess
+import itertools
 
 class SecondPreimage(Kernel):
     def __init__(self, jid, args):
@@ -18,6 +19,7 @@ class SecondPreimage(Kernel):
         self.rounds = self.args['rounds']
         self.algo.rounds = self.rounds
         self.places = self.args['places']
+
         if 'h1_start_state' in self.args:
             self.h1_start_state = self.args['h1_start_state']
         else:
@@ -36,6 +38,29 @@ class SecondPreimage(Kernel):
             self.h2_start_block = self.args['h2_start_block']
         else:
             self.h2_start_block = ""
+
+    def gen_work(round_set, size_set):
+        work = set()
+        for r in round_set:
+            for s in size_set:
+                for e in itertools.combinations(list(range(0, r-4)), s):
+                    work.add((r, e))
+        print("Work: " + str(len(work)))
+        return list(work)
+
+    def work_to_args(algo_name, start_state, start_block, work):
+        d =  {
+            "algo": algo_name,
+            "rounds": work[0],
+            "cms_args": "",
+            "places": work[1],
+            "h1_start_state": start_state,
+            "h2_start_state": start_state,
+            "h1_start_block": start_block
+        }
+
+        return d
+
 
     def build_tag(self):
         return self.jid + self.build_cache_tag() + "-e" + '-'.join(list(map(str, self.places)))

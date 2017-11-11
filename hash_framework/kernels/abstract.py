@@ -10,6 +10,12 @@ class Kernel:
     def cache_dir(self):
         return config.cache_dir
 
+    def gen_work():
+        pass
+
+    def work_to_args():
+        pass
+
     def pre_run(self):
         pass
 
