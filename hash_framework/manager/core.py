@@ -16,21 +16,38 @@ def build_client_set(uris):
 def _send_sats(client_list, work_list, kernel_name):
     csi = 0
 
-    jids = set()
-    work_map = {}
+
+    wzip = []
     for wid in range(len(work_list)):
+        wzip.append((wid, csi))
+        csi = (csi + 1) % len(client_list)
+
+    def _add_sat(data):
+        wid, csi = data
         work = work_list[wid]
         c = client_list[csi]
         jid = c.add_sat(kernel_name, work)
         if jid != False:
-            jids.add(jid)
-            work_map[jid] = (csi, wid)
-            csi = (csi + 1) % len(client_list)
+            return (jid, csi, wid)
+        return None
+
+    pool = ThreadPool(processes=len(client_list)*2)
+    res = pool.map(_add_sat, wzip)
+
+    work_map = {}
+    jids = set()
+    for r in res:
+        if r == None:
+            continue
+        jid, csi, wid = r
+        jids.add(jid)
+        work_map[jid] = (csi, wid)
 
     return jids, work_map
 
 
 def run(client_list, work_list, kernel_name):
+    print("Sending sats...")
     jids, work_map = _send_sats(client_list, work_list, kernel_name)
 
     def _read_job(jid):
@@ -39,9 +56,11 @@ def run(client_list, work_list, kernel_name):
         c = client_list[csi]
         if c.finished(jid):
             d = c.result(jid)
+            c.delete(jid)
             return (jid, wid, d)
         return None
 
+    print("Waiting for sats to complete...")
     pool = ThreadPool(processes=len(client_list)*2)
     results = {}
     while True:
