@@ -16,12 +16,10 @@ queues.update_thread()
 
 @app.route("/")
 def handle_overview():
-    queues.update()
     return queues.overview()
 
 @app.route("/ready/")
 def handle_ready():
-    queues.update()
     return str(queues.ready())
 
 @app.route("/jobs/", methods=['GET', 'POST'])
@@ -32,11 +30,6 @@ def handle_jobs():
         return queues.add(j)
     else:
         return queues.all()
-
-@app.route("/update/")
-def handle_update():
-    queues.update()
-    return queues.all()
 
 @app.route("/status/<int:jid>")
 def handle_status(jid):
@@ -79,4 +72,4 @@ def handle_clean(jid):
     j.clean()
     return ""
 
-app.run(host="0.0.0.0")
+app.run(host="0.0.0.0", port=5001)

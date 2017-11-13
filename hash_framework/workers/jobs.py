@@ -22,7 +22,6 @@ class Jobs:
         thread.start()
         return thread
 
-
     def do_update(self):
         while True:
             self.update()
@@ -126,5 +125,4 @@ class Jobs:
         return json.dumps(j.result())
 
     def ready(self):
-        self.update()
         return len(self.jq) < self.config["jobs"]

@@ -5,6 +5,7 @@ import subprocess, sys, random
 from hash_framework.workers.utils import *
 from hash_framework.config import config
 import hash_framework.kernels as kernels
+from multiprocessing import Process
 
 class Job:
     def __init__(self, kernel_name, kernel_args):
@@ -24,7 +25,6 @@ class Job:
         self.kernel.pre_run()
         cmd = self.kernel.run_cmd()
         out_path = self.kernel.out_path()
-
         self.of = open(out_path, 'w')
         self._p = subprocess.Popen(cmd, stdin=subprocess.DEVNULL, stdout=self.of, shell=True)
         self.rtime = time.time()
