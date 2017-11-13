@@ -42,7 +42,7 @@ def run(client_list, work_list, kernel_name):
             return (jid, wid, d)
         return None
 
-    pool = ThreadPool(processes=4)
+    pool = ThreadPool(processes=len(client_list)*2)
     results = {}
     while True:
         res = pool.map(_read_job, jids)

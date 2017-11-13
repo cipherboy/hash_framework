@@ -91,19 +91,19 @@ class SecondPreimage(Kernel):
         m = models()
         tag = self.build_tag()
         m.start(tag, False)
-        os.system("ln -s " + cache_path + "/00-combined-model.txt " + m.model_dir + "/" + tag + "/00-combined-model.txt")
+        base_path  = m.model_dir + "/" + tag
+        os.system("ln -s " + cache_path + "/00-combined-model.txt " + base_path + "/00-combined-model.txt")
 
         if self.h1_start_state != '':
-            models.vars.write_values(self.h1_start_state, 'h1s', "01-h1-state.txt")
+            models.vars.write_values(self.h1_start_state, 'h1s', base_path + "/01-h1-state.txt")
         if self.h1_start_block != '':
-            models.vars.write_values(self.h1_start_block, 'h1b', "15-h1-state.txt")
+            models.vars.write_values(self.h1_start_block, 'h1b', base_path + "/15-h1-state.txt")
         if self.h2_start_state != '':
-            models.vars.write_values(self.h2_start_state, 'h2s', "01-h2-state.txt")
+            models.vars.write_values(self.h2_start_state, 'h2s', base_path + "/01-h2-state.txt")
         if self.h2_start_block != '':
-            models.vars.write_values(self.h2_start_block, 'h2b', "15-h2-state.txt")
+            models.vars.write_values(self.h2_start_block, 'h2b', base_path + "/15-h2-state.txt")
 
-        attacks.collision.reduced.specified_difference(self.algo, self.places)
-        m.collapse()
+        attacks.collision.reduced.specified_difference(self.algo, self.places, base_path + "/07-differential.txt")
 
     def out_path(self):
         m = models()

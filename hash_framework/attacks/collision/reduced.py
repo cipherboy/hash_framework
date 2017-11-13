@@ -19,7 +19,7 @@ def find_arbitrary_differential(algo, db, rounds, tag):
     ncols = attacks.collision.build_col_rows(algo, db, rs, tag)
     print(ncols)
 
-def only_one_differences(algo):
+def only_one_differences(algo, name="07-differential.txt"):
     differential = ['or']
     for i in range(0, algo.rounds):
         dlist = []
@@ -29,9 +29,9 @@ def only_one_differences(algo):
             else:
                 dlist.append(['.'*32, 'h1i', j*algo.int_size, "h2i", j*algo.int_size])
         differential.append(models.vars.differentials(dlist))
-    models.vars.write_clause('cdifferentials', tuple(differential), "07-differential.txt")
+    models.vars.write_clause('cdifferentials', tuple(differential), name)
 
-def only_two_differences(algo):
+def only_two_differences(algo, name="07-differential.txt"):
     differential = ['or']
     for i in range(0, algo.rounds):
         for k in range(i+1, algo.rounds):
@@ -44,9 +44,9 @@ def only_two_differences(algo):
                 else:
                     dlist.append(['.'*32, 'h1i', j*algo.int_size, "h2i", j*algo.int_size])
             differential.append(models.vars.differentials(dlist))
-    models.vars.write_clause('cdifferentials', tuple(differential), "07-differential.txt")
+    models.vars.write_clause('cdifferentials', tuple(differential), name)
 
-def specified_difference(algo, places):
+def specified_difference(algo, places, name="07-differential.txt"):
     differential = ['and']
     for i in range(0, algo.rounds):
         if i not in places:
@@ -54,7 +54,7 @@ def specified_difference(algo, places):
         else:
             differential.append(models.vars.any_difference(32, 'h1i', i*algo.int_size, "h2i", i*algo.int_size))
 
-    models.vars.write_clause('cdifferentials', tuple(differential), "07-differential.txt")
+    models.vars.write_clause('cdifferentials', tuple(differential), name)
 
 def find_simplest_differential(algo, db, rounds, tag):
     algo.rounds = rounds
