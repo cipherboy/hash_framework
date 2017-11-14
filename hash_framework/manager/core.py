@@ -29,7 +29,7 @@ def _add_sat(c, kernel_name, work_element):
 def _add_sat_client(datas):
     curi, kernel_name, works = datas
     c = Client(curi)
-    cpool = ThreadPool(processes=4)
+    cpool = ThreadPool(processes=2)
     res = cpool.map(functools.partial(_add_sat, c, kernel_name), works)
     return res
 
@@ -87,21 +87,23 @@ def _read_job_client(datas):
         wdata = []
         for jid in jids:
             wdata.append((jid, work_map[jid]))
-        cpool = ThreadPool(processes=4)
-        res = cpool.map(functools.partial(_read_job, c), wdata)
 
-        for r in res:
-            if r == None:
-                continue
-            jid, wid, d = r
-            ret_data.append((wid, d))
-            jids.remove(jid)
-        if len(jids) == 0:
-            break
-        if len(jids) > 10:
-            time.sleep(1)
-        else:
+        try:
+            res = map(functools.partial(_read_job, c), wdata)
+
+            for r in res:
+                if r == None:
+                    continue
+                jid, wid, d = r
+                ret_data.append((wid, d))
+                jids.remove(jid)
+            if len(jids) == 0:
+                break
+            time.sleep(len(jids) / 3)
             time.sleep(0.25)
+        except Exception as e:
+            print(e)
+            time.sleep(1)
 
     print("Client finished: " + c.uri)
     return ret_data
@@ -128,38 +130,3 @@ def run(client_list, work_list, kernel_name):
     c_jids, c_work_map = _send_sats(client_list, work_list, kernel_name)
     print("Waiting for results...")
     return wait_results(client_list, work_list, c_jids, c_work_map)
-
-    def _read_job(jid):
-        csi = work_map[jid][0]
-        wid = work_map[jid][1]
-        c = client_list[csi]
-        try:
-            if c.finished(jid):
-                d = c.result(jid)
-                try:
-                    c.delete(jid)
-                except:
-                    return None
-                return (jid, wid, d)
-        except:
-            return None
-        return None
-
-    print("Waiting for sats to complete...")
-    pool = ThreadPool(processes=len(client_list)*2)
-    results = {}
-    while True:
-        res = pool.map(_read_job, jids)
-        for r in res:
-            if r == None:
-                continue
-            jid, wid, d = r
-            jids.remove(jid)
-            results[wid] = d
-        if len(jids) == 0:
-            break
-        if len(jids) > 10:
-            time.sleep(1)
-        else:
-            time.sleep(0.25)
-    return results

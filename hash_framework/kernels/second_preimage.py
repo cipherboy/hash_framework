@@ -83,8 +83,8 @@ class SecondPreimage(Kernel):
             models.generate(self.algo, ['h1', 'h2'], rounds=self.rounds, bypass=True)
             attacks.collision.write_constraints(self.algo)
             attacks.collision.write_optional_differential(self.algo)
-            invalid_differentials = models.vars.differentials([['.'*32, 'h1b', 96, 'h2b', 96], ['.'*32, 'h1b', 224, 'h2b', 224], ['.'*32, 'h1b', 352, 'h2b', 352], ['.'*32, 'h1b', 480, 'h2b', 480]])
-            models.vars.write_clause('cinvalid', invalid_differentials, '23-invalid.txt')
+            #invalid_differentials = models.vars.differentials([['.'*32, 'h1b', 96, 'h2b', 96], ['.'*32, 'h1b', 224, 'h2b', 224], ['.'*32, 'h1b', 352, 'h2b', 352], ['.'*32, 'h1b', 480, 'h2b', 480]])
+            #models.vars.write_clause('cinvalid', invalid_differentials, '23-invalid.txt')
             models.vars.write_assign(['ccollision', 'cblocks', 'cstate', 'cdifferentials', 'cinvalid', 'cnegated'])
             m.collapse(bc="00-combined-model.txt")
 

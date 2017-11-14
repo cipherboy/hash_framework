@@ -5,6 +5,8 @@ min_port=5000
 max_port=$((min_port + num_process))
 
 mkdir -p ~/logs
+rm -rf ~/models ~/kernel_cache
+mkdir -p ~/models ~/kernel_cache
 
 for port in `seq $min_port $max_port`; do
     echo "Starting..."
