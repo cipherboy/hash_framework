@@ -2,7 +2,7 @@ from os.path import expanduser
 
 class config:
     base_path = expanduser("~")
-    threads = 4
+    threads = 1
 
     tools = base_path + "/tools"
 

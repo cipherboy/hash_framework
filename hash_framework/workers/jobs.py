@@ -25,7 +25,7 @@ class Jobs:
     def do_update(self):
         while True:
             self.update()
-            time.sleep(0.001)
+            time.sleep(0.05)
 
     def update(self):
         for jid in self.jq.copy():

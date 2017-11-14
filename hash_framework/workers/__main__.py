@@ -70,6 +70,9 @@ def handle_clean(jid):
         return "", 404
 
     j.clean()
+    queues.jobs[jid] = None
     return ""
 
-app.run(host="0.0.0.0", port=5000)
+assert(len(sys.argv) == 2)
+
+app.run(host="0.0.0.0", port=int(sys.argv[1]))

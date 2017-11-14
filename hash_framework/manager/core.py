@@ -54,10 +54,16 @@ def run(client_list, work_list, kernel_name):
         csi = work_map[jid][0]
         wid = work_map[jid][1]
         c = client_list[csi]
-        if c.finished(jid):
-            d = c.result(jid)
-            c.delete(jid)
-            return (jid, wid, d)
+        try:
+            if c.finished(jid):
+                d = c.result(jid)
+                try:
+                    c.delete(jid)
+                except:
+                    return None
+                return (jid, wid, d)
+        except:
+            return None
         return None
 
     print("Waiting for sats to complete...")
@@ -73,5 +79,8 @@ def run(client_list, work_list, kernel_name):
             results[wid] = d
         if len(jids) == 0:
             break
-        time.sleep(0.5)
+        if len(jids) > 10:
+            time.sleep(1)
+        else:
+            time.sleep(0.25)
     return results
