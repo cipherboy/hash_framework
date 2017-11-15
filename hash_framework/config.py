@@ -16,6 +16,8 @@ class config:
     cache_dir = base_path + "/kernel_cache"
     sat_dir = base_path + "/sats"
 
+    results_dir = base_path + "/results"
+
     def update_basepath(base_path):
         config.base_path = base_path
         config.tools = base_path + "/tools"

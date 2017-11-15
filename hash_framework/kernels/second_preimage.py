@@ -61,6 +61,13 @@ class SecondPreimage(Kernel):
 
         return d
 
+    def work_to_tag(algo_name, work):
+        return algo_name + "-r" + str(work[0]) + "-e" + '-'.join(map(str, work[1]))
+
+    def on_result(algo, db, tags, wid, result):
+        tag = tags[wid]
+        if type(result['results']) == list and len(result['results']) > 0:
+            attacks.collision.insert_db_multiple(algo, db, result['results'], tag)
 
     def build_tag(self):
         return self.jid + self.build_cache_tag() + "-e" + '-'.join(list(map(str, self.places)))

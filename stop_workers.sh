@@ -7,4 +7,5 @@ for i in ~/logs/*.pid; do
     echo "Killed $i: $pid"
 done
 
-rm ~/logs/*.pid
+rm -f ~/logs/*.pid
+ps aux | grep cryptominisat5 | awk '{print $2}' | xargs kill

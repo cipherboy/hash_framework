@@ -53,15 +53,9 @@ def _send_sats(client_list, work_list, kernel_name):
 
     return c_jids, c_work_map
 
-
-def _read_job(args):
-    c_uri, jids = datas
-    c = Client(c_uri)
-    return
-
 def _read_jobs_client(datas):
     ret_data = []
-    c, jids, work_map = datas
+    c, on_results, jids, work_map = datas
 
     except_count = 0
     while True:
@@ -70,6 +64,8 @@ def _read_jobs_client(datas):
             for k in j_results:
                 jids.remove(k)
                 ret_data.append((work_map[k], j_results[k]))
+                if on_results != None:
+                    on_results(work_map[k], j_results[k])
                 c.delete(k)
 
             if len(jids) == 0:
@@ -91,24 +87,47 @@ def _read_jobs_client(datas):
     return ret_data
 
 
-def wait_results(client_list, work_list, c_jids, c_work_map):
+def wait_results(client_list, work_list, c_jids, c_work_map, on_results):
     results = {}
+    except_count = 0
 
-    c_zip = []
-    for i in range(len(client_list)):
-        c_zip.append((client_list[i], c_jids[i], c_work_map[i]))
+    while True:
+        min_sleep = len(work_list)
+        all_finished = True
+        for i in range(len(client_list)):
+            c = client_list[i]
+            if len(c_jids[i]) == 0:
+                continue
 
-    pool = Pool(processes=len(client_list))
-    res_pool = pool.map(_read_jobs_client, c_zip)
-    for res in res_pool:
-        for r in res:
-            wid, d = r
-            results[wid] = d
+            all_finished = False
+
+            #try:
+            j_results = c.bulk_result(c_jids[i])
+            for k in j_results:
+                c_jids[i].remove(k)
+                results[c_work_map[i][k]] = j_results[k]
+                if on_results != None:
+                    on_results(c_work_map[i][k], j_results[k])
+                c.delete(k)
+
+            if len(c_jids[i]) == 0:
+                print("Client finished: " + c.uri)
+                continue
+
+            if len(c_jids[i]) > 10:
+                min_sleep = min(len(c_jids[i]) * 0.5, min_sleep)
+            else:
+                min_sleep = min(0.5, min_sleep)
+
+        if all_finished:
+            break
+
+        time.sleep(min_sleep)
 
     return results
 
-def run(client_list, work_list, kernel_name):
+def run(client_list, work_list, kernel_name, on_results=None):
     print("Sending sats...")
     c_jids, c_work_map = _send_sats(client_list, work_list, kernel_name)
     print("Waiting for results...")
-    return wait_results(client_list, work_list, c_jids, c_work_map)
+    return wait_results(client_list, work_list, c_jids, c_work_map, on_results)
