@@ -110,18 +110,18 @@ class md4:
         t = []
         for i in range(0, self.state_size//self.int_size):
             t.append(iet['s' + str(i)])
-        oet['state'] = block_to_hex(t)
+        oet['state'] = b_block_to_hex(t)
         t = []
         for i in range(0, self.block_size//self.int_size):
             t.append(iet['b' + str(i)])
-        oet['block'] = block_to_hex(t)
+        oet['block'] = b_block_to_hex(t)
         t = []
         for i in range(0, self.rounds):
-            t.append(block_to_hex([iet['i' + str(i)]]))
+            t.append(b_block_to_hex([iet['i' + str(i)]]))
         oet['intermediate'] = t
         t = []
         for i in range(0, self.state_size//self.int_size):
             t.append(iet['o' + str(i)])
-        oet['output'] = block_to_hex(t)
+        oet['output'] = b_block_to_hex(t)
 
         return oet

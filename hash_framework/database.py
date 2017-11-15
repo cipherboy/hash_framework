@@ -1,7 +1,13 @@
 import sqlite3
+import time
+
+from hash_framework.config import config
 
 class database:
-    def __init__(self, path="framework_results.db"):
+    def __init__(self, path=None):
+        if path == None:
+            path = config.results_dir + "/framework_results.db"
+        print(path)
         self.path = path
         self.conn = sqlite3.connect(path)
 

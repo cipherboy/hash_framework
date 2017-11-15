@@ -96,12 +96,55 @@ def md4_build_state(eval_table, prefix=""):
     return state
 
 
+def BuildBlockEvalTable(block):
+    eval_table = {}
+    for i in range(0, 32):
+        eval_table['s' + str(i)] = b_tobitl(0x67452301)[i % 32]
+    for i in range(32, 64):
+        eval_table['s' + str(i)] = b_tobitl(0xefcdab89)[i % 32]
+    for i in range(64, 96):
+        eval_table['s' + str(i)] = b_tobitl(0x98badcfe)[i % 32]
+    for i in range(96, 128):
+        eval_table['s' + str(i)] = b_tobitl(0x10325476)[i % 32]
+    for i in range(0, 512):
+        eval_table['b' + str(i)] = b_tobitl(block[i//32])[i % 32]
+
+    return eval_table
+
+def MD4BuildBlockStateEvalTable(block, state):
+    eval_table = {}
+    for i in range(0, 32):
+        if type(state[0]) == int:
+            eval_table['s' + str(i)] = b_tobitl(state[0])[i % 32]
+        else:
+            eval_table['s' + str(i)] = state[0][i % 32]
+    for i in range(32, 64):
+        if type(state[1]) == int:
+            eval_table['s' + str(i)] = b_tobitl(state[1])[i % 32]
+        else:
+            eval_table['s' + str(i)] = state[1][i % 32]
+    for i in range(64, 96):
+        if type(state[2]) == int:
+            eval_table['s' + str(i)] = b_tobitl(state[2])[i % 32]
+        else:
+            eval_table['s' + str(i)] = state[2][i % 32]
+    for i in range(96, 128):
+        if type(state[3]) == int:
+            eval_table['s' + str(i)] = b_tobitl(state[3])[i % 32]
+        else:
+            eval_table['s' + str(i)] = state[3][i % 32]
+    for i in range(0, 512):
+        if type(block[i//32]) == int:
+            eval_table['b' + str(i)] = b_tobitl(block[i//32])[i % 32]
+        else:
+            eval_table['b' + str(i)] = block[i//32][i % 32]
+
+    return eval_table
+
 def compute_md4(block, state=None, rounds=48):
     eval_table = BuildBlockEvalTable(block)
-
-    if state == None:
-        state = md4_build_state(eval_table)
-    else:
+    state = md4_build_state(eval_table)
+    if state != None:
         eval_table = MD4BuildBlockStateEvalTable(block, state)
         state = md4_build_state(eval_table)
 

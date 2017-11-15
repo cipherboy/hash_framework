@@ -66,10 +66,10 @@ class database:
         h2 = algo.to_hex(h2)
         #print_dict(h2, "h2")
 
-        h1s = hex_to_block(h1['state'])
-        h1b = hex_to_block(h1['block'])
-        h2s = hex_to_block(h2['state'])
-        h2b = hex_to_block(h2['block'])
+        h1s = b_hex_to_block(h1['state'])
+        h1b = b_hex_to_block(h1['block'])
+        h2s = b_hex_to_block(h2['state'])
+        h2b = b_hex_to_block(h2['block'])
 
         et = attacks.collision.build_col_row(algo, db, h1s, h1b, h2s, h2b, "")
 
