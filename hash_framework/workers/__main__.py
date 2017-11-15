@@ -1,6 +1,7 @@
 import time, time
 import base64, json
 import subprocess, sys, random
+import gc
 
 from flask import Flask
 from flask import request
@@ -25,9 +26,18 @@ def handle_ready():
 @app.route("/jobs/", methods=['GET', 'POST'])
 def handle_jobs():
     if request.method == 'POST':
-        data = request.get_json(force=True)
-        j = Job(data['kernel_name'], data['kernel_args'])
-        return queues.add(j)
+        datas = request.get_json(force=True)
+        if type(datas) == list:
+            result = []
+            for data in datas:
+                j = Job(data['kernel_name'], data['kernel_args'])
+                result.append(queues.add(j))
+            return json.dumps(result)
+        elif type(datas) == dict:
+            j = Job(datas['kernel_name'], datas['kernel_args'])
+            return queues.add(j)
+        else:
+            return "Invalid data", 400
     else:
         return queues.all()
 
@@ -42,6 +52,21 @@ def handle_status(jid):
 
     return "false", 202
 
+@app.route("/bulk_status/", methods=['POST'])
+def bulk_status():
+    if request.method == 'POST':
+        datas = request.get_json(force=True)
+        if not type(datas) == list:
+            return "Invalid data", 400
+
+        result = {}
+        for data in datas:
+            j = queues.get(str(data))
+            if j:
+                result[data] = j.status()
+
+        return json.dumps(result)
+
 @app.route("/job/<int:jid>")
 def handle_job(jid):
     j = queues.get(str(jid))
@@ -52,6 +77,21 @@ def handle_job(jid):
         return queues.result(j), 200
 
     return "", 202
+
+@app.route("/bulk_job/", methods=['POST'])
+def bulk_job():
+    if request.method == 'POST':
+        datas = request.get_json(force=True)
+        if not type(datas) == list:
+            return "Invalid data", 400
+
+        result = {}
+        for data in datas:
+            j = queues.get(str(data))
+            if j and j.status():
+                result[data] = j.result()
+
+        return json.dumps(result)
 
 @app.route("/kill/<int:jid>")
 def handle_kill(jid):
@@ -72,6 +112,22 @@ def handle_clean(jid):
     j.clean()
     queues.jobs[jid] = None
     return ""
+
+@app.route("/bulk_clean/", methods=['POST'])
+def bulk_clean():
+    if request.method == 'POST':
+        datas = request.get_json(force=True)
+        if not type(datas) == list:
+            return "Invalid data", 400
+
+        for data in datas:
+            j = queues.get(str(data))
+            if j:
+                j.clean()
+                queues.jobs[data] = None
+        gc.collect()
+
+        return ""
 
 assert(len(sys.argv) == 2)
 

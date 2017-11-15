@@ -4,6 +4,7 @@ num_process=`cat /proc/cpuinfo | grep 'processor' | wc -l`
 min_port=5000
 max_port=$((min_port + num_process))
 
+bash ./stop_workers.sh
 mkdir -p ~/logs
 rm -rf ~/models ~/kernel_cache
 mkdir -p ~/models ~/kernel_cache
