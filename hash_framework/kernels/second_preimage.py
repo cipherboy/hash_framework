@@ -22,9 +22,13 @@ class SecondPreimage(Kernel):
 
         if 'invalid' in self.args:
             self.invalid = self.args['invalid']
+        else:
+            self.invalid = False
 
         if 'specific' in self.args:
             self.specific = self.args['specific']
+        else:
+            self.specific = None
 
         if 'h1_start_state' in self.args:
             self.h1_start_state = self.args['h1_start_state']
@@ -64,7 +68,7 @@ class SecondPreimage(Kernel):
             "h2_start_state": start_state,
             "h1_start_block": start_block,
             "invalid": True,
-            "specific": [['.'*32, 'h1b', 0*32, 'h2b', 0*32], ['.'*32, 'h1b', 12*32, 'h2b', 12*32]]
+            #"specific": [['.'*32, 'h1b', i*32, 'h2b', i*32] for i in [0, 12]]
         }
 
         return d
