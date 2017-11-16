@@ -106,7 +106,7 @@ class SecondPreimage(Kernel):
             m = models()
             m.model_dir = self.cache_dir()
             while count < 10 and not os.path.exists(cache_path):
-                time.sleep(0.01 * random.randint(0, 20))
+                time.sleep(0.01 * random.randint(0, 25))
                 count +=1
             if not os.path.exists(cache_path):
                 m.start(cache_tag, False)
@@ -120,9 +120,8 @@ class SecondPreimage(Kernel):
 
                 models.vars.write_assign(['ccollision', 'cblocks', 'cstate', 'cdifferentials', 'cinvalid', 'cnegated', 'cspecific'])
                 m.collapse(bc="00-combined-model.bc")
-        else:
-            while not os.path.exists(cache_path + "/00-combined-model.bc"):
-                time.sleep(0.1)
+        while not os.path.exists(cache_path) or not os.path.exists(cache_path + "/00-combined-model.bc"):
+            time.sleep(0.1)
 
         m = models()
         tag = self.build_tag()
