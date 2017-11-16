@@ -89,7 +89,12 @@ def bulk_job():
         for data in datas:
             j = queues.get(str(data))
             if j and j.status():
-                result[data] = j.result()
+                try:
+                    result[data] = j.result()
+                except Exception as e:
+                    print("Error processing result: " + e + " " + str(data))
+                    sys.stdout.flush()
+
 
         return json.dumps(result)
 
