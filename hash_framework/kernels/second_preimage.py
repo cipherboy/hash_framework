@@ -68,7 +68,7 @@ class SecondPreimage(Kernel):
             "h1_start_state": start_state,
             "h2_start_state": start_state,
             "h1_start_block": start_block,
-            "invalid": True,
+            #"invalid": True,
             #"specific": [['.'*32, 'h1b', i*32, 'h2b', i*32] for i in [0, 12]]
         }
 
@@ -105,8 +105,8 @@ class SecondPreimage(Kernel):
             count = 0
             m = models()
             m.model_dir = self.cache_dir()
-            while count < 10 and not os.path.exists(cache_path):
-                time.sleep(0.01 * random.randint(0, 25))
+            while count < 20 and not os.path.exists(cache_path):
+                time.sleep(0.01 * random.randint(0, 50))
                 count +=1
             if not os.path.exists(cache_path):
                 m.start(cache_tag, False)

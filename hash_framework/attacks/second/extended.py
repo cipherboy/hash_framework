@@ -1,3 +1,6 @@
+import itertools
+
+
 def generate_test_delta(d, n, r):
     if n <= 0:
         return [tuple(d)]
@@ -12,7 +15,7 @@ def generate_test_delta(d, n, r):
     return res
 
 
-class Extended(cmsfabric.Loom):
+"""class Extended(Loom):
     def __init__(self, algo, db, start_state, start_block, rounds, delta_set, min_delta, max_delta, tag_base):
         self.algo = algo
         self.db = db
@@ -77,7 +80,6 @@ class Extended(cmsfabric.Loom):
 
 def fabric_extended(algo, db, start_state, start_block, rounds, delta_set, min_delta, max_delta, tag_base):
     loom = attacks.collision.second_preimage.Extended(algo, db, start_state, start_block, rounds, delta_set, min_delta, max_delta, tag_base)
-    fabric = cmsfabric.Weave()
     fabric.set_loom(loom)
     fabric.spin_from_object(cmsfabric_config)
     fabric.run()
@@ -192,3 +194,4 @@ def find_extended(algo, db, start_state, start_block, delta_set, rounds, tag_bas
             print("Done waiting for work.")
 
     print(found_differences)
+"""
