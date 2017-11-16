@@ -14,7 +14,7 @@ def generate_test_delta(d, n, r):
             res.append(tuple(n))
     return res
 
-def generate_reduced_test_delta(d, n, r):
+def generate_reduced_test_delta(d, n):
     if n >= len(d):
         return [()]
 
