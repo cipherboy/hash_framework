@@ -44,6 +44,10 @@ class models:
                     end = -3
                 l_assigns = l[2:end].split(' ')
                 for v in l_assigns:
+                    if len(v) == 0:
+                        print(out)
+                        print(cnf)
+                        continue
                     var = v
                     val = 'T'
                     if v[0] == '-':
