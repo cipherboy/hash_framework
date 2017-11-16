@@ -7,6 +7,7 @@ from hash_framework.config import config
 import os.path, shutil
 import json, subprocess
 import itertools, time
+import random
 
 class SecondPreimage(Kernel):
     def __init__(self, jid, args):
@@ -101,8 +102,14 @@ class SecondPreimage(Kernel):
         cache_tag = self.build_cache_tag()
 
         if not os.path.exists(cache_path):
+            count = 0
             m = models()
             m.model_dir = self.cache_dir()
+            while count < 10 and not os.path.exists(cache_path):
+                time.sleep(0.01 * random.randint(0, 20))
+                count +=1
+            if os.path.exists(cache_path):
+                break
             m.start(cache_tag, False)
             models.vars.write_header()
             models.generate(self.algo, ['h1', 'h2'], rounds=self.rounds, bypass=True)
