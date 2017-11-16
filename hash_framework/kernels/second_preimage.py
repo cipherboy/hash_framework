@@ -20,6 +20,12 @@ class SecondPreimage(Kernel):
         self.algo.rounds = self.rounds
         self.places = self.args['places']
 
+        if 'invalid' in self.args:
+            self.invalid = self.args['invalid']
+
+        if 'specific' in self.args:
+            self.specific = self.args['specific']
+
         if 'h1_start_state' in self.args:
             self.h1_start_state = self.args['h1_start_state']
         else:
@@ -56,7 +62,9 @@ class SecondPreimage(Kernel):
             "places": work[1],
             "h1_start_state": start_state,
             "h2_start_state": start_state,
-            "h1_start_block": start_block
+            "h1_start_block": start_block,
+            "invalid": True,
+            "specific": [['.'*32, 'h1b', 0*32, 'h2b', 0*32], ['.'*32, 'h1b', 12*32, 'h2b', 12*32]]
         }
 
         return d
@@ -74,7 +82,12 @@ class SecondPreimage(Kernel):
         return self.jid + self.build_cache_tag() + "-e" + '-'.join(list(map(str, self.places)))
 
     def build_cache_tag(self):
-        return "sp-" + self.algo_name + "-r" + str(self.rounds)
+        base = "sp-" + self.algo_name + "-r" + str(self.rounds)
+        if self.invalid:
+            base += '-iT'
+        if self.specific:
+            base += '-s' + str(len(self.specific))
+        return base
 
     def build_cache_path(self):
         return self.cache_dir() + "/" + self.build_cache_tag()
@@ -91,9 +104,11 @@ class SecondPreimage(Kernel):
             models.generate(self.algo, ['h1', 'h2'], rounds=self.rounds, bypass=True)
             attacks.collision.write_constraints(self.algo)
             attacks.collision.write_optional_differential(self.algo)
-            invalid_differentials = models.vars.differentials([['.'*32, 'h1b', 96, 'h2b', 96], ['.'*32, 'h1b', 224, 'h2b', 224], ['.'*32, 'h1b', 352, 'h2b', 352], ['.'*32, 'h1b', 480, 'h2b', 480]])
-            models.vars.write_clause('cinvalid', invalid_differentials, '23-invalid.txt')
-            models.vars.write_assign(['ccollision', 'cblocks', 'cstate', 'cdifferentials', 'cinvalid', 'cnegated'])
+            if self.invalid:
+                invalid_differentials = models.vars.differentials([['.'*32, 'h1b', 96, 'h2b', 96], ['.'*32, 'h1b', 224, 'h2b', 224], ['.'*32, 'h1b', 352, 'h2b', 352], ['.'*32, 'h1b', 480, 'h2b', 480]])
+                models.vars.write_clause('cinvalid', invalid_differentials, '23-invalid.txt')
+
+            models.vars.write_assign(['ccollision', 'cblocks', 'cstate', 'cdifferentials', 'cinvalid', 'cnegated', 'cspecific'])
             m.collapse(bc="00-combined-model.bc")
         else:
             while not os.path.exists(cache_path + "/00-combined-model.bc"):
@@ -113,6 +128,10 @@ class SecondPreimage(Kernel):
             models.vars.write_values(self.h2_start_state, 'h2s', base_path + "/01-h2-state.txt")
         if self.h2_start_block != '':
             models.vars.write_values(self.h2_start_block, 'h2b', base_path + "/15-h2-state.txt")
+
+        if self.specific != None:
+            specific_differentials = models.vars.differentials(self.specific)
+            models.vars.write_clause('cspecific', specific_differentials, '28-specific.txt')
 
         attacks.collision.reduced.specified_difference(self.algo, self.places, base_path + "/07-differential.txt")
 
