@@ -14,6 +14,12 @@ def generate_test_delta(d, n, r):
             res.append(tuple(n))
     return res
 
+def generate_reduced_test_delta(d, n, r):
+    if n >= len(d):
+        return [()]
+
+    return list(itertools.combinations(d, len(d) - n))
+
 
 """class Extended(Loom):
     def __init__(self, algo, db, start_state, start_block, rounds, delta_set, min_delta, max_delta, tag_base):
