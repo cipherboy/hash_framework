@@ -221,7 +221,9 @@ def perform_md4(eval_table, original_state, f, f3, f2=None, prefix="", rounds=48
                     f2.write(t + " := " + translate(clause_dedupe_s[t]) + ";\n")
             else:
                 f2.write(t + " := " + translate(clause_dedupe_s[t]) + ";\n")
-
+        f2.write("\n\n")
+        f2.flush()
+        f2.close)
 
     if f3 != None:
         f3.write("\n\n")
