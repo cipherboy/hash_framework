@@ -6,7 +6,7 @@ from hash_framework.config import config
 
 import os.path, shutil
 import json, subprocess
-import itertools
+import itertools, time
 
 class SecondPreimage(Kernel):
     def __init__(self, jid, args):
@@ -52,7 +52,7 @@ class SecondPreimage(Kernel):
         d =  {
             "algo": algo_name,
             "rounds": work[0],
-            "cms_args": "",
+            "cms_args": [],
             "places": work[1],
             "h1_start_state": start_state,
             "h2_start_state": start_state,
@@ -64,10 +64,11 @@ class SecondPreimage(Kernel):
     def work_to_tag(algo_name, work):
         return algo_name + "-r" + str(work[0]) + "-e" + '-'.join(map(str, work[1]))
 
-    def on_result(algo, db, tags, wid, result):
+    def on_result(algo, db, tags, work, wid, result):
         tag = tags[wid]
         if type(result['results']) == list and len(result['results']) > 0:
-            attacks.collision.insert_db_multiple(algo, db, result['results'], tag)
+            algo.rounds = work[wid][0]
+            attacks.collision.insert_db_multiple(algo, db, result['results'], tag, False)
 
     def build_tag(self):
         return self.jid + self.build_cache_tag() + "-e" + '-'.join(list(map(str, self.places)))
@@ -93,13 +94,16 @@ class SecondPreimage(Kernel):
             invalid_differentials = models.vars.differentials([['.'*32, 'h1b', 96, 'h2b', 96], ['.'*32, 'h1b', 224, 'h2b', 224], ['.'*32, 'h1b', 352, 'h2b', 352], ['.'*32, 'h1b', 480, 'h2b', 480]])
             models.vars.write_clause('cinvalid', invalid_differentials, '23-invalid.txt')
             models.vars.write_assign(['ccollision', 'cblocks', 'cstate', 'cdifferentials', 'cinvalid', 'cnegated'])
-            m.collapse(bc="00-combined-model.txt")
+            m.collapse(bc="00-combined-model.bc")
+        else:
+            while not os.path.exists(cache_path + "/00-combined-model.bc"):
+                time.sleep(0.1)
 
         m = models()
         tag = self.build_tag()
         m.start(tag, False)
         base_path  = m.model_dir + "/" + tag
-        os.system("ln -s " + cache_path + "/00-combined-model.txt " + base_path + "/00-combined-model.txt")
+        os.system("ln -s " + cache_path + "/00-combined-model.bc " + base_path + "/00-combined-model.txt")
 
         if self.h1_start_state != '':
             models.vars.write_values(self.h1_start_state, 'h1s', base_path + "/01-h1-state.txt")
@@ -142,10 +146,11 @@ class SecondPreimage(Kernel):
         cmd = model_files + " | " + compile_model
 
         of = open(cnf_file, 'w')
+        oerr = open(cnf_file + ".err", 'w')
 
-        ret = subprocess.call(cmd, shell=True, stdout=of)
+        ret = subprocess.call(cmd, shell=True, stdout=of, stderr=oerr)
         if ret != 0:
-            return "An unknown error occurred while compiling the model: " + json.dumps(self.args)
+            return "An unknown error occurred while compiling the model (" + cmd + "): " + json.dumps(self.args)
 
         m.start(tag, False)
         rs = m.results(self.algo, out=out_file, cnf=cnf_file)

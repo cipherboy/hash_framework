@@ -84,12 +84,12 @@ def __insert__(db, table, values, commit=False):
     if commit:
         self.conn.commit()
 
-def insert_db_single(algo, db, col, commit=False):
-    if not verify_collision(algo, col):
+def insert_db_single(algo, db, col, commit=False, verify=True):
+    if verify and not verify_collision(algo, col):
         return
     __insert__(db, "c_" + algo.name, col, commit=False)
 
-def insert_db_multiple(algo, db, cols, tag):
+def insert_db_multiple(algo, db, cols, tag, verify=True):
     for r in cols:
         h1 = unprefix_keys(r, "h1")
         h1 = algo.to_hex(h1)
@@ -104,7 +104,7 @@ def insert_db_multiple(algo, db, cols, tag):
         h2s = b_hex_to_block(h2['state'])
         h2b = b_hex_to_block(h2['block'])
 
-        import_single(algo, db, h1s, h1b, h2s, h2b, tag)
+        import_single(algo, db, h1s, h1b, h2s, h2b, tag, commit=False)
     db.commit()
 
 def build_col_row(algo, db, s1, b1, s2, b2, tag):

@@ -53,46 +53,13 @@ def _send_sats(client_list, work_list, kernel_name):
 
     return c_jids, c_work_map
 
-def _read_jobs_client(datas):
-    ret_data = []
-    c, on_results, jids, work_map = datas
-
-    except_count = 0
-    while True:
-        try:
-            j_results = c.bulk_result(jids)
-            for k in j_results:
-                jids.remove(k)
-                ret_data.append((work_map[k], j_results[k]))
-                if on_results != None:
-                    on_results(work_map[k], j_results[k])
-                c.delete(k)
-
-            if len(jids) == 0:
-                break
-
-            if len(jids) > 10:
-                time.sleep(len(jids) * 0.2)
-            else:
-                time.sleep(0.5)
-        except:
-            except_count += 1
-            print(e)
-            time.sleep(1)
-            if except_count > 10:
-                print("Client had too many exceptions: " + c.uri)
-                return ret_data
-
-    print("Client finished: " + c.uri)
-    return ret_data
-
 
 def wait_results(client_list, work_list, c_jids, c_work_map, on_results):
     results = {}
     except_count = 0
 
     while True:
-        min_sleep = len(work_list)
+        min_sleep = 0.5
         all_finished = True
         for i in range(len(client_list)):
             c = client_list[i]
@@ -103,25 +70,29 @@ def wait_results(client_list, work_list, c_jids, c_work_map, on_results):
 
             #try:
             j_results = c.bulk_result(c_jids[i])
+            if len(j_results) == 0:
+                print(c_jids[i])
+                print(j_results)
+
             for k in j_results:
                 c_jids[i].remove(k)
                 results[c_work_map[i][k]] = j_results[k]
                 if on_results != None:
                     on_results(c_work_map[i][k], j_results[k])
-                c.delete(k)
+                #c.delete(k)
 
             if len(c_jids[i]) == 0:
                 print("Client finished: " + c.uri)
                 continue
 
             if len(c_jids[i]) > 10:
-                min_sleep = min(len(c_jids[i]) * 0.5, min_sleep)
-            else:
-                min_sleep = min(0.5, min_sleep)
+                min_sleep = 10
 
         if all_finished:
             break
 
+        print(min_sleep)
+        print(list(map(len, c_jids)))
         time.sleep(min_sleep)
 
     return results
