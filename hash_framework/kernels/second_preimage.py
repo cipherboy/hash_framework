@@ -108,19 +108,18 @@ class SecondPreimage(Kernel):
             while count < 10 and not os.path.exists(cache_path):
                 time.sleep(0.01 * random.randint(0, 20))
                 count +=1
-            if os.path.exists(cache_path):
-                break
-            m.start(cache_tag, False)
-            models.vars.write_header()
-            models.generate(self.algo, ['h1', 'h2'], rounds=self.rounds, bypass=True)
-            attacks.collision.write_constraints(self.algo)
-            attacks.collision.write_optional_differential(self.algo)
-            if self.invalid:
-                invalid_differentials = models.vars.differentials([['.'*32, 'h1b', 96, 'h2b', 96], ['.'*32, 'h1b', 224, 'h2b', 224], ['.'*32, 'h1b', 352, 'h2b', 352], ['.'*32, 'h1b', 480, 'h2b', 480]])
-                models.vars.write_clause('cinvalid', invalid_differentials, '23-invalid.txt')
+            if not os.path.exists(cache_path):
+                m.start(cache_tag, False)
+                models.vars.write_header()
+                models.generate(self.algo, ['h1', 'h2'], rounds=self.rounds, bypass=True)
+                attacks.collision.write_constraints(self.algo)
+                attacks.collision.write_optional_differential(self.algo)
+                if self.invalid:
+                    invalid_differentials = models.vars.differentials([['.'*32, 'h1b', 96, 'h2b', 96], ['.'*32, 'h1b', 224, 'h2b', 224], ['.'*32, 'h1b', 352, 'h2b', 352], ['.'*32, 'h1b', 480, 'h2b', 480]])
+                    models.vars.write_clause('cinvalid', invalid_differentials, '23-invalid.txt')
 
-            models.vars.write_assign(['ccollision', 'cblocks', 'cstate', 'cdifferentials', 'cinvalid', 'cnegated', 'cspecific'])
-            m.collapse(bc="00-combined-model.bc")
+                models.vars.write_assign(['ccollision', 'cblocks', 'cstate', 'cdifferentials', 'cinvalid', 'cnegated', 'cspecific'])
+                m.collapse(bc="00-combined-model.bc")
         else:
             while not os.path.exists(cache_path + "/00-combined-model.bc"):
                 time.sleep(0.1)
