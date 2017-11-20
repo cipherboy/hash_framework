@@ -106,10 +106,9 @@ class SecondPreimage(Kernel):
             count = 0
             m = models()
             m.model_dir = self.cache_dir()
-            while count < 20 and not os.path.exists(cache_path):
-                time.sleep(0.01 * random.randint(0, 50))
-                count +=1
-            if not os.path.exists(cache_path):
+            cache_dir_path = m.model_dir + "/" + cache_tag
+
+            if self.create_cache_dir(cache_dir_path):
                 m.start(cache_tag, False)
                 models.vars.write_header()
                 models.generate(self.algo, ['h1', 'h2'], rounds=self.rounds, bypass=True)

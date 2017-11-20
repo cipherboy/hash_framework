@@ -47,9 +47,10 @@ class Neighborhood(Kernel):
     def gen_work(rounds, bases, size_set):
         work = []
         existing = [[]]*48
-        for s in size_set:
-            for e in itertools.combinations(list(range(0, rounds-4)), s):
-                work.append((rounds, bases, existing, e))
+        for base in bases:
+            for s in size_set:
+                for e in itertools.combinations(list(range(0, rounds-4)), s):
+                    work.append((rounds, base, existing, e))
         print("Work: " + str(len(work)))
         return work
 
@@ -74,7 +75,7 @@ class Neighborhood(Kernel):
         return d
 
     def work_to_tag(algo_name, work):
-        return algo_name + "-r" + str(work[0]) + "-e" + '-'.join(map(str, work[1]))
+        return algo_name + "-r" + str(work[0]) + "-e" + '-'.join(map(str, work[3]))
 
     def on_result(algo, db, tags, work, wid, result):
         tag = tags[wid]
@@ -100,11 +101,9 @@ class Neighborhood(Kernel):
             count = 0
             m = models()
             m.model_dir = self.cache_dir()
-            while count < 20 and not os.path.exists(cache_path):
-                time.sleep(0.01 * random.randint(0, 50))
-                count +=1
+            cache_dir_path = m.model_dir + "/" + cache_tag
 
-            if not os.path.exists(cache_path):
+            if self.create_cache_dir(cache_dir_path):
                 m.start(cache_tag, False)
                 models.vars.write_header()
                 models.generate(self.algo, ['h1', 'h2'], rounds=self.rounds, bypass=True)

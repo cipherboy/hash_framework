@@ -1,6 +1,6 @@
 from hash_framework.config import config
-import os.path
-import json
+import os, random
+import json, time
 
 class Kernel:
     def __init__(self, jid, args):
@@ -18,6 +18,28 @@ class Kernel:
 
     def pre_run(self):
         pass
+
+    def create_cache_dir(self, dir_path):
+        os.system("mkdir -p " + dir_path)
+        if os.path.exists(dir_path + "/lock"):
+            return False
+
+        s = str(random.randint(100000000000000, 999999999999999))
+
+        while True:
+            f = open(dir_path + '/lock', 'w')
+            f.write(s)
+            f.close()
+
+            time.sleep(0.01 * random.randint(1, 10))
+
+            contents = open(dir_path + '/lock', 'r').read()
+            if len(contents) == len(s):
+                if contents == s:
+                    return True
+                return False
+
+        return False
 
     def out_path(self):
         return "problem.out"
