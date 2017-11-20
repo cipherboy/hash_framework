@@ -185,10 +185,10 @@ class models:
             f.close()
 
 
-        def write_values(vars, prefix, name, mode='w'):
+        def write_values(given_vars, prefix, name, mode='w'):
             f = open(name, mode)
             i = 0
-            for v in vars:
+            for v in given_vars:
                 f.write(prefix + str(i) + ' := ' + v + ";\n")
                 i += 1
             f.flush()

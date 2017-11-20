@@ -6,7 +6,7 @@ max_port=$((min_port + num_process))
 
 bash ./stop_workers.sh
 mkdir -p ~/logs
-rm -rf ~/models ~/kernel_cache
+rm -rf ~/models # ~/kernel_cache
 mkdir -p ~/models ~/kernel_cache ~/results
 
 for port in `seq $min_port $max_port`; do

@@ -1,3 +1,6 @@
+import hash_framework.attacks.collision.connected
+import hash_framework.attacks.collision.metric
+
 from hash_framework.attacks.collision.constraints import *
 from hash_framework.attacks.collision.database import *
 from hash_framework.attacks.collision.differentials import *
