@@ -147,7 +147,8 @@ class models:
         return r
 
     def collapse(self, bc="problem.bc"):
-        os.system("cat *.txt > " + bc)
+        os.system("cat *.txt > " + bc + ".concat")
+        os.system("ln -s " + bc + ".concat " + bc)
 
     def run(self, count=10000, random=0, bc="problem.bc", cnf="problem.cnf", output="problem.out"):
         if self.remote:
