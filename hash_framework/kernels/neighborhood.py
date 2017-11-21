@@ -110,6 +110,7 @@ class Neighborhood(Kernel):
                 models.generate(self.algo, ['h1', 'h2'], rounds=self.rounds, bypass=True)
                 attacks.collision.write_constraints(self.algo)
                 attacks.collision.write_optional_differential(self.algo)
+                attacks.collision.write_same_state(self.algo)
 
                 models.vars.write_assign(['ccollision', 'cblocks', 'cstate', 'cdifferentials'])
                 m.collapse(bc="00-combined-model.bc")
