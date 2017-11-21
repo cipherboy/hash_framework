@@ -141,12 +141,12 @@ def MD4BuildBlockStateEvalTable(block, state):
 
     return eval_table
 
-def compute_md4(block, state=None, rounds=48):
+def compute_md4(block, in_state=None, rounds=48):
     eval_table = BuildBlockEvalTable(block)
+    if in_state != None:
+        eval_table = MD4BuildBlockStateEvalTable(block, in_state)
+
     state = md4_build_state(eval_table)
-    if state != None:
-        eval_table = MD4BuildBlockStateEvalTable(block, state)
-        state = md4_build_state(eval_table)
 
     return perform_md4(eval_table, state, None, None, None, rounds=rounds)
 
