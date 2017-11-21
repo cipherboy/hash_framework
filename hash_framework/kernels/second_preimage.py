@@ -10,6 +10,8 @@ import itertools, time
 import random
 
 class SecondPreimage(Kernel):
+    name = "second_preimage"
+
     def __init__(self, jid, args):
         super().__init__(jid, args)
 
