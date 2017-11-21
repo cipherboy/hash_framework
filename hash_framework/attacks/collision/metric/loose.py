@@ -13,3 +13,11 @@ def delta(algo, col1, col2):
         if col1[k] != col2[k]:
             r.append((i, col1[k], col2[k]))
     return r
+
+def abs(algo, col):
+    r = []
+    for i in range(0, algo.rounds):
+        k = "ri" + str(i)
+        if col[k] != '.'*32:
+            r.append(i)
+    return tuple(r)

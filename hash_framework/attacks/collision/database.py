@@ -1,4 +1,6 @@
 from hash_framework.attacks import *
+from hash_framework.attacks.collision.metric.loose import abs as loose_abs
+
 from hash_framework.boolean import *
 from hash_framework.attacks.utils import table_cols as attacks_table_cols
 from hash_framework.database import database
@@ -107,6 +109,25 @@ def insert_db_multiple(algo, db, cols, tag, verify=True):
         import_single(algo, db, h1s, h1b, h2s, h2b, tag, commit=False)
     db.commit()
 
+
+def insert_db_multiple_automatic_tag(algo, db, cols, verify=True):
+    for r in cols:
+        h1 = unprefix_keys(r, "h1")
+        h1 = algo.to_hex(h1)
+        #print_dict(h1, "h1")
+
+        h2 = unprefix_keys(r, "h2")
+        h2 = algo.to_hex(h2)
+        #print_dict(h2, "h2")
+
+        h1s = b_hex_to_block(h1['state'])
+        h1b = b_hex_to_block(h1['block'])
+        h2s = b_hex_to_block(h2['state'])
+        h2b = b_hex_to_block(h2['block'])
+
+        import_single_automatic_tag(algo, db, h1s, h1b, h2s, h2b, commit=False)
+    db.commit()
+
 def build_col_row(algo, db, s1, b1, s2, b2, tag):
     et1 = algo.evaluate(b1, s1)
     et1 = algo.sanitize(et1)
@@ -119,6 +140,27 @@ def build_col_row(algo, db, s1, b1, s2, b2, tag):
     jet = merge_dict([et1, et2])
 
     et = build_deltas(db, algo, jet)
+    et['tag'] = tag
+
+    return et
+
+
+def build_col_row_automatic_tag(algo, db, s1, b1, s2, b2):
+    et1 = algo.evaluate(b1, s1)
+    et1 = algo.sanitize(et1)
+    et1 = prefix_keys(et1, "h1")
+
+    et2 = algo.evaluate(b2, s2)
+    et2 = algo.sanitize(et2)
+    et2 = prefix_keys(et2, "h2")
+
+    jet = merge_dict([et1, et2])
+
+    et = build_deltas(db, algo, jet)
+
+    dplaces = loose_abs(algo, et)
+    tag = algo.name + "-r" + str(algo.rounds) + "-e" + '-'.join(map(str, dplaces))
+
     et['tag'] = tag
 
     return et
@@ -145,6 +187,20 @@ def build_col_rows(algo, db, rs, tag):
 
 def import_single(algo, db, s1, b1, s2, b2, tag, commit=False):
     et = build_col_row(algo, db, s1, b1, s2, b2, tag)
+
+    for i in range(0, algo.state_size//algo.int_size):
+        if not et["h1o" + str(i)] == et["h2o" + str(i)]:
+            if commit:
+                db.commit()
+            return
+
+    __insert__(db, "c_" + algo.name, et)
+    if commit:
+        db.commit()
+
+
+def import_single_automatic_tag(algo, db, s1, b1, s2, b2, commit=False):
+    et = build_col_row_automatic_tag(algo, db, s1, b1, s2, b2)
 
     for i in range(0, algo.state_size//algo.int_size):
         if not et["h1o" + str(i)] == et["h2o" + str(i)]:

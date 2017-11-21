@@ -48,6 +48,11 @@ class Neighborhood(Kernel):
         work = []
         existing = [[]]*48
         for base in bases:
+            base = list(base)
+            while len(base) < rounds:
+                base.append('.'*32)
+            base = tuple(base)
+
             for s in size_set:
                 for e in itertools.combinations(list(range(0, rounds-4)), s):
                     work.append((rounds, base, existing, e))
@@ -74,14 +79,10 @@ class Neighborhood(Kernel):
 
         return d
 
-    def work_to_tag(algo_name, work):
-        return algo_name + "-r" + str(work[0]) + "-e" + '-'.join(map(str, work[3]))
-
     def on_result(algo, db, tags, work, wid, result):
-        tag = tags[wid]
         if type(result['results']) == list and len(result['results']) > 0:
             algo.rounds = work[wid][0]
-            attacks.collision.insert_db_multiple(algo, db, result['results'], tag, False)
+            attacks.collision.insert_db_multiple_automatic_tag(algo, db, result['results'], False)
 
     def build_tag(self):
         return self.jid + self.build_cache_tag() + "-e" + '-'.join(list(map(str, self.poses)))
