@@ -48,23 +48,19 @@ class Neighborhood(Kernel):
 
     def gen_work(rounds, bases, size_set):
         work = []
-        for base in bases:
-            base = list(base)
+        for i in range(0, len(bases)):
+            base = list(bases[i])
             while len(base) < rounds:
                 base.append('.'*32)
-            base = tuple(base)
+            bases[i] = tuple(base)
 
+        for base in bases:
             for s in size_set:
                 existing = []
                 for i in range(0, rounds):
                     existing.append(set())
 
                 for alternate in bases:
-                    alternate = list(alternate)
-                    while len(alternate) < rounds:
-                        alternate.append('.'*32)
-                    alternate = tuple(alternate)
-
                     if len(attacks.collision.metric.loose.delta_alt(rounds, base, alternate)) == s:
                         for i in range(0, rounds):
                             existing[i].add(alternate[i])
