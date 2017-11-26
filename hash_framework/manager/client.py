@@ -48,11 +48,25 @@ class Client:
         return d
 
     def bulk_result(self, jids):
-        r = requests.post(self.uri + "/bulk_job/", json=jids)
-        if r.status_code != 200:
-            return {}
+        count = 0
+        while True:
+            r = requests.post(self.uri + "/bulk_job/", json=jids)
+            if r.status_code != 200:
+                return {}
 
-        return r.json()
+            if count > 2:
+                f = open("/tmp/error-body.txt", 'wb')
+                f.write(r.content)
+                f.close()
+                return r.json()
+
+            try:
+                res = r.json()
+                return res
+            except:
+                pass
+
+            count += 1
 
     def delete(self, jid):
         r = requests.get(self.uri + "/clean/" + jid)

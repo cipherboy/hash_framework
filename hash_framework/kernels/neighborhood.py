@@ -46,7 +46,7 @@ class Neighborhood(Kernel):
         else:
             self.h2_start_block = ""
 
-    def gen_work(rounds, bases, size_set):
+    def gen_work(rounds, bases, size_set, use_existing=False):
         work = []
         for i in range(0, len(bases)):
             base = list(bases[i])
@@ -60,10 +60,11 @@ class Neighborhood(Kernel):
                 for i in range(0, rounds):
                     existing.append(set())
 
-                for alternate in bases:
-                    if len(attacks.collision.metric.loose.delta_alt(rounds, base, alternate)) == s:
-                        for i in range(0, rounds):
-                            existing[i].add(alternate[i])
+                if use_existing:
+                    for alternate in bases:
+                        if len(attacks.collision.metric.loose.delta_alt(rounds, base, alternate)) == s:
+                            for i in range(0, rounds):
+                                existing[i].add(alternate[i])
 
                 for i in range(0, rounds):
                     existing[i] = tuple(existing[i])
@@ -71,6 +72,41 @@ class Neighborhood(Kernel):
 
                 for e in itertools.combinations(list(range(0, rounds-4)), s):
                     work.append((rounds, base, existing, e))
+
+        print("Work: " + str(len(work)))
+        return work
+
+    def gen_work_expand(rounds, bases, size_set, use_existing=False):
+        work = []
+        for i in range(0, len(bases)):
+            base = list(bases[i])
+            while len(base) < rounds:
+                base.append('.'*32)
+            bases[i] = tuple(base)
+
+        for base in bases:
+            for s in size_set:
+                existing = []
+                for i in range(0, rounds):
+                    existing.append(set())
+
+                if use_existing:
+                    for alternate in bases:
+                        if len(attacks.collision.metric.loose.delta_alt(rounds, base, alternate)) == s:
+                            for i in range(0, rounds):
+                                existing[i].add(alternate[i])
+
+                for i in range(0, rounds):
+                    existing[i] = tuple(existing[i])
+                existing = tuple(existing)
+
+                for e in itertools.combinations(list(range(0, rounds-4)), s):
+                    keep = True
+                    for x in e:
+                        if base[x] != '.'*32:
+                            keep = False
+                    if keep:
+                        work.append((rounds, base, existing, e))
 
         print("Work: " + str(len(work)))
         return work
