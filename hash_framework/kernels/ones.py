@@ -61,6 +61,10 @@ class Ones(Kernel):
             "ones": ones,
         }
 
+        if start_state is not None:
+            d["h1_start_state"] = start_state
+            d["h2_start_state"] = start_state
+
         return d
 
     def on_result(algo, db, tags, work, wid, result):
@@ -114,6 +118,14 @@ class Ones(Kernel):
         f.write("cones := [" + str(self.ones) + "," + str(self.ones) + "](" + ','.join(map(lambda x: 'h1b' + str(x), range(512))) + ");")
         f.flush()
         f.close()
+
+
+        if self.h1_start_state != '':
+            models.vars.write_values(self.h1_start_state, 'h1s', base_path + "/01-h1-state.txt")
+
+        if self.h2_start_state != '':
+            models.vars.write_values(self.h2_start_state, 'h2s', base_path + "/01-h2-state.txt")
+
 
     def out_path(self):
         m = models()
