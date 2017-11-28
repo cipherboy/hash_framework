@@ -26,6 +26,9 @@ class Neighborhood(Kernel):
         self.existing = self.args['existing']
         self.poses = self.args['poses']
 
+        self.ascii = self.args['ascii']
+        self.both = self.args['both']
+
         if 'h1_start_state' in self.args:
             self.h1_start_state = self.args['h1_start_state']
         else:
@@ -111,7 +114,7 @@ class Neighborhood(Kernel):
         print("Work: " + str(len(work)))
         return work
 
-    def work_to_args(algo_name, work, start_state=None, start_block=None):
+    def work_to_args(algo_name, work, start_state=None, start_block=None, ascii_block=False, both_ascii=False):
         rounds, base, existing, poses = work
         d =  {
             "algo": algo_name,
@@ -128,6 +131,12 @@ class Neighborhood(Kernel):
 
         if start_block is not None:
             d["h1_start_block"] = start_block
+
+        if ascii_block:
+            d['ascii'] = True
+
+        if both_ascii:
+            d['both'] = True
 
         return d
 
@@ -177,6 +186,14 @@ class Neighborhood(Kernel):
         os.system("ln -s " + cache_path + "/00-combined-model.bc " + base_path + "/00-combined-model.txt")
 
         attacks.collision.connected.loose.distributed_new_neighbor(self.algo, self.base, self.existing, self.poses, base_path + "/07-differential.txt")
+
+        if self.ascii:
+            prefixes = ['h1b']
+            if self.both:
+                prefixes = ['h1b', 'h2b']
+
+            attacks.collision.write_ascii_constraints(prefixes, base_path + "/44-ascii.txt")
+
 
         if self.h1_start_state != '':
             models.vars.write_values(self.h1_start_state, 'h1s', base_path + "/01-h1-state.txt")
