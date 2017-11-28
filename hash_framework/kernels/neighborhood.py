@@ -26,8 +26,14 @@ class Neighborhood(Kernel):
         self.existing = self.args['existing']
         self.poses = self.args['poses']
 
-        self.ascii = self.args['ascii']
-        self.both = self.args['both']
+        self.ascii = False
+        self.both = False
+
+        if 'ascii' in self.args:
+            self.ascii = self.args['ascii']
+
+        if 'both' in self.args:
+            self.both = self.args['both']
 
         if 'h1_start_state' in self.args:
             self.h1_start_state = self.args['h1_start_state']
