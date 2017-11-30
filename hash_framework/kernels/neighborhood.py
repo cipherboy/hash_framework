@@ -179,7 +179,7 @@ class Neighborhood(Kernel):
                 attacks.collision.write_optional_differential(self.algo)
                 attacks.collision.write_same_state(self.algo)
 
-                models.vars.write_assign(['ccollision', 'cblocks', 'cstate', 'cdifferentials'])
+                models.vars.write_assign(['ccollision', 'cblocks', 'cstate', 'cdifferentials', 'cascii'])
                 m.collapse(bc="00-combined-model.bc")
 
         while not os.path.exists(cache_path) or not os.path.exists(cache_path + "/00-combined-model.bc"):
