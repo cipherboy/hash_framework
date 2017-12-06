@@ -2,7 +2,7 @@
 
 num_process=`cat /proc/cpuinfo | grep 'processor' | wc -l`
 min_port=5000
-max_port=$((min_port + num_process))
+max_port=$((min_port + num_process - 1))
 
 bash ./stop_workers.sh
 mkdir -p ~/logs
