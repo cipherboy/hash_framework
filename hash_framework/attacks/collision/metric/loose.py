@@ -28,3 +28,10 @@ def abs(algo, col):
         if col[k] != '.'*32:
             r.append(i)
     return tuple(r)
+
+def abs_alt(rounds, col):
+    r = []
+    for i in range(0, rounds):
+        if col[i] != '.'*32:
+            r.append(i)
+    return tuple(r)

@@ -1,26 +1,34 @@
 from hash_framework.models import models
 
 
-def write_constraints(algo, prefixes=['h1', 'h2'], name="98-collision.txt"):
+def write_constraints(algo, prefixes=['h1', 'h2'], name="98-collision.txt", out_name="ccollision"):
     assert(type(prefixes) == list and len(prefixes) == 2 and type(prefixes[0]) == str and type(prefixes[1]) == str)
     c = ['and']
     for var in algo.output_vars:
         c.append(('equal', prefixes[0] + var, prefixes[1] + var))
-    models.vars.write_clause("ccollision", tuple(c), name)
+    models.vars.write_clause(out_name, tuple(c), name)
 
-def write_optional_differential(algo, prefixes=['h1', 'h2'], name="06-blocks.txt"):
+def write_optional_differential(algo, prefixes=['h1', 'h2'], name="06-blocks.txt", out_name="cblocks"):
     assert(type(prefixes) == list and len(prefixes) == 2 and type(prefixes[0]) == str and type(prefixes[1]) == str)
     c = ['and']
     for var in algo.block_vars:
         c.append(('equal', prefixes[0] + var, prefixes[1] + var))
-    models.vars.write_clause("cblocks", ('not', tuple(c)), name)
+    models.vars.write_clause(out_name, ('not', tuple(c)), name)
 
-def write_same_state(algo, prefixes=['h1', 'h2'], name="01-state.txt"):
+def write_same_state(algo, prefixes=['h1', 'h2'], name="01-state.txt", out_name="cstate"):
     assert(type(prefixes) == list and len(prefixes) == 2 and type(prefixes[0]) == str and type(prefixes[1]) == str)
     c = ['and']
     for var in algo.state_vars:
         c.append(('equal', prefixes[0] + var, prefixes[1] + var))
-    models.vars.write_clause("cstate", tuple(c), name)
+    models.vars.write_clause(out_name, tuple(c), name)
+
+def write_same_blocks(algo, prefixes=['h1', 'h2'], name="08-blocks.txt", out_name="cblock"):
+    assert(type(prefixes) == list and len(prefixes) == 2 and type(prefixes[0]) == str and type(prefixes[1]) == str)
+    c = ['and']
+    for var in algo.block_vars:
+        c.append(('equal', prefixes[0] + var, prefixes[1] + var))
+    models.vars.write_clause(out_name, tuple(c), name)
+
 
 def write_ascii_constraints(prefixes=['h1b'], name="44-ascii.txt"):
     z = "cascii := AND(T==T,"
