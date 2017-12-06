@@ -74,12 +74,15 @@ def wait_results(client_list, work_list, c_jids, c_work_map, on_results):
                 print(c_jids[i])
                 print(j_results)
 
+            finished_jids = set()
             for k in j_results:
                 c_jids[i].remove(k)
                 results[c_work_map[i][k]] = j_results[k]
                 if on_results != None:
                     on_results(c_work_map[i][k], j_results[k])
-                #c.delete(k)
+                finished_jids.add(k)
+
+            c.bulk_delete(list(finished_jids))
 
             if len(c_jids[i]) == 0:
                 print("Client finished: " + c.uri)
