@@ -9,8 +9,8 @@ import json, subprocess
 import itertools, time
 import random
 
-class SecondPreimage(Kernel):
-    name = "second_preimage"
+class Families(Kernel):
+    name = "families"
 
     def __init__(self, jid, args):
         super().__init__(jid, args)
@@ -147,6 +147,25 @@ class SecondPreimage(Kernel):
 
         attacks.collision.reduced.specified_difference(self.algo, self.places, base_path + "/07-differential.txt")
 
+        cnf = self.cnf_path()
+        o_cnf = open(cnf, 'w')
+        o_err = open(cnf + ".err", 'w')
+        model_files = "cat " + m.model_dir + "/" + tag + "/*.txt"
+        compile_model = m.bc_bin + " " + " ".join(m.bc_args)
+        cmd = model_files + " | " + compile_model
+        ret = subprocess.call(cmd, stdin=subprocess.DEVNULL, stdout=o_cnf, stderr=o_err, shell=True)
+
+        if not o_cnf.closed:
+            o_cnf.flush()
+            o_cnf.close()
+
+        if not o_err.closed:
+            o_err.flush()
+            o_err.close()
+
+        if ret != 0:
+            print("ERROR COMPILING MODEL: " + tag)
+
     def out_path(self):
         m = models()
         tag = self.build_tag()
@@ -159,29 +178,15 @@ class SecondPreimage(Kernel):
 
     def run_cmd(self):
         m = models()
-        tag = self.build_tag()
 
-        model_files = "cat " + m.model_dir + "/" + tag + "/*.txt"
-        compile_model = m.bc_bin + " " + " ".join(m.bc_args)
-        run_model = m.cms_bin + " " + " ".join(m.cms_args) + " " + " ".join(self.cms_args)
-        return model_files + " | " + compile_model + " | " + run_model
+        run_model = m.cms_bin + " " + " ".join(m.cms_args) + " " + " ".join(self.cms_args) + " " + self.cnf_path()
+        return run_model
 
     def run_sat(self):
         m = models()
         tag = self.build_tag()
         out_file = self.out_path()
         cnf_file = self.cnf_path()
-
-        model_files = "cat " + m.model_dir + "/" + tag + "/*.txt"
-        compile_model = m.bc_bin + " " + " ".join(m.bc_args)
-        cmd = model_files + " | " + compile_model
-
-        of = open(cnf_file, 'w')
-        oerr = open(cnf_file + ".err", 'w')
-
-        ret = subprocess.call(cmd, shell=True, stdout=of, stderr=oerr)
-        if ret != 0:
-            return "An unknown error occurred while compiling the model (" + cmd + "): " + json.dumps(self.args)
 
         m.start(tag, False)
         rs = m.results(self.algo, out=out_file, cnf=cnf_file)

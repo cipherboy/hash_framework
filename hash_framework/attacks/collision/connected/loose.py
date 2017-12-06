@@ -137,20 +137,24 @@ def new_unit_step(algo, start, cols, target):
     raw_target = ('and', tuple(all_differentials), ('not', tuple(negated)))
     models.vars.write_clause('cdifferentials', tuple(raw_target), "07-differential.txt")
 
-def distributed_new_neighbor(algo, base, existing, poses, name="07-differential.txt"):
+def distributed_new_neighbor(algo, base, existing, poses, name="07-differential.txt", prefixes=["h1", 'h2'], out_name="cdifferentials"):
+    assert(type(prefixes) == list or type(prefixes) == tuple)
+    assert(len(prefixes) == 2)
+    h1 = prefixes[0]
+    h2 = prefixes[1]
     differential = ['and']
     for i in range(0, algo.rounds):
         k = "ri" + str(i)
         if i in poses:
             dlist = []
             for e in existing[i]:
-                dlist.append([e, 'h1i', i*algo.int_size, 'h2i', i*algo.int_size])
-            dlist.append([base[i], 'h1i', i*algo.int_size, 'h2i', i*algo.int_size])
+                dlist.append([e, h1 + 'i', i*algo.int_size, h2 + 'i', i*algo.int_size])
+            dlist.append([base[i], h1 + 'i', i*algo.int_size, h2 + 'i', i*algo.int_size])
             differential.append(('not', models.vars.choice_differentials(dlist)))
         else:
             differential.append(models.vars.differential(base[i], 'h1i', i*algo.int_size, 'h2i', i*algo.int_size))
 
-    models.vars.write_clause('cdifferentials', tuple(differential), name)
+    models.vars.write_clause(out_name, tuple(differential), name)
 
 def constraints_new_neighbor(algo, cols, pos):
     # Differential Path
