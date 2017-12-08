@@ -16,6 +16,14 @@ def b_xor(x, y):
     #return simplify(b_or(b_and(x, b_not(y)), b_and(b_not(x), y)))
     return simplify(('xor', x, y))
 
+def b_xorw(x, y):
+    r = []
+    assert(len(x) == len(y))
+    for i in range(0, len(x)):
+        r.append(b_xor(x[i], y[i]))
+
+    return r
+
 def b_andbit(b, x):
     r = []
     for i in range(0, len(x)):
@@ -92,6 +100,12 @@ def b_mul(a, b):
 
 def b_rotl(x, l):
     return x[l:] + x[:l]
+
+def b_rotr(x, l):
+    x.reverse()
+    x = b_rotl(x, l)
+    x.reverse()
+    return x
 
 def b_tobitl(num):
     r = []
