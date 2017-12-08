@@ -66,3 +66,9 @@ class Kernel:
 
     def clean(self):
         pass
+
+    def store_result(self, db, result):
+        return []
+
+    def load_result(self, db, rid):
+        return []

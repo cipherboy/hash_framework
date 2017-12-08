@@ -17,7 +17,7 @@ def import_from_other(path, tag):
 
 def create_table(algo, db):
     q = create_table_query(algo)
-    db.execute(q)
+    db.execute(q, limit=1)
 
 def clean_table(algo, db):
     cols = table_cols(algo)
@@ -78,18 +78,23 @@ def build_deltas(db, algo, et):
 def __insert__(db, table, values, commit=False):
     assert(type(table) == str)
     assert(type(values) == dict or (type(values) == list and len(values) > 0 and type(values[0]) == dict))
+    rids = []
     if type(values) == dict:
         values = [values]
     for value in values:
         q = insert_query(table, value)
-        db.execute(q)
+        result = db.execute(q, rowid=True)
+        if result != None:
+            r, rid = result
+            rids.append(rid)
     if commit:
         self.conn.commit()
+    return rids
 
 def insert_db_single(algo, db, col, commit=False, verify=True):
     if verify and not verify_collision(algo, col):
         return
-    __insert__(db, "c_" + algo.name, col, commit=False)
+    return __insert__(db, "c_" + algo.name, col, commit=False)
 
 def insert_db_multiple(algo, db, cols, tag, verify=True):
     for r in cols:
@@ -111,6 +116,7 @@ def insert_db_multiple(algo, db, cols, tag, verify=True):
 
 
 def insert_db_multiple_automatic_tag(algo, db, cols, verify=True):
+    rids = []
     for r in cols:
         h1 = unprefix_keys(r, "h1")
         h1 = algo.to_hex(h1)
@@ -125,8 +131,10 @@ def insert_db_multiple_automatic_tag(algo, db, cols, verify=True):
         h2s = b_hex_to_block(h2['state'])
         h2b = b_hex_to_block(h2['block'])
 
-        import_single_automatic_tag(algo, db, h1s, h1b, h2s, h2b, commit=False)
+        rid = import_single_automatic_tag(algo, db, h1s, h1b, h2s, h2b, commit=False)
+        rids.extend(rid)
     db.commit()
+    return rids
 
 def build_col_row(algo, db, s1, b1, s2, b2, tag):
     et1 = algo.evaluate(b1, s1)
@@ -206,11 +214,12 @@ def import_single_automatic_tag(algo, db, s1, b1, s2, b2, commit=False):
         if not et["h1o" + str(i)] == et["h2o" + str(i)]:
             if commit:
                 db.commit()
-            return
+            return None
 
-    __insert__(db, "c_" + algo.name, et)
+    rids = __insert__(db, "c_" + algo.name, et)
     if commit:
         db.commit()
+    return rids
 
 def load_db_single(algo, db, id, name=None):
     if name is None:

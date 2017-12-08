@@ -67,10 +67,25 @@ class Ones(Kernel):
 
         return d
 
+
     def on_result(algo, db, tags, work, wid, result):
+        tag = tags[wid]
         if type(result['results']) == list and len(result['results']) > 0:
             algo.rounds = work[wid][0]
             attacks.collision.insert_db_multiple_automatic_tag(algo, db, result['results'], False)
+
+    def store_result(self, db, result):
+        algo = self.algo
+        rids = attacks.collision.insert_db_multiple_automatic_tag(algo, db, result['results'], False)
+        return rids
+
+    def load_result(self, db, rids):
+        algo = self.algo
+        results = []
+        for rid in rids:
+            r = attacks.collision.load_db_single(algo, db, rid)
+            results.append(r)
+        return results
 
     def build_tag(self):
         return self.jid + self.build_cache_tag() + "-o" + str(self.ones)

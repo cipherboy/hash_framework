@@ -11,6 +11,22 @@ from hash_framework.workers.job import Job
 from hash_framework.workers.jobs import Jobs
 from hash_framework.config import config
 
+assert(len(sys.argv) == 2)
+
+if sys.argv[1] == "db":
+    import hash_framework as hf
+    db_path = config.results_dir + "/worker_results.db"
+    db = hf.database(path=db_path)
+    for name in hf.algorithms.all_algorithms:
+        algo = hf.algorithms.lookup(name)
+        try:
+            hf.attacks.collision.create_table(algo, db)
+        except:
+            pass
+    sys.exit()
+
+config.port = int(sys.argv[1])
+
 app = Flask(__name__)
 queues = Jobs(config)
 queues.update_thread()
@@ -90,7 +106,7 @@ def bulk_job():
             j = queues.get(str(data))
             if j and j.status():
                 try:
-                    result[data] = j.result()
+                    result[data] = queues.result(j)
                 except Exception as e:
                     print("Error processing result: " + e + " " + str(data))
                     sys.stdout.flush()
@@ -134,6 +150,5 @@ def bulk_clean():
 
         return ""
 
-assert(len(sys.argv) == 2)
 
 app.run(host="0.0.0.0", port=int(sys.argv[1]))

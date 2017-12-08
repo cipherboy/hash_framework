@@ -49,8 +49,15 @@ class Job:
         if self.ftime == 0:
             self.ftime = time.time()
 
-    def result(self):
-        return {"id": self.id, "return": self.status(), "results": self.kernel.post_run(self.status())}
+    def finish(self, db):
+        result = {"id": self.id, "return": self.status(), "results": self.kernel.post_run(self.status())}
+        rids = self.kernel.store_result(db, result)
+        return rids
+
+    def result(self, db, rids):
+        results = self.kernel.load_result(db, rids)
+        r = {"id": self.id, "return": self.status(), "results": results}
+        return r
 
     def clean(self):
         self.kernel.clean()

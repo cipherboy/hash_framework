@@ -1,5 +1,5 @@
 import sqlite3
-import time
+import time, sys
 
 from hash_framework.config import config
 
@@ -11,17 +11,21 @@ class database:
         self.path = path
         self.conn = sqlite3.connect(path)
 
-    def execute(self, q, commit=True):
-        for i in range(0, 20):
+    def execute(self, q, commit=True, limit=20, rowid=False):
+        for i in range(0, limit):
             try:
                 c = self.conn.cursor()
                 r = c.execute(q)
-                if commit:
+                if commit or rowid:
                     self.conn.commit()
+                if rowid:
+                    return r, c.lastrowid
                 return r
             except Exception as e:
-                time.sleep(1)
-                print(e)
+                if i < limit-1:
+                    time.sleep(1)
+                print("Database Error:", file=sys.stderr)
+                print(e, file=sys.stderr)
                 pass
 
         return None

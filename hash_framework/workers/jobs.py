@@ -1,9 +1,10 @@
 import time, time
 import base64, json
 import subprocess, sys, random
-import threading
+import threading, os.path
 
 from hash_framework.workers.job import Job
+import hash_framework as hf
 
 class Jobs:
     def __init__(self, config):
@@ -11,7 +12,11 @@ class Jobs:
         self.fj = set()
         self.jq = set()
         self.wj = set()
+        self.rids = {}
         self.config = config
+        self.db_path = self.config.results_dir + "/worker_results.db"
+        self.db = hf.database(path=self.db_path)
+        self.thread_db = None
 
     def update_config(self, config):
         self.config = config
@@ -23,6 +28,7 @@ class Jobs:
         return thread
 
     def do_update(self):
+        self.thread_db = hf.database(path=self.db_path)
         while True:
             self.update()
             time.sleep(0.05)
@@ -31,6 +37,8 @@ class Jobs:
         for jid in self.jq.copy():
             j = self.jobs[jid]
             if j.status() != None:
+                rids = j.finish(self.thread_db)
+                self.rids[jid] = rids
                 self.fj.add(jid)
                 self.jq.remove(jid)
 
@@ -122,7 +130,7 @@ class Jobs:
 
     def result(self, j):
         assert(type(j) == Job)
-        return json.dumps(j.result())
+        return j.result(self.db, self.rids[j.id])
 
     def ready(self):
         return len(self.jq) < self.config["jobs"]
