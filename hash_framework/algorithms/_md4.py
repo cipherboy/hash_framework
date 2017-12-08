@@ -96,7 +96,7 @@ def md4_build_state(eval_table, prefix=""):
     return state
 
 
-def BuildBlockEvalTable(block):
+def MD4BuildBlockEvalTable(block):
     eval_table = {}
     for i in range(0, 32):
         eval_table['s' + str(i)] = b_tobitl(0x67452301)[i % 32]
@@ -142,7 +142,7 @@ def MD4BuildBlockStateEvalTable(block, state):
     return eval_table
 
 def compute_md4(block, in_state=None, rounds=48):
-    eval_table = BuildBlockEvalTable(block)
+    eval_table = MD4BuildBlockEvalTable(block)
     if in_state != None:
         eval_table = MD4BuildBlockStateEvalTable(block, in_state)
 
@@ -194,19 +194,13 @@ def perform_md4(eval_table, original_state, f, f3, f2=None, prefix="", rounds=48
     print(b_tonum(occ))
     print(b_tonum(odd))
 
+    print("MD4: " + str(rounds))
     eval_table = writeo(f3, prefix, oaa, 'oaa', eval_table)
     eval_table = writeo(f3, prefix, obb, 'obb', eval_table)
     eval_table = writeo(f3, prefix, occ, 'occ', eval_table)
     eval_table = writeo(f3, prefix, odd, 'odd', eval_table)
-    stats = []
-
-    print("Generating stats...")
-    for i in eval_table:
-        stats.append(var_count(eval_table[i]))
-    print(list(map(lambda x: (x, stats.count(x)), set(stats))))
 
     global clause_dedupe_s
-    print("Deduplicated clauses: " + str(len(clause_dedupe_s)))
     for t in clause_dedupe_s:
         if len(prefix) > 0:
             if prefix == t[0:len(prefix)]:
