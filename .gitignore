@@ -100,5 +100,6 @@ ENV/
 # mypy
 .mypy_cache/
 
-# Ignore main from now on
+# Ignore main, compute from now on
 main.py
+compute.py
