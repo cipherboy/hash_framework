@@ -93,8 +93,8 @@ def __insert__(db, table, values, commit=False, rowid=True):
         values = [values]
     for value in values:
         q = insert_query(table, value)
-        result = db.execute(q, commit=False, rowid=False)
-        if result != None and len(result) == 2 and rowid:
+        result = db.execute(q, commit=False, rowid=rowid)
+        if result != None and rowid:
             r, rid = result
             rids.append(rid)
     if commit:

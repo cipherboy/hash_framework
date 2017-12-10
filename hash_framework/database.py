@@ -17,6 +17,7 @@ class database:
                 c = self.conn.cursor()
                 r = c.execute(q)
                 if commit or rowid:
+                    print((commit, rowid))
                     self.conn.commit()
                 if rowid:
                     return r, c.lastrowid
