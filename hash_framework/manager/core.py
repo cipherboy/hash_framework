@@ -71,10 +71,12 @@ def wait_results(client_list, work_list, c_jids, c_work_map, on_results):
             #try:
             j_results = c.bulk_result(c_jids[i])
             if len(j_results) == 0:
-                print(c_jids[i])
-                print(j_results)
+                print("Received no results from " + c.uri)
 
             finished_jids = set()
+            if len(j_results) > 0:
+                print("Received results from " + c.uri + ": " + str(len(j_results)))
+
             for k in j_results:
                 c_jids[i].remove(k)
                 results[c_work_map[i][k]] = j_results[k]
