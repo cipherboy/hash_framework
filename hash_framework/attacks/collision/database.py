@@ -7,7 +7,17 @@ from hash_framework.database import database
 from hash_framework.models import models
 from hash_framework.utils import *
 
-def import_from_other(path, tag):
+import sqlite3
+
+def import_from_other(db, algo, path):
+    db2 = database()
+    db2.path=path
+    db2.conn = sqlite3.connect(db2.path)
+    cols = load_db(algo, db2)
+    print(len(cols))
+    import_db_multiple(algo, db, cols)
+
+def import_from_other_tag(path, tag):
     db2 = database()
     db2.path=path
     db2.conn = sqlite3.connect(db2.path)
@@ -96,7 +106,16 @@ def insert_db_single(algo, db, col, commit=False, verify=True):
         return
     return __insert__(db, "c_" + algo.name, col, commit=False)
 
-def insert_db_multiple(algo, db, cols, tag, verify=True):
+def import_db_multiple(algo, db, cols):
+    for r in cols:
+        et = {}
+        for k in r:
+            if r[k] != None:
+                et[k] = r[k]
+        __insert__(db, "c_" + algo.name, et, commit=False)
+    db.commit()
+
+def insert_db_multiple(algo, db, cols, verify=True):
     for r in cols:
         h1 = unprefix_keys(r, "h1")
         h1 = algo.to_hex(h1)
