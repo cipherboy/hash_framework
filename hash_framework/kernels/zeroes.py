@@ -71,7 +71,7 @@ class Zeroes(Kernel):
         tag = tags[wid]
         if type(result['results']) == list and len(result['results']) > 0:
             algo.rounds = work[wid][0]
-            attacks.collision.insert_db_multiple_automatic_tag(algo, db, result['results'], False)
+            attacks.collision.import_db_multiple(algo, db, result['results'])
 
     def store_result(self, db, result):
         algo = self.algo

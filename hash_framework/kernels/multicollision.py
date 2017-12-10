@@ -67,7 +67,7 @@ class Multicollision(Kernel):
     def on_result(algo, db, tags, work, wid, result):
         if type(result['results']) == list and len(result['results']) > 0:
             algo.rounds = work[wid][0]
-            attacks.collision.insert_db_multiple_automatic_tag(algo, db, result['results'], False)
+            attacks.collision.import_db_multiple(algo, db, result['results'])
 
     def build_tag(self):
         return self.jid + self.build_cache_tag()
