@@ -1,5 +1,6 @@
 from hash_framework.boolean import *
 
+
 def sipround(v0, v1, v2, v3, iv, et):
     nv0 = v0.copy()
     nv1 = v1.copy()
@@ -87,6 +88,427 @@ def write_et(et, name):
     f.flush()
     f.close()
 
+def build_state(prefix):
+    s = []
+    for i in range(0, 4):
+        sa = []
+        for j in range(0, 64):
+            sa.append(prefix + str(i) + "i" + str(j))
+        s.append(sa)
+    return s
+
+
+def gen_random_state(prefix):
+    import random
+    output = ['and']
+    for i in range(0, 4):
+        for j in range(0, 64):
+            if random.randint(0, 1) == 0:
+                output.append(prefix + str(i) + "b" + str(j))
+            else:
+                output.append(('not', "h1iv" + str(i) + "b" + str(j)))
+    f = open("97-output.txt", 'w')
+    f.write('coutput := ' + translate(tuple(output)) + ";\n")
+    f.flush()
+    f.close()
+
+
+def build_test_block_fixed():
+    block_len = 1
+    block_rounds = 2
+
+    giv = 0
+    get = {}
+
+    for prefix in ['h']:
+        iv0 = hex_to_bit64("736f6d6570736575")
+        iv1 = hex_to_bit64("646f72616e646f6d")
+        iv2 = hex_to_bit64("6c7967656e657261")
+        iv3 = hex_to_bit64("7465646279746573")
+
+        k1 = []
+        for k in range(0, 64):
+            k1.append(prefix + "k1" + "b" + str(k))
+
+        k2 = []
+        for k in range(0, 64):
+            k2.append(prefix + "k2" + "b" + str(k))
+
+        s = (iv0, iv1, iv2, iv3)
+        s = list(s)
+        s[0] = b_xorw(s[0], k1)
+        s[1] = b_xorw(s[1], k2)
+        s[2] = b_xorw(s[2], k1)
+        s[3] = b_xorw(s[3], k2)
+        s = tuple(s)
+        name = prefix + "iv"
+        fname = "01-" + prefix + "-initial.txt"
+        s = write_state(name, s, fname)
+
+        for i in range(0, block_len):
+            mb = []
+            for k in range(0, 64):
+                mb.append(prefix + "m" + str(i) + "b" + str(k))
+
+            s = list(s)
+            s[3] = b_xorw(s[3], mb)
+            s = tuple(s)
+
+            for j in range(0, block_rounds):
+                ns, giv, get = sipround(s[0], s[1], s[2], s[3], giv, get)
+                name = prefix + "b" + str(i) + "r" + str(j) + "v"
+                fname = "02-" + prefix + "-b" + str(i) + "-r" + str(j) + "-sipround.txt"
+                s = write_state(name, ns, fname)
+
+            s = list(s)
+            s[0] = b_xorw(s[0], mb)
+            s = tuple(s)
+
+        name = prefix + "o"
+        fname = "03-" + prefix + "-output.txt"
+        s = write_state(name, s, fname)
+
+    f = open("00-header.txt", 'w')
+    f.write("BC1.1\n\n")
+    f.flush()
+    f.close()
+
+
+    cfixed = ['and']
+    for i in range(0, 4):
+        for j in range(0, 64):
+            cfixed.append(('equal', 'hiv' + str(i) + "b" + str(j), 'ho' + str(i) + "b" + str(j)))
+    f = open("98-fixed.txt", 'w')
+    f.write('cfixed := ' + translate(tuple(cfixed)) + ";\n")
+    f.flush()
+    f.close()
+
+    write_et(get, "50-all-flat.txt")
+
+    f = open("99-problem.txt", 'w')
+    f.write("ASSIGN cfixed;\n\n")
+    f.flush()
+    f.close()
+
+
+def build_test_block_invert():
+    block_len = 3
+    block_rounds = 2
+
+    giv = 0
+    get = {}
+
+    for prefix in ['h']:
+        iv0 = hex_to_bit64("736f6d6570736575")
+        iv1 = hex_to_bit64("646f72616e646f6d")
+        iv2 = hex_to_bit64("6c7967656e657261")
+        iv3 = hex_to_bit64("7465646279746573")
+
+        k1 = []
+        for k in range(0, 64):
+            k1.append(prefix + "k1" + "b" + str(k))
+
+        k2 = []
+        for k in range(0, 64):
+            k2.append(prefix + "k2" + "b" + str(k))
+
+        s = (iv0, iv1, iv2, iv3)
+        s = list(s)
+        s[0] = b_xorw(s[0], k1)
+        s[1] = b_xorw(s[1], k2)
+        s[2] = b_xorw(s[2], k1)
+        s[3] = b_xorw(s[3], k2)
+        s = tuple(s)
+        name = prefix + "iv"
+        fname = "01-" + prefix + "-initial.txt"
+        s = write_state(name, s, fname)
+
+        for i in range(0, block_len):
+            mb = []
+            for k in range(0, 64):
+                mb.append(prefix + "m" + str(i) + "b" + str(k))
+
+            s = list(s)
+            s[3] = b_xorw(s[3], mb)
+            s = tuple(s)
+
+            for j in range(0, block_rounds):
+                ns, giv, get = sipround(s[0], s[1], s[2], s[3], giv, get)
+                name = prefix + "b" + str(i) + "r" + str(j) + "v"
+                fname = "02-" + prefix + "-b" + str(i) + "-r" + str(j) + "-sipround.txt"
+                s = write_state(name, ns, fname)
+
+            s = list(s)
+            s[0] = b_xorw(s[0], mb)
+            s = tuple(s)
+
+        name = prefix + "o"
+        fname = "03-" + prefix + "-output.txt"
+        s = write_state(name, s, fname)
+
+    f = open("00-header.txt", 'w')
+    f.write("BC1.1\n\n")
+    f.flush()
+    f.close()
+
+
+    output = ['and']
+    for i in range(0, 4):
+        for j in range(0, 64):
+            output.append(('equal', 'ho' + str(i) + "b" + str(j), "F"))
+
+    f = open("97-output.txt", 'w')
+    f.write('coutput := ' + translate(tuple(output)) + ";\n")
+    f.flush()
+    f.close()
+
+    write_et(get, "50-all-flat.txt")
+
+    f = open("99-problem.txt", 'w')
+    f.write("ASSIGN coutput;\n\n")
+    f.flush()
+    f.close()
+
+
+def build_test_strong_block_collision():
+    block_len = 2
+    block_rounds = 1
+
+    giv = 0
+    get = {}
+
+    for prefix in ['h1', 'h2']:
+        s = build_state(prefix + "in")
+
+        for i in range(0, block_len):
+            mb = []
+            for k in range(0, 64):
+                mb.append(prefix + "m" + str(i) + "b" + str(k))
+
+            s = list(s)
+            s[3] = b_xorw(s[3], mb)
+            s = tuple(s)
+
+            for j in range(0, block_rounds):
+                ns, giv, get = sipround(s[0], s[1], s[2], s[3], giv, get)
+                name = prefix + "b" + str(i) + "r" + str(j) + "v"
+                fname = "02-" + prefix + "-b" + str(i) + "-r" + str(j) + "-sipround.txt"
+                s = write_state(name, ns, fname)
+
+            s = list(s)
+            s[0] = b_xorw(s[0], mb)
+            s = tuple(s)
+
+        name = prefix + "o"
+        fname = "03-" + prefix + "-output.txt"
+        s = write_state(name, s, fname)
+
+    f = open("00-header.txt", 'w')
+    f.write("BC1.1\n\n")
+    f.flush()
+    f.close()
+
+    collision = ['and']
+    for i in range(0, 4):
+        for j in range(0, 64):
+            collision.append(('equal', 'h1o' + str(i) + "b" + str(j), "h2o" + str(i) + "b" + str(j)))
+    f = open("98-collision.txt", 'w')
+    f.write('ccollision := ' + translate(tuple(collision)) + ";\n")
+    f.flush()
+    f.close()
+
+    cblock = ['and']
+    for i in range(0, block_len):
+        for k in range(0, 64):
+            cblock.append(('equal', 'h1m' + str(i) + 'b' + str(k), "h2m" + str(i) + "b" + str(k)))
+    f = open("96-block.txt", 'w')
+    f.write('cblock := ' + translate(('not', tuple(cblock))) + ";\n")
+    f.flush()
+    f.close()
+
+    cinput = ['and']
+    for i in range(0, 4):
+        for j in range(0, 64):
+            cinput.append(('equal', 'h1in' + str(i) + "i" + str(j), "h2in" + str(i) + "i" + str(j)))
+    f = open("97-input.txt", 'w')
+    f.write('cinput := ' + translate(tuple(cinput)) + ";\n")
+    f.flush()
+    f.close()
+
+    write_et(get, "50-all-flat.txt")
+
+    f = open("99-problem.txt", 'w')
+    f.write("ASSIGN ccollision, cinput, cblock;\n\n")
+    f.flush()
+    f.close()
+
+
+def build_test_fixed():
+    rounds = 3
+
+    giv = 0
+    get = {}
+    for prefix in ["h"]:
+        s = build_state("hin")
+
+        for r in range(0, rounds):
+            ns, giv, get = sipround(s[0], s[1], s[2], s[3], giv, get)
+            name = "r" + str(r) + "s"
+            fname = "02-" + name + "-siphash.txt"
+            s = write_state(name, ns, fname)
+
+        name = prefix + "o"
+        fname = "03-" + prefix + "-output.txt"
+        s = write_state(name, s, fname)
+
+    f = open("00-header.txt", 'w')
+    f.write("BC1.1\n\n")
+    f.flush()
+    f.close()
+
+    cinput = ['or']
+    for i in range(0, 4):
+        for j in range(0, 64):
+            cinput.append('hin' + str(i) + "i" + str(j))
+    f = open("96-input.txt", 'w')
+    f.write('cinput := ' + translate(tuple(cinput)) + ";\n")
+    f.flush()
+    f.close()
+
+    cintermediate = ['and']
+    for i in range(0, 4):
+        for j in range(0, 64):
+            cintermediate.append(('equal', 'hin' + str(i) + "i" + str(j), 'h1r0s' + str(i) + "b" + str(j)))
+    f = open("97-intermediate.txt", 'w')
+    f.write('cintermediate := ' + translate(('not', tuple(cintermediate))) + ";\n")
+    f.flush()
+    f.close()
+
+    cfixed = ['and']
+    for i in range(0, 4):
+        for j in range(0, 64):
+            cfixed.append(('equal', 'hin' + str(i) + "i" + str(j), 'ho' + str(i) + "b" + str(j)))
+    f = open("98-fixed.txt", 'w')
+    f.write('cfixed := ' + translate(tuple(cfixed)) + ";\n")
+    f.flush()
+    f.close()
+
+    write_et(get, "50-all-flat.txt")
+
+    f = open("99-problem.txt", 'w')
+    f.write("ASSIGN cfixed, cinput, cintermediate;\n\n")
+    f.flush()
+    f.close()
+
+
+
+def build_test_invert(rounds=3):
+    giv = 0
+    get = {}
+    for prefix in ["h1"]:
+        s = build_state("in")
+
+        for r in range(0, rounds):
+            ns, giv, get = sipround(s[0], s[1], s[2], s[3], giv, get)
+            name = "r" + str(r) + "s"
+            fname = "02-" + name + "-siphash.txt"
+            s = write_state(name, ns, fname)
+
+    gen_random_state("r" + str(r) + "s")
+
+    f = open("00-header.txt", 'w')
+    f.write("BC1.1\n\n")
+    f.flush()
+    f.close()
+
+    write_et(get, "50-all-flat.txt")
+
+    f = open("99-problem.txt", 'w')
+    f.write("ASSIGN coutput;\n\n")
+    f.flush()
+    f.close()
+
+
+def build_test_xor():
+    block_len = 1
+    block_rounds = 1
+    post_rounds = 1
+    hashlen128 = False
+    collision = True
+
+    giv = 0
+    get = {}
+    for prefix in ["h1", "h2"]:
+        s = build_state(prefix + "in")
+
+        ss = b_xorw(b_xorw(s[0],s[1]),b_xorw(s[2],s[3]))
+        name = prefix + "ss"
+        fname = "01-" + prefix + "-input.txt"
+        f = open(fname, 'w')
+        for i in range(0, 64):
+            name = prefix + "ss" + str(i)
+            f.write(name + " := " + translate(ss[i]) + ";\n")
+        f.flush()
+        f.close()
+
+
+        ns, giv, get = sipround(s[0], s[1], s[2], s[3], giv, get)
+        name = prefix + "iv"
+        fname = "02-" + prefix + "-siphash.txt"
+        s = write_state(name, ns, fname)
+
+        os = b_xorw(b_xorw(s[0],s[1]),b_xorw(s[2],s[3]))
+        name = prefix + "os"
+        fname = "03-" + prefix + "-output.txt"
+        f = open(fname, 'w')
+        for i in range(0, 64):
+            name = prefix + "os" + str(i)
+            f.write(name + " := " + translate(os[i]) + ";\n")
+        f.flush()
+        f.close()
+
+    f = open("00-header.txt", 'w')
+    f.write("BC1.1\n\n")
+    f.flush()
+    f.close()
+
+    collision = ['and']
+    for i in range(0, 64):
+        name1 = "h1os" + str(i)
+        name2 = "h2os" + str(i)
+        collision.append(('equal', name1, name2))
+    f = open("98-collision.txt", 'w')
+    f.write('ccollision := ' + translate(tuple(collision)) + ";\n")
+    f.flush()
+    f.close()
+
+    collision = ['and']
+    for i in range(0, 64):
+        name1 = "h1ss" + str(i)
+        name2 = "h2ss" + str(i)
+        collision.append(('equal', name1, name2))
+    f = open("97-input.txt", 'w')
+    f.write('cinput := ' + translate(tuple(collision)) + ";\n")
+    f.flush()
+    f.close()
+
+    cblocks = ['and']
+    for i in range(0, 4):
+        for k in range(0, 64):
+            name1 = "h1in" + str(i) + "i" + str(k)
+            name2 = "h2in" + str(i) + "i" + str(k)
+            cblocks.append(('equal', name1, name2))
+    f = open("96-different.txt", 'w')
+    f.write('cdifferent := ' + translate(('not', tuple(cblocks))) + ";\n")
+    f.flush()
+    f.close()
+
+    write_et(get, "50-all-flat.txt")
+
+    f = open("99-problem.txt", 'w')
+    f.write("ASSIGN ccollision, cinput, cdifferent;\n\n")
+    f.flush()
+    f.close()
 
 def build_sipmodel():
     block_len = 1
@@ -97,6 +519,9 @@ def build_sipmodel():
 
     giv = 0
     get = {}
+
+    build_test_xor()
+    return
 
     for prefix in ['h1', 'h2']:
         iv0 = hex_to_bit64("736f6d6570736575")
