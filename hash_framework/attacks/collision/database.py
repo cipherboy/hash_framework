@@ -85,7 +85,7 @@ def build_deltas(db, algo, et):
         et["r" + bare_col] = models.vars.compute_rdelta(et["h1" + bare_col], et["h2" + bare_col])
     return et
 
-def __insert__(db, table, values, commit=False):
+def __insert__(db, table, values, commit=False, rowid=True):
     assert(type(table) == str)
     assert(type(values) == dict or (type(values) == list and len(values) > 0 and type(values[0]) == dict))
     rids = []
@@ -93,8 +93,8 @@ def __insert__(db, table, values, commit=False):
         values = [values]
     for value in values:
         q = insert_query(table, value)
-        result = db.execute(q, commit=False, rowid=True)
-        if result != None:
+        result = db.execute(q, commit=False, rowid=False)
+        if result != None and len(result) == 2 and rowid:
             r, rid = result
             rids.append(rid)
     if commit:
@@ -112,7 +112,7 @@ def import_db_multiple(algo, db, cols):
         for k in r:
             if r[k] != None:
                 et[k] = r[k]
-        __insert__(db, "c_" + algo.name, et, commit=False)
+        __insert__(db, "c_" + algo.name, et, commit=False, rowid=False)
     db.commit()
 
 def insert_db_multiple(algo, db, cols, verify=True):
