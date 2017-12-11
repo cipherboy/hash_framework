@@ -1,14 +1,31 @@
 import hash_framework
 import sys
 
-def get_rowids(db, algo):
-    q = "SELECT ROWID from c_" + algo.name
+def get_rowid_count(db, algo):
+    q = "SELECT COUNT(ROWID) from c_" + algo.name
     q += " WHERE tag='' or tag is null;"
-    rowids = set()
     datas = db.execute(q).fetchall()
+    return datas[0][0]
+
+def get_rows(db, algo):
+    cols = hash_framework.attacks.collision.table_cols(algo)
+    cols.append("tag")
+    cols.append("ROWID")
+
+    q = "SELECT " + ','.join(cols) + " FROM c_" + algo.name
+    q += " WHERE ROWID in ("
+    q += "    SELECT ROWID from c_" + algo.name
+    q += "    WHERE tag='' or tag is null LIMIT 10000);"
+
+    datas = db.execute(q).fetchall()
+    results = []
     for data in datas:
-        rowids.add(data[0])
-    return rowids
+        r = {}
+        for i in range(0, len(cols)):
+            r[cols[i]] = data[i]
+        results.append(r)
+    return results
+
 
 def determine_tag(algo, row):
     rounds = 0
@@ -23,14 +40,9 @@ def determine_tag(algo, row):
     tag = "md4-r" + str(rounds) + "-e" + '-'.join(map(str, deltas))
     return tag
 
-def retag(db, algo, rowid):
-    name = "c_" + algo.name
-    cols = hash_framework.attacks.collision.table_cols(algo)
-    cols.append("tag")
-
-    r = db.query(name, cols, rowid=rowid, limit=1)
+def retag(db, algo, r):
     tag = determine_tag(algo, r)
-    r['tag'] = tag
+    rowid = r['ROWID']
 
     q = "UPDATE c_" + algo.name
     q += " SET tag='" + tag + "' WHERE ROWID="+str(rowid) + ";"
@@ -40,10 +52,14 @@ def retag(db, algo, rowid):
 def __main__():
     db = hash_framework.database()
     algo = hash_framework.algorithms.lookup(sys.argv[1])()
-    rowids = get_rowids(db, algo)
-    print(len(rowids))
-    for rowid in rowids:
-        retag(db, algo, rowid)
+    rowids = get_rowid_count(db, algo)
+    print(rowids)
+    while rowids > 0:
+        rows = get_rows(db, algo)
+        for row in rows:
+            retag(db, algo, row)
+        rowids = get_rowid_count(db, algo)
+        print(rowids)
     db.commit()
 
 

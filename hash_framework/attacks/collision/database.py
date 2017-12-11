@@ -245,7 +245,7 @@ def load_db_single(algo, db, id, name=None):
         name = "c_" + algo.name
     cols = table_cols(algo)
     if not 'tag' in cols:
-        cols.append(tag)
+        cols.append("tag")
     r = db.query(name, cols, rowid=id, limit=1)
     return r
 
@@ -254,7 +254,7 @@ def load_db_tag(algo, db, tag, name=None):
         name = "c_" + algo.name
     cols = table_cols(algo)
     if not 'tag' in cols:
-        cols.append(tag)
+        cols.append("tag")
     r = db.query(name, cols, tag=tag)
     return r
 
@@ -263,7 +263,7 @@ def load_db(algo, db, name=None):
         name = "c_" + algo.name
     cols = table_cols(algo)
     if not 'tag' in cols:
-        cols.append(tag)
+        cols.append("tag")
     r = db.query(name, cols)
     return r
 
