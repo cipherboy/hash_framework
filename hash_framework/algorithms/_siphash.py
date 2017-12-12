@@ -235,12 +235,9 @@ def gen_random_block():
             blk.append('F')
     return blk
 
-def build_test_key_leakage():
-    key_unknown_bits = 64
-    number_of_blocks = 512
-    block_len = 1
-    block_rounds = 1
-    final_rounds = 3
+def build_test_key_leakage(dir="",key_unknown_bits=16,number_of_blocks=4,block_len=1,block_rounds=1,final_rounds=3):
+    if dir != "":
+        dir += "/"
 
     giv = 0
     get = {}
@@ -252,9 +249,9 @@ def build_test_key_leakage():
     k2 = []
     for k in range(0, 64):
         k2.append("gk2b" + str(k))
-    write_key(gk1, gk2, "gk1b", "gk2b", bits=(64 - key_unknown_bits))
+    write_key(gk1, gk2, "gk1b", "gk2b", fname=dir + "01-key.txt", bits=(64 - key_unknown_bits))
     print((bit64_to_hex(gk1), bit64_to_hex(gk2)))
-    write_key(gk1, gk2, "gk1b", "gk2b", fname="actual.key")
+    write_key(gk1, gk2, "gk1b", "gk2b", fname=dir + "actual.key")
 
     cout = ['and']
 
@@ -284,7 +281,7 @@ def build_test_key_leakage():
             mb = []
             for k in range(0, 64):
                 mb.append(prefix + "m" + str(i) + "b" + str(k))
-            write_block(gmb, prefix + "m" + str(i) + "b", fname="05-" + prefix + "-block.txt")
+            write_block(gmb, prefix + "m" + str(i) + "b", fname=dir + "05-" + prefix + "-block.txt")
 
             s = list(s)
             s[3] = b_xorw(s[3], mb)
@@ -293,7 +290,7 @@ def build_test_key_leakage():
             for j in range(0, block_rounds):
                 ns, giv, get = sipround(s[0], s[1], s[2], s[3], giv, get)
                 name = prefix + "b" + str(i) + "r" + str(j) + "v"
-                fname = "02-" + prefix + "-b" + str(i) + "-r" + str(j) + "-sipround.txt"
+                fname = dir + "02-" + prefix + "-b" + str(i) + "-r" + str(j) + "-sipround.txt"
                 s = write_state(name, ns, fname)
 
             s = list(s)
@@ -304,17 +301,17 @@ def build_test_key_leakage():
         for j in range(0, final_rounds):
             ns, giv, get = sipround(s[0], s[1], s[2], s[3], giv, get)
             name = prefix + "r" + str(j) + "v"
-            fname = "03-" + prefix + "-r" + str(j) + "-sipround.txt"
+            fname = dir + "03-" + prefix + "-r" + str(j) + "-sipround.txt"
             s = write_state(name, ns, fname)
 
         name = prefix + "o"
-        fname = "03-" + prefix + "-output.txt"
+        fname = dir + "03-" + prefix + "-output.txt"
         s = write_state(name, s, fname)
 
 
         os = b_xorw(b_xorw(s[0],s[1]),b_xorw(s[2],s[3]))
         name = prefix + "os"
-        fname = "04-" + prefix + "-output.txt"
+        fname = dir + "04-" + prefix + "-output.txt"
         f = open(fname, 'w')
         for i in range(0, 64):
             name = prefix + "os" + str(i)
@@ -323,22 +320,22 @@ def build_test_key_leakage():
         f.close()
 
         # write_output_state(go, prefix + "o", "b", prefix + "os", fname="06-" + prefix + "-block.txt")
-        write_output(gos, prefix + "os", "f" + prefix+"os", fname="06-" + prefix + "-block.txt")
+        write_output(gos, prefix + "os", "f" + prefix+"os", fname=dir + "06-" + prefix + "-block.txt")
         cout.append("f" + prefix + "os")
 
-    f = open("00-header.txt", 'w')
+    f = open(dir + "00-header.txt", 'w')
     f.write("BC1.1\n\n")
     f.flush()
     f.close()
 
-    write_et(get, "50-all-flat.txt")
+    write_et(get, dir + "50-all-flat.txt")
 
-    f = open("98-out.txt", 'w')
+    f = open(dir + "98-out.txt", 'w')
     f.write('cout := ' + translate(tuple(cout)) + ";\n")
     f.flush()
     f.close()
 
-    f = open("99-problem.txt", 'w')
+    f = open(dir + "99-problem.txt", 'w')
     f.write("ASSIGN cout;\n\n")
     f.flush()
     f.close()

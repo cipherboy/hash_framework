@@ -2,7 +2,7 @@ from hash_framework.config import config
 from hash_framework.boolean.translate import *
 from hash_framework.utils import *
 
-import os, collections
+import os, collections, subprocess
 
 class models:
     def __init__(self):
@@ -99,6 +99,7 @@ class models:
 
     def start(self, dir, recreate=False):
         assert(type(dir) == str)
+        print(dir)
 
         if recreate:
             os.system("rm -rf " + self.model_dir + "/" + dir)
