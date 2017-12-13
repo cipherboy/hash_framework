@@ -80,9 +80,8 @@ class Families(Kernel):
     def work_to_tag(algo_name, work):
         return algo_name + "-r" + str(work[0]) + "-e" + '-'.join(map(str, work[1]))
 
-    def on_result(algo, db, tags, work, wid, result):
+    def on_result(algo, db, result):
         if type(result['results']) == list and len(result['results']) > 0:
-            algo.rounds = work[wid][0]
             attacks.collision.import_db_multiple(algo, db, result['results'])
 
     def store_result(self, db, result):

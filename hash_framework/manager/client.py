@@ -22,6 +22,19 @@ class Client:
         jid = r.json()
         return jid
 
+    def all_jobs(self):
+        r = requests.get(self.uri + "/jobs/")
+        if r.status_code != 200:
+            return set([])
+
+        jids = set()
+        result = r.json()
+        for k in result:
+            for jid in result[k]:
+                jids.add(jid)
+
+        return list(jids)
+
     def finished(self, jid):
         r = requests.get(self.uri + "/status/" + jid)
         if r.status_code == 404:

@@ -235,7 +235,7 @@ def gen_random_block():
             blk.append('F')
     return blk
 
-def build_test_key_leakage(dir="",key_unknown_bits=16,number_of_blocks=4,block_len=1,block_rounds=1,final_rounds=3):
+def build_test_key_leakage(dir="", key_unknown_bits=16, number_of_blocks=4, block_len=1, block_rounds=1, final_rounds=3, output_bits=64):
     if dir != "":
         dir += "/"
 
@@ -320,7 +320,7 @@ def build_test_key_leakage(dir="",key_unknown_bits=16,number_of_blocks=4,block_l
         f.close()
 
         # write_output_state(go, prefix + "o", "b", prefix + "os", fname="06-" + prefix + "-block.txt")
-        write_output(gos, prefix + "os", "f" + prefix+"os", fname=dir + "06-" + prefix + "-block.txt")
+        write_output(gos, prefix + "os", "f" + prefix+"os", fname=dir + "06-" + prefix + "-block.txt", bits=output_bits)
         cout.append("f" + prefix + "os")
 
     f = open(dir + "00-header.txt", 'w')

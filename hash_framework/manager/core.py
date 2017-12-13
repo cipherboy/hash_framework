@@ -38,23 +38,14 @@ def _send_sats(client_list, work_list, kernel_name):
     pool = Pool(processes=len(client_list))
     res_pool = pool.map(_add_sats_client, c_post_data)
 
-    c_work_map = []
     c_jids = []
     for i in range(len(client_list)):
-        work_map = {}
-        for pos in range(len(res_pool[i])):
-            if res_pool[i][pos] == None:
-                continue
-            wid = c_work[i][pos]
-            jid = res_pool[i][pos]
-            work_map[jid] = wid
-        c_work_map.append(work_map)
         c_jids.append(res_pool[i])
 
-    return c_jids, c_work_map
+    return c_jids
 
 
-def wait_results(client_list, work_list, c_jids, c_work_map, on_results):
+def wait_results(client_list, c_jids, on_results):
     results = {}
     except_count = 0
 
@@ -79,9 +70,8 @@ def wait_results(client_list, work_list, c_jids, c_work_map, on_results):
 
             for k in j_results:
                 c_jids[i].remove(k)
-                results[c_work_map[i][k]] = j_results[k]
                 if on_results != None:
-                    on_results(c_work_map[i][k], j_results[k])
+                    on_results(j_results[k])
                 finished_jids.add(k)
 
             c.bulk_delete(list(finished_jids))
@@ -100,10 +90,9 @@ def wait_results(client_list, work_list, c_jids, c_work_map, on_results):
         print(list(map(len, c_jids)))
         time.sleep(min_sleep)
 
-    return results
 
 def run(client_list, work_list, kernel_name, on_results=None):
     print("Sending sats...")
-    c_jids, c_work_map = _send_sats(client_list, work_list, kernel_name)
+    c_jids = _send_sats(client_list, work_list, kernel_name)
     print("Waiting for results...")
-    return wait_results(client_list, work_list, c_jids, c_work_map, on_results)
+    wait_results(client_list, c_jids, on_results)
