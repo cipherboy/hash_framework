@@ -111,7 +111,6 @@ def bulk_job():
                     print("Error processing result: " + e + " " + str(data))
                     sys.stdout.flush()
 
-
         return json.dumps(result)
 
 @app.route("/kill/<int:jid>")
@@ -132,6 +131,9 @@ def handle_clean(jid):
 
     j.clean()
     queues.jobs[jid] = None
+
+    gc.collect()
+
     return ""
 
 @app.route("/bulk_clean/", methods=['POST'])

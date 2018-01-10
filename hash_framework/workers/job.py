@@ -12,7 +12,8 @@ class Job:
         # Copy config
         self.id = u_ri()
         self.kernel_type = kernels.lookup(kernel_name)
-        self.kernel = self.kernel_type(self.id, kernel_args)
+        self.kernel_args = kernel_args
+        self.kernel = None
 
         self.of = None
         self._p = None
@@ -22,6 +23,9 @@ class Job:
         self.ftime = 0
 
     def run(self):
+        if self.kernel == None:
+            self.kernel = self.kernel_type(self.id, self.kernel_args)
+
         self.kernel.pre_run()
         cmd = self.kernel.run_cmd()
         out_path = self.kernel.out_path()
@@ -50,14 +54,22 @@ class Job:
             self.ftime = time.time()
 
     def finish(self, db):
+        if self.kernel == None:
+            self.kernel = self.kernel_type(self.id, self.kernel_args)
+
         result = {"id": self.id, "return": self.status(), "results": self.kernel.post_run(self.status())}
         rids = self.kernel.store_result(db, result)
         return rids
 
     def result(self, db, rids):
+        if self.kernel == None:
+            self.kernel = self.kernel_type(self.id, self.kernel_args)
+
         results = self.kernel.load_result(db, rids)
         r = {"id": self.id, "return": self.status(), "results": results}
         return r
 
     def clean(self):
         self.kernel.clean()
+        self.kernel = None
+        self.kernel_args = None
