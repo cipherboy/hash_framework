@@ -115,7 +115,7 @@ def import_db_multiple(algo, db, cols):
         __insert__(db, "c_" + algo.name, et, commit=False, rowid=False)
     db.commit()
 
-def insert_db_multiple(algo, db, cols, verify=True):
+def insert_db_multiple(algo, db, cols, tag, verify=True):
     for r in cols:
         h1 = unprefix_keys(r, "h1")
         h1 = algo.to_hex(h1)
