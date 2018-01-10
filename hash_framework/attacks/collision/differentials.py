@@ -28,6 +28,12 @@ def write(algo, differential, clause="cblocks", name="06-blocks.txt"):
     r = models.vars.differential(delta, "h1b", 0, "h2b", 0)
     models.vars.write_clause(clause, r, name)
 
+def write_path(algo, differential, clause="cdifferentials", name="09-differential.txt"):
+    delta = ''.join(differential)
+    r = models.vars.differential(delta, "h1i", 0, "h2i", 0)
+    models.vars.write_clause(clause, r, name)
+
+
 def write_choice(algo, differentials, clause="cblocks", name="06-blocks.txt"):
     r = ['or']
     for differential in differentials:
