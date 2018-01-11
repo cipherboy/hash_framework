@@ -109,7 +109,7 @@ class Minimal(Kernel):
         return self.jid + self.build_cache_tag() + "-e" + '-'.join(list(map(str, self.bits)))
 
     def build_cache_tag(self):
-        base = "nh-" + self.algo_name + "-r" + str(self.rounds)
+        base = "min-" + self.algo_name + "-r" + str(self.rounds)
         return base
 
     def build_cache_path(self):
