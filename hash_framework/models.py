@@ -97,15 +97,15 @@ class models:
                 f = fr % prefix
                 os.system("cp " + d + "/" + f + " " + f)
 
-    def start(self, dir, recreate=False):
-        assert(type(dir) == str)
-        print(dir)
+    def start(self, ndir, recreate=False):
+        assert(type(ndir) == str)
+        print(ndir)
 
         if recreate:
-            os.system("rm -rf " + self.model_dir + "/" + dir)
+            os.system("rm -rf " + self.model_dir + "/" + ndir)
 
-        os.system("mkdir -p " + self.model_dir + "/" + dir)
-        os.chdir(self.model_dir + "/" + dir)
+        os.system("mkdir -p " + self.model_dir + "/" + ndir)
+        os.chdir(self.model_dir + "/" + ndir)
 
     def build(self, bc="problem.bc", cnf="problem.cnf"):
         assert(type(bc) == str)

@@ -36,11 +36,14 @@ class Jobs:
     def update(self):
         for jid in self.jq.copy():
             j = self.jobs[jid]
-            if j.status() != None:
+            if j.status() != None and jid not in self.rids:
                 rids = j.finish(self.thread_db)
                 self.rids[jid] = rids
+
+            if j.status() != None:
                 self.fj.add(jid)
-                self.jq.remove(jid)
+                if jid in self.jq:
+                    self.jq.remove(jid)
 
         while len(self.jq) < self.config.threads and len(self.wj) > 0:
             jid = self.wj.pop()
@@ -54,46 +57,6 @@ class Jobs:
         ps += " - fj: " + str(len(self.fj)) + "\n"
         ps += " - jq: " + str(len(self.jq)) + "\n"
         ps += " - wj: " + str(len(self.wj)) + "\n"
-        ps += "\n## Finished\n\n"
-        c = 0
-        wt = 0
-        rt = 0
-        tt = 0
-        for jid in self.fj.copy():
-            j = self.jobs[jid]
-            wt += j.rtime - j.stime
-            rt += j.ftime - j.rtime
-            tt += j.ftime - j.stime
-            c += 1
-        if c > 0:
-            ps += " - Avg. wait time: " + str(wt / c) + "\n"
-            ps += " - Avg. run time (est.): " + str(rt / c) + "\n"
-            ps += " - Avg. total time (est.): " + str(tt / c) + "\n"
-        ps += "\n## Running\n\n"
-        c = 0
-        ct = time.time()
-        wt = 0
-        rt = 0
-        for jid in self.jq.copy():
-            j = self.jobs[jid]
-            wt += j.rtime - j.stime
-            rt += ct - j.rtime
-            c += 1
-        if c > 0:
-            ps += " - Avg. wait time: " + str(wt / c) + "\n"
-            ps += " - Avg. run time (curr.): " + str(rt / c) + "\n"
-        ps += "\n## Waiting\n\n"
-        c = 0
-        ct = time.time()
-        wt = 0
-        for jid in self.wj.copy():
-            j = self.jobs[jid]
-            wt += ct - j.stime
-            c += 1
-        if c > 0:
-            ps += " - Avg. wait time (curr.): " + str(wt / c) + "\n"
-
-        return ps
 
     def get(self, jid):
         if jid in self.jobs:
@@ -130,6 +93,11 @@ class Jobs:
 
     def result(self, j):
         assert(type(j) == Job)
+        if j.status() != None and not j.id self.rids:
+            self.rids[j.id] = None
+            rids = j.finish(self.db)
+            self.rids[j.id] = rids
+
         return j.result(self.db, self.rids[j.id])
 
     def ready(self):
