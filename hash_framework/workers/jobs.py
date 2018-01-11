@@ -93,7 +93,7 @@ class Jobs:
 
     def result(self, j):
         assert(type(j) == Job)
-        if j.status() != None and not j.id self.rids:
+        if j.status() != None and j.id not in self.rids:
             self.rids[j.id] = None
             rids = j.finish(self.db)
             self.rids[j.id] = rids
