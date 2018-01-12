@@ -36,6 +36,9 @@ class Jobs:
     def update(self):
         for jid in self.jq.copy():
             j = self.jobs[jid]
+            if j == None:
+                continue
+
             if j.status() != None and jid not in self.rids:
                 rids = j.finish(self.thread_db)
                 self.rids[jid] = rids
@@ -93,6 +96,7 @@ class Jobs:
 
     def result(self, j):
         assert(type(j) == Job)
+
         if j.status() != None and j.id not in self.rids:
             self.rids[j.id] = None
             rids = j.finish(self.db)
