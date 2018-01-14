@@ -104,7 +104,7 @@ def bulk_job():
         result = {}
         for data in datas:
             j = queues.get(str(data))
-            if j and j.status():
+            if j and j.status() and j.id in queues.rids:
                 try:
                     result[data] = queues.result(j)
                 except Exception as e:
