@@ -32,7 +32,7 @@ class Jobs:
         while True:
             try:
                 self.update()
-            except e:
+            except Exception as e:
                 print("do_update() - Thread Failure: " + str(e))
                 pass
             time.sleep(0.05)
