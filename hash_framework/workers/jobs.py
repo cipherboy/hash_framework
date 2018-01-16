@@ -29,12 +29,26 @@ class Jobs:
 
     def do_update(self):
         self.thread_db = hf.database(path=self.db_path)
+        failure_count = 0
+        failure_threshold = 100
         while True:
+            if failure_count > failure_threshold:
+                blacklist = []
+                for jid in self.jq.copy():
+                    blacklist.append(jid)
+                self.jq = set()
+
+                for jid in blacklist:
+                    self.wj.add(jid)
+
+                failure_count = 0
+
             try:
                 self.update()
             except Exception as e:
                 print("do_update() - Thread Failure: " + str(e))
-                pass
+                failure_count += 1
+
             time.sleep(0.05)
 
 

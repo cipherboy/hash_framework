@@ -28,6 +28,7 @@ if sys.argv[1] == "db":
 config.port = int(sys.argv[1])
 
 app = Flask(__name__)
+
 queues = Jobs(config)
 queues.update_thread()
 
