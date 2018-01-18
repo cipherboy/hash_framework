@@ -64,6 +64,22 @@ class Minimal(Kernel):
         print("Work: " + str(len(work)))
         return work
 
+    def gen_work_family(rounds, family, search_sizes):
+        work = []
+
+        var_set = []
+        for pos in family:
+            var_set += list(range(pos*32, (pos+1)*32))
+
+        for r in rounds:
+            for s in search_sizes:
+                for e in itertools.combinations(list(var_set), s):
+                    if list(map(lambda x: x//32, e)) == list(family):
+                        work.append((r, e))
+
+        print("Work: " + str(len(work)))
+        return work
+
     def work_to_args(algo_name, work, start_state=None, start_block=None, ascii_block=False, both_ascii=False):
         rounds, bits = work
         d =  {
