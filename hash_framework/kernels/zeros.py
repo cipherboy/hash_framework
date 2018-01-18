@@ -9,8 +9,8 @@ import json, subprocess
 import itertools, time
 import random
 
-class Zeroes(Kernel):
-    name = "zeroes"
+class Zeros(Kernel):
+    name = "zeros"
 
     def __init__(self, jid, args):
         super().__init__(jid, args)
