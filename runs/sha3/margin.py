@@ -13,6 +13,8 @@ algo = hf.algorithms.sha3(w=w, rounds=rounds)
 db_path = hf.config.results_dir + "/worker_results.db"
 db = hf.database(path=db_path)
 
+sat = set()
+
 for in_margin in range(input_error, 25*w):
     min_v = 0
     max_v = 25*w
@@ -23,7 +25,8 @@ for in_margin in range(input_error, 25*w):
     while min_v < max_v:
         m = hf.models()
         m.remote = False
-        m.start("margin-sha3-" + str(input_error) + "-" + str(in_margin) + "-" + str(out_margin) + "-" + str(w))
+        mn = "sha3-margin-w" + str(w) + "-ie" + str(input_error) + "-im" + str(in_margin) + "-om" + str(out_margin)
+        m.start(mn, False)
         hf.models.vars.write_header()
         hf.models.generate(algo, ['h1', 'h2'], bypass=True)
         hf.models.vars.write_assign(['cstart', 'cinput', 'coutput'])
@@ -47,11 +50,7 @@ for in_margin in range(input_error, 25*w):
         searched.add(out_margin)
         if rs:
             min_v = out_margin
-            res = m.results(algo)
-            for result in res:
-                col = hf.attacks.collision.build_deltas(db, algo, result)
-                col['tag'] = 'sha3-margin-w' + str(w) + '-ie' + str(input_error) + "-im" + str(in_margin) + "-om" + str(out_margin)
-                hf.attacks.collision.insert_db_single(algo, db, col, commit=True, verify=False)
+            sat.add(mn)
         else:
             max_v = out_margin
 
@@ -68,7 +67,8 @@ for in_margin in range(input_error, 25*w):
 
         m = hf.models()
         m.remote = False
-        m.start("margin-sha3-" + str(input_error) + "-" + str(in_margin) + "-" + str(out_margin) + "-" + str(w))
+        mn = "sha3-margin-w" + str(w) + "-ie" + str(input_error) + "-im" + str(in_margin) + "-om" + str(out_margin)
+        m.start(mn, False)
         hf.models.vars.write_header()
         hf.models.generate(algo, ['h1', 'h2'], bypass=True)
         hf.models.vars.write_assign(['cstart', 'cinput', 'coutput'])
@@ -89,13 +89,17 @@ for in_margin in range(input_error, 25*w):
         m.build()
         rs = m.run(count=1)
         if rs:
-            res = m.results(algo)
-            for result in res:
-                col = hf.attacks.collision.build_deltas(db, algo, result)
-                col['tag'] = 'sha3-margin-w' + str(w) + '-ie' + str(input_error) + "-im" + str(in_margin) + "-om" + str(out_margin)
-                hf.attacks.collision.insert_db_single(algo, db, col, commit=True, verify=False)
+            sat.add(mn)
         r.add((w, input_error, in_margin, out_margin, rs))
 
 sys.stderr.write(str(list(r)))
 sys.stderr.write("\n")
 sys.stderr.flush()
+
+for mn in sat:
+    m.start(mn, False)
+    res = m.results(algo)
+    for result in res:
+        col = hf.attacks.collision.build_deltas(db, algo, result)
+        col['tag'] = mn
+        hf.attacks.collision.insert_db_single(algo, db, col, commit=True, verify=False)
