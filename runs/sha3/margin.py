@@ -96,4 +96,6 @@ for in_margin in range(input_error, 25*w):
                 hf.attacks.collision.insert_db_single(algo, db, col, commit=True, verify=False)
         r.add((w, input_error, in_margin, out_margin, rs))
 
-print(list(r))
+sys.stderr.write(str(list(r)))
+sys.stderr.write("\n")
+sys.stderr.flush()
