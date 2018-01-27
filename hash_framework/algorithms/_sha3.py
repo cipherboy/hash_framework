@@ -109,7 +109,6 @@ def sha3iota(w, s, i):
     return ns
 
 def sha3p(et, prefix, w, s, ir):
-
     ns = sha3theta(w, s)
     for i in range(0, len(ns)):
         name = prefix + "r" + str(ir) + "t" + str(i)
@@ -176,7 +175,9 @@ def perform_sha3(eval_table, original_state, f, prefix="", rounds=24, w=64):
     input_prefix = prefix + "i"
     for i in range(0, len(original_state)):
         name = input_prefix + str(i)
-        eval_table[name] = original_state[i]
+        if original_state[i] != None:
+            eval_table[name] = original_state[i]
+
         if state[i] not in ['T', 'F']:
             state[i] = name
 
