@@ -189,7 +189,8 @@ def perform_sha3(eval_table, original_state, f, prefix="", rounds=24, w=64):
 
     if f is not None:
         for e in eval_table:
-            f.write(e + " := " + eval_table[e] + ";\n")
+            if eval_table[e] is not None:
+                f.write(e + " := " + translate(eval_table[e]) + ";\n")
 
     return eval_table
 

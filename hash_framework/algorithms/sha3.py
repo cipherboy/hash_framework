@@ -16,9 +16,10 @@ class sha3:
 
     generate_files = ["01-%s-sha3.txt"]
 
-    def __init__(self, w=64):
+    def __init__(self, w=64, rounds=24):
         self.w = w
         self.state_size = 25*w
+        self.rounds = rounds
 
     def evaluate(self, block, state, rounds=None):
         if rounds is None:
@@ -31,7 +32,7 @@ class sha3:
 
         for prefix in prefixes:
             eval_table = {}
-            state = [None] * 1600
+            state = [None] * self.state_size
 
             f = open("01-" + prefix + "-sha3.txt", 'w')
             perform_sha3(eval_table, state, f, prefix=prefix, rounds=rounds, w=self.w)
@@ -79,6 +80,8 @@ class sha3:
         for j in range(0, self.state_size):
             v.append(eval_table['o' + str(j)])
         et['o'] = ''.join(v)
+
+        return et
 
 
     def to_hex(self, eval_table):

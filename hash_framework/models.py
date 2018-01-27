@@ -215,6 +215,17 @@ class models:
             f.flush()
             f.close()
 
+        def write_range_clause(clause, min, max, value, name, mode='w'):
+            f = open(name, mode)
+
+            cv = translate(value)
+            assert(cv[0:3] == 'AND')
+            nv = "[" + str(min) + "," + str(max) + "]" + cv[3:]
+
+            f.write(clause + ' := ' + nv + ";\n")
+            f.flush()
+            f.close()
+
         def compute_ddelta(v1, v2):
             assert(len(v1) == len(v2))
 

@@ -13,11 +13,11 @@ def table_cols(algo):
     elif algo.name == "sha3":
         cols = ["i", "o"]
         for i in range(0, algo.rounds):
-            cols.append("r1t" + str(i))
-            cols.append("r1r" + str(i))
-            cols.append("r1p" + str(i))
-            cols.append("r1c" + str(i))
-            cols.append("r1i" + str(i))
+            cols.append("r" + str(i) + "t")
+            cols.append("r" + str(i) + "r")
+            cols.append("r" + str(i) + "p")
+            cols.append("r" + str(i) + "c")
+            cols.append("r" + str(i) + "i")
         return cols
     print("Unknown algorithm")
     raise
