@@ -5,14 +5,14 @@ import png
 DOT="/tmp/lattice.dot"
 
 
-points = [(8, (3,)),
-(16, (3, 5, 7)),
-(16, (3, 5, 7, 9)),
-(20, (0, 3, 4, 5, 9, 11, 12)),
-(20, (1, 3, 5, 7, 9, 10, 11, 12, 13)),
-(20, (1, 3, 5, 7, 9, 10, 11, 12, 15)),
-(48, (1, 2, 3, 5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 16, 19, 20, 35, 36)),
-(48, (0, 1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 12, 15, 16, 20, 32))]
+db = hash_framework.database()
+query = "SELECT DISTINCT(tag) FROM c_md5;"
+rs = db.execute(query)
+results = []
+for r in rs:
+    results.append(r[0])
+
+points = list(map(lambda y: tuple([y[0], tuple(y[1:])]), list(map(lambda x: list(map(int, x.replace('e', '').replace('r', '').split("-")[1:])), results))[:-2]))
 
 
 w_graph = {}
