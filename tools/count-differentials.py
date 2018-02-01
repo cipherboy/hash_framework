@@ -20,7 +20,7 @@ def get_differential_families(db, name, r):
         dset.add(tuple(t))
     print(len(dset))
     return dset
-     
+
 
 def rank_differentials(db, name, r):
     max_count = 0
@@ -29,7 +29,7 @@ def rank_differentials(db, name, r):
         c = []
         for i in range(0, 16):
             if i in p:
-                c.append('rb' + str(i) + '!="' + '.'*32 + '"') 
+                c.append('rb' + str(i) + '!="' + '.'*32 + '"')
             else:
                 c.append('rb' + str(i) + '="' + '.'*32 + '"')
         clause = ' AND '.join(c)
@@ -44,8 +44,6 @@ def rank_differentials(db, name, r):
     print(results)
 
 if __name__ == "__main__":
-    algo = hash_framework.algorithms.md5()
     db = hash_framework.database()
 
-    #work = kernel.gen_work([8, 12, 16, 20], list(range(0, 16)))
-    rank_differentials(db, 'md5', 24)
+    rank_differentials(db, 'md4', 24)

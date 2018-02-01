@@ -7,7 +7,6 @@ class database:
     def __init__(self, path=None):
         if path == None:
             path = config.results_dir + "/framework_results.db"
-        print(path)
         self.path = path
         self.conn = sqlite3.connect(path)
 
@@ -17,7 +16,6 @@ class database:
                 c = self.conn.cursor()
                 r = c.execute(q)
                 if commit or rowid:
-                    print((commit, rowid))
                     self.conn.commit()
                 if rowid:
                     return r, c.lastrowid

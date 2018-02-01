@@ -50,6 +50,10 @@ def retag(db, algo, r):
 
 
 def __main__():
+    if len(sys.argv) != 2:
+        print("Usage: " + sys.argv[0] + " algorithm")
+        return
+
     db = hash_framework.database()
     algo = hash_framework.algorithms.lookup(sys.argv[1])()
     rowids = get_rowid_count(db, algo)
