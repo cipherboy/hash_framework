@@ -37,15 +37,19 @@ def clean_table(algo, db):
     q += " FROM c_" + algo.name + " GROUP BY "
     q += ','.join(cols)
     q += ";"
-    db.execute(q)
+    print(q)
+    #db.execute(q)
     q = "ALTER TABLE c_" + algo.name + " RENAME TO backup_c_" + algo.name + ";"
-    db.execute(q)
+    print(q)
+    #db.execute(q)
     q = "CREATE TABLE c_" + algo.name + " AS SELECT "
     q += ','.join(cols)
     q += " FROM cleaning_c_" + algo.name + " GROUP BY "
     q += ','.join(cols)
     q += ";"
-    db.execute(q)
+    print(q)
+    #db.execute(q)
+
     print("Done")
 
 def table_cols(algo):

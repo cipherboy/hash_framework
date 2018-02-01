@@ -11,7 +11,8 @@ def __main__():
     db.init_psql()
 
     algo = hash_framework.algorithms.lookup(sys.argv[1])()
-    hash_framework.attacks.collision.import_from_other(db, algo, sys.argv[2])
+    hash_framework.attacks.collision.clean_table(algo, db)
+    #hash_framework.attacks.collision.import_from_other(db, algo, sys.argv[2])
 
 if __name__ == "__main__":
     __main__()
