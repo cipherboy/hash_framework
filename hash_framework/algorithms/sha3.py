@@ -12,7 +12,7 @@ class sha3:
     w = 64
     block_map = {}
     round_funcs = []
-    output_vars = ["o" + str(i) for i in range(0, 1600)]
+    output_vars = ["out" + str(i) for i in range(0, 1600)]
 
     generate_files = ["01-%s-sha3.txt"]
 
@@ -42,7 +42,7 @@ class sha3:
 
         v = []
         for j in range(0, self.state_size):
-            v.append(eval_table['i' + str(j)])
+            v.append(eval_table['in' + str(j)])
         et['i'] = ''.join(v)
 
         for i in range(0, self.rounds):
@@ -78,32 +78,7 @@ class sha3:
 
         v = []
         for j in range(0, self.state_size):
-            v.append(eval_table['o' + str(j)])
-        et['o'] = ''.join(v)
+            v.append(eval_table['out' + str(j)])
+        et['out'] = ''.join(v)
 
         return et
-
-
-    def to_hex(self, eval_table):
-        iet = {}
-        for k in eval_table:
-            iet[k] = b_tonum(eval_table[k])
-        oet = {}
-        t = []
-        for i in range(0, self.state_size//self.int_size):
-            t.append(iet['s' + str(i)])
-        oet['state'] = b_block_to_hex(t)
-        t = []
-        for i in range(0, self.block_size//self.int_size):
-            t.append(iet['b' + str(i)])
-        oet['block'] = b_block_to_hex(t)
-        t = []
-        for i in range(0, self.rounds):
-            t.append(b_block_to_hex([iet['i' + str(i)]]))
-        oet['intermediate'] = t
-        t = []
-        for i in range(0, self.state_size//self.int_size):
-            t.append(iet['o' + str(i)])
-        oet['output'] = b_block_to_hex(t)
-
-        return oet

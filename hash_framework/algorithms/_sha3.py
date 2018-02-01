@@ -172,7 +172,7 @@ def sha3_mix_block(block, state):
 def perform_sha3(eval_table, original_state, f, prefix="", rounds=24, w=64):
     state = [None] * len(original_state)
 
-    input_prefix = prefix + "i"
+    input_prefix = prefix + "in"
     for i in range(0, len(original_state)):
         name = input_prefix + str(i)
         if original_state[i] != None:
@@ -183,7 +183,7 @@ def perform_sha3(eval_table, original_state, f, prefix="", rounds=24, w=64):
 
     eval_table, state = sha3f(eval_table, prefix, w, state, rounds)
 
-    output_prefix = prefix + "o"
+    output_prefix = prefix + "out"
     for i in range(0, len(state)):
         eval_table[output_prefix + str(i)] = state[i]
 

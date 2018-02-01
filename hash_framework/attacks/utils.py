@@ -11,7 +11,7 @@ def table_cols(algo):
             cols.append("o" + str(i))
         return cols
     elif algo.name == "sha3":
-        cols = ["i", "o"]
+        cols = ["in", "out"]
         for i in range(0, algo.rounds):
             cols.append("r" + str(i) + "t")
             cols.append("r" + str(i) + "r")

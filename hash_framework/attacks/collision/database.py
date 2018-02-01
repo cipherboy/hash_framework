@@ -54,7 +54,7 @@ def table_cols(algo):
     prefixes = ["h1", "h2", "d", "r"]
     for bare_col in bare_cols:
         for prefix in prefixes:
-            cols.append(prefix + "_" + bare_col)
+            cols.append(prefix + bare_col)
 
     if algo.name == "md4" or algo.name == "md5":
         cols.append("family")
