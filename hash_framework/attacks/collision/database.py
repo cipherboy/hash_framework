@@ -54,7 +54,18 @@ def table_cols(algo):
     prefixes = ["h1", "h2", "d", "r"]
     for bare_col in bare_cols:
         for prefix in prefixes:
-            cols.append(prefix + bare_col)
+            cols.append(prefix + "_" + bare_col)
+
+    if algo.name == "md4" or algo.name == "md5":
+        cols.append("family")
+        cols.append("input_family")
+        cols.append("rounds")
+    elif algo.name == "sha3":
+        cols.append("rounds")
+        cols.append("min_round")
+        cols.append("max_round")
+        cols.append("w")
+
     return cols
 
 def create_table_query(algo, name=None):

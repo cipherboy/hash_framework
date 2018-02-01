@@ -1,21 +1,18 @@
-CREATE DATABASE IF NOT EXISTS hash_framework;
-USE hash_framework;
-
 CREATE TABLE tasks (
-    id BIGINT AUTO_INCREMENT NOT NULL,
+    id BIGSERIAL NOT NULL,
 
     max_threads INT NOT NULL,
     priority INT NOT NULL,
 
     name VARCHAR(1024) UNIQUE NOT NULL,
     algo VARCHAR(64) NOT NULL,
-    started DATETIME NOT NULL,
+    started TIMESTAMP NOT NULL,
 
     PRIMARY KEY(id)
 );
 
 CREATE TABLE jobs (
-    id BIGINT AUTO_INCREMENT NOT NULL,
+    id BIGSERIAL NOT NULL,
 
     kernel VARCHAR(64) NOT NULL,
     algo VARCHAR(64) NOT NULL,
@@ -26,7 +23,7 @@ CREATE TABLE jobs (
 );
 
 CREATE TABLE hosts (
-    id BIGINT AUTO_INCREMENT NOT NULL,
+    id BIGSERIAL NOT NULL,
 
     ip VARCHAR(128) NOT NULL,
     hostname VARCHAR(512) NOT NULL,
@@ -35,8 +32,8 @@ CREATE TABLE hosts (
     memory BIGINT NOT NULL,
     disk BIGINT NOT NULL,
 
-    registerred DATETIME NOT NULL,
-    last_seen DATETIME NOT NULL,
+    registerred TIMESTAMP NOT NULL,
+    last_seen TIMESTAMP NOT NULL,
 
     version VARCHAR(512) NOT NULL,
 
@@ -56,11 +53,11 @@ CREATE TABLE assigns (
 
     state INT NOT NULL,
 
-    start_time DATETIME,
-    compile_time DATETIME,
-    run_time DATETIME,
-    finalize_time DATETIME,
-    checked_back DATETIME
+    start_time TIMESTAMP,
+    compile_time TIMESTAMP,
+    run_time TIMESTAMP,
+    finalize_time TIMESTAMP,
+    checked_back TIMESTAMP
 );
 
 CREATE TABLE results (

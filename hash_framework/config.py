@@ -18,6 +18,12 @@ class config:
 
     results_dir = base_path + "/results"
 
+    # Change during deploy
+    psql_host = "localhost"
+    psql_user = "hf"
+    psql_password = "hash_framework"
+    psql_database = "hash_framework"
+
     def update_basepath(base_path):
         config.base_path = base_path
         config.tools = base_path + "/tools"
