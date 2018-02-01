@@ -1,6 +1,18 @@
 import png
+import os
 
-all_results = eval(open('/home/cipherboy/GitHub/hash_framework/results.txt', 'r').read())
+all_results = []
+for w in [4, 8]:
+    bp = '/home/cipherboy/GitHub/hash_framework/results/sha3/'
+    for i in range(0, 25*w+2):
+        try:
+            e = eval(open('/home/cipherboy/GitHub/hash_framework/results/sha3/results-' +str(w) + "-" + str(i) + ".json", 'r').read())
+            if type(e) == list:
+                all_results += e
+        except Exception as e:
+            print(str(e) + " -- " + str(w) + "-" + str(i))
+            pass
+
 results = {}
 for e in all_results:
     w = e[0]
