@@ -22,18 +22,79 @@ class database:
         self.type = "psql"
         self.conn = psycopg2.connect(host=host, user=user, password=password, database=database)
 
-    def execute(self, q, commit=True, limit=20, rowid=False):
+    def sqlite_rowid(self, r, c, cursor):
+        lastrowid = c.lastrowid
+
+        if cursor:
+            return r, lastrowid, c
+        else:
+            c.close()
+            return r, lastrowid
+
+    def psql_rowid(self, r, c, cursor):
+        tmp = c.fetchone()
+        lastrowid = 0
+        if tmp is not None and len(tmp) == 1:
+            lastrowid = tmp[0]
+
+        if cursor:
+            return r, lastrowid, c
+        else:
+            c.close()
+            return r, lastrowid
+
+    def rowid(self, r, c, rowid, cursor):
+        if rowid:
+            if self.type == "psql":
+                return self.psql_rowid(r, c, cursor)
+            else:
+                return self.sqlite3_rowid(r, c, cursor)
+
+        if cursor:
+            return r, c
+        else:
+            c.close()
+            return r
+
+    def execute(self, q, commit=True, limit=20, rowid=False, cursor=False):
         for i in range(0, limit):
+            c = None
             try:
                 c = self.conn.cursor()
                 r = c.execute(q)
                 if commit or rowid:
                     self.conn.commit()
-                if rowid:
-                    return r, c.lastrowid
-                return r
+
+                return self.rowid(r, c, rowid, cursor)
             except Exception as e:
                 if i < limit-1:
+                    if c:
+                        self.conn.rollback()
+                        c.close()
+                        c = None
+                    time.sleep(1)
+                print("Database Error (" + self.type + "):", file=sys.stderr)
+                print(e, file=sys.stderr)
+                pass
+
+        return None
+
+    def prepared(self, q, values, commit=True, limit=20, rowid=False, cursor=False):
+        for i in range(0, limit):
+            c = None
+            try:
+                c = self.conn.cursor()
+                r = c.execute(q, values)
+                if commit or rowid:
+                    self.conn.commit()
+
+                return self.rowid(r, c, rowid, cursor)
+            except Exception as e:
+                if i < limit-1:
+                    if c:
+                        self.conn.rollback()
+                        c.close()
+                        c = None
                     time.sleep(1)
                 print("Database Error (" + self.type + "):", file=sys.stderr)
                 print(e, file=sys.stderr)

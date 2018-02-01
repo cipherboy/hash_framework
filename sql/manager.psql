@@ -32,18 +32,21 @@ CREATE TABLE hosts (
     memory BIGINT NOT NULL,
     disk BIGINT NOT NULL,
 
-    registerred TIMESTAMP NOT NULL,
+    registered TIMESTAMP NOT NULL,
     last_seen TIMESTAMP NOT NULL,
 
     version VARCHAR(512) NOT NULL,
 
+    UNIQUE (ip, hostname),
     PRIMARY KEY(id)
 );
 
 CREATE TABLE host_metadata (
     host_id BIGINT NOT NULL REFERENCES hosts(id),
     name VARCHAR(512) NOT NULL,
-    value TEXT NOT NULL
+    value TEXT NOT NULL,
+
+    UNIQUE (host_id, name)
 );
 
 CREATE TABLE assigns (
@@ -54,14 +57,18 @@ CREATE TABLE assigns (
     state INT NOT NULL,
 
     start_time TIMESTAMP,
-    compile_time TIMESTAMP,
-    run_time TIMESTAMP,
-    finalize_time TIMESTAMP,
-    checked_back TIMESTAMP
+    compile_time INTEGER,
+    run_time INTEGER,
+    finalize_time INTEGER,
+    checked_back TIMESTAMP,
+
+    UNIQUE (task_id, job_id)
 );
 
 CREATE TABLE results (
     job_id BIGINT NOT NULL REFERENCES jobs(id),
     result_table VARCHAR(64) NOT NULL,
-    result_id BIGINT NOT NULL
+    result_id BIGINT NOT NULL,
+
+    UNIQUE (job_id, result_table, result_id)
 );
