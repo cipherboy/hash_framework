@@ -1,7 +1,10 @@
 from hash_framework import *
 
 def __main__():
-    r = 36
+    r = 48
+    # family = [1, 2, 3, 5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 16, 19, 20, 35, 36]
+    # family = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 20, 32]
+    family = [1, 2, 3, 5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 16, 20]
     start_state = "FTTFFTTTFTFFFTFTFFTFFFTTFFFFFFFTTTTFTTTTTTFFTTFTTFTFTFTTTFFFTFFTTFFTTFFFTFTTTFTFTTFTTTFFTTTTTTTFFFFTFFFFFFTTFFTFFTFTFTFFFTTTFTTF"
 
     algo = algorithms.md4()
@@ -24,9 +27,17 @@ def __main__():
         models.vars.write_values(start_state, 'h1s', "01-h1-state.txt")
         models.vars.write_values(start_state, 'h2s', "01-h2-state.txt")
 
-    s = "cdifferentials := [2, 2]("
-    for i in range(0, 32*r):
-        s += "NOT(h1i" + str(i) + " == " + "h2i" + str(i) + "),"
+    s = "cdifferentials := AND("
+    for ro in range(0, r):
+        if ro in family:
+            s += "[1,1]("
+            for i in range(ro*32, (ro+1)*32):
+                s += "NOT(h1i" + str(i) + " == " + "h2i" + str(i) + "),"
+        else:
+            s += "AND("
+            for i in range(ro*32, (ro+1)*32):
+                s += "h1i" + str(i) + " == " + "h2i" + str(i) + ","
+        s = s[:-1] + "),"
     s = s[:-1] + ");\n\n"
     f = open("08-differential-path.txt", 'w')
     f.write(s)

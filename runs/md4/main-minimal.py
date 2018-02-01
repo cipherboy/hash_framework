@@ -13,6 +13,36 @@ def _h(host, processes):
         r.append("http://" + host + ":" + str(min_port + i))
     return r
 
+def from_db(algo, db, kernel):
+    rounds = [8]
+    bits = [1]
+
+    all_work = kernel.gen_work(rounds, bits)
+    print(len(all_work))
+
+    for r in rounds:
+        c = []
+        for i in range(0, r):
+            c.append('ri' + str(i))
+
+        query = "SELECT " + ','.join(c) + " FROM c_" + algo.name + " WHERE tag LIKE '%" + str(r) + "%' AND ROWID > 24695;"
+        rs = db.execute(query)
+        for row in rs:
+            jr = ''.join(row)
+            c = jr.count('*')
+            if c in bits:
+                locs = [i for i in range(len(jr)) if jr[i] == '*']
+                all_work.remove((r, tuple(locs)))
+
+    print(len(all_work))
+
+    return all_work
+
+
+
+
+
+
 if __name__ == "__main__":
     print(len(cset))
     cs = hash_framework.manager.build_client_set(cset)
@@ -39,11 +69,16 @@ if __name__ == "__main__":
     algo = hash_framework.algorithms.md4()
     db = hash_framework.database()
 
-    work = kernel.gen_work([36], [2])
+    # work = from_db(algo, db, kernel)
+    # work = kernel.gen_work([24], [3])
+    work = kernel.gen_work_family([36], [2, 6, 22, 24], [4])
 
     # print(work)
+    random.shuffle(work)
+    work = work[:10000]
     print(len(work))
-    assert(False)
+    # assert(False)
+
 
     # neighborhood
     tags = []
