@@ -103,3 +103,4 @@ ENV/
 # Ignore main, compute from now on
 main.py
 compute.py
+results/
