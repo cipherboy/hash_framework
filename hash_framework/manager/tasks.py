@@ -1,6 +1,66 @@
 import hash_framework.config as config
 import hash_framework
 
+class Tasks:
+    def __init__(self, db):
+        self.db = db
+
+    def load_ids(self):
+        results = []
+        
+        q = "SELECT id FROM tasks;"
+
+        r, cur = self.db.execute(q, cursor=True)
+
+        data = cur.fetchall()
+        for d in data:
+            results.append(d[0])
+
+        return results
+
+    def verify(self, datas):
+        if type(datas) != list:
+            return False
+
+        for data in datas:
+            if type(data) != dict:
+                return False
+            if 'name' not in data or type(data['name']) != str:
+                return False
+            if 'algo' not in data or type(data['algo']) != str:
+                return False
+
+            keys = set(data)
+            all_keys = {'max_threads', 'priority', 'name', 'algo'}
+
+            if len(keys.difference(all_keys)) != 0:
+                return False
+
+            if 'max_threads' in data and type(data['max_threads']) != int:
+                return False
+            if 'priority' in data and type(data['priority']) != int:
+                return False
+
+        return True
+
+    def add_all(self, datas):
+        default_priority = 100
+        default_threads = -1
+
+        for i in range(len(datas)):
+            if 'max_threads' not in datas[i]:
+                datas[i]['max_threads'] = default_threads
+
+            if 'priority' not in datas[i]:
+                datas[i]['priority'] = default_priority
+
+            datas[i] = (datas[i]['name'], datas[i]['algo'],
+                        datas[i]['max_threads'], datas[i]['priority'])
+
+        q = "INSERT INTO tasks (name, algo, max_threads, priority) VALUES %s"
+
+        self.db.prepared_many(q, datas, commit=True)
+
 class Task:
     def __init__(self, db):
         self.db = db
@@ -10,6 +70,7 @@ class Task:
         self.algo = None
         self.max_threads = None
         self.priority = None
+
 
     def new(self, name, algo, max_threads=-1, priority=100):
         assert(type(name) == str)

@@ -102,6 +102,30 @@ class database:
 
         return None
 
+    def prepared_many(self, q, values_list, commit=True, limit=20, cursor=False):
+        for i in range(0, limit):
+            c = None
+            try:
+                c = self.conn.cursor()
+                r = c.execute_values(q, values_list)
+                if commit:
+                    self.conn.commit()
+
+                return self.rowid(r, c, False, cursor)
+            except Exception as e:
+                if i < limit-1:
+                    if c:
+                        self.conn.rollback()
+                        c.close()
+                        c = None
+                    time.sleep(1)
+                print("Database Error (" + self.type + "):", file=sys.stderr)
+                print(e, file=sys.stderr)
+                pass
+
+        return None
+
+
     def query(self, table, cols, rowid=0, tag="", limit=0):
         assert(type(table) == str)
         assert(type(cols) == list and len(cols) > 0)
