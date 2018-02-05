@@ -63,7 +63,7 @@ def handle_task(tid):
     t = hash_framework.manager.Task(db)
     return jsonify(t.load_id(tid).to_dict())
 
-@app.route("/tasks/<int:tid>/jobs/", methods=['GET', 'POST'])
+@app.route("/task/<int:tid>/jobs/", methods=['GET', 'POST'])
 def handle_task_jobs(tid):
     if request.method == 'POST':
         j = hash_framework.manager.Jobs(db)
