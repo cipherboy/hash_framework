@@ -1,5 +1,6 @@
 import sqlite3
 import psycopg2
+import psycopg2.extras
 import time, sys
 
 from hash_framework.config import config
@@ -67,14 +68,16 @@ class database:
 
                 return self.rowid(r, c, rowid, cursor)
             except Exception as e:
-                if i < limit-1:
-                    if c:
-                        self.conn.rollback()
-                        c.close()
-                        c = None
-                    time.sleep(1)
+                if c:
+                    c.close()
+                    c = None
+
                 print("Database Error (" + self.type + "):", file=sys.stderr)
                 print(e, file=sys.stderr)
+
+                if i < limit-1:
+                    time.sleep(1)
+                self.conn.rollback()
                 pass
 
         return None
@@ -90,14 +93,17 @@ class database:
 
                 return self.rowid(r, c, rowid, cursor)
             except Exception as e:
-                if i < limit-1:
-                    if c:
-                        self.conn.rollback()
-                        c.close()
-                        c = None
-                    time.sleep(1)
+                if c:
+                    c.close()
+                    c = None
+
                 print("Database Error (" + self.type + "):", file=sys.stderr)
                 print(e, file=sys.stderr)
+
+                if i < limit-1:
+                    time.sleep(1)
+
+                self.conn.rollback()
                 pass
 
         return None
@@ -107,20 +113,24 @@ class database:
             c = None
             try:
                 c = self.conn.cursor()
-                r = c.execute_values(q, values_list)
+                r = psycopg2.extras.execute_values(c, q, values_list)
+
                 if commit:
                     self.conn.commit()
 
                 return self.rowid(r, c, False, cursor)
             except Exception as e:
-                if i < limit-1:
-                    if c:
-                        self.conn.rollback()
-                        c.close()
-                        c = None
-                    time.sleep(1)
+                if c:
+                    c.close()
+                    c = None
+
                 print("Database Error (" + self.type + "):", file=sys.stderr)
                 print(e, file=sys.stderr)
+
+                if i < limit-1:
+                    time.sleep(1)
+
+                self.conn.rollback()
                 pass
 
         return None
