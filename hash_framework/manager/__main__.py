@@ -34,6 +34,37 @@ def handle_tasks():
     elif request.method == 'GET':
         return jsonify(t.load_ids())
 
+@app.route("/task/<int:tid>/", methods=['GET'])
+def handle_task(tid):
+    t = hash_framework.manager.Task(db)
+    return jsonify(t.load_id(tid).to_dict())
+
+@app.route("/task/<int:tid>/jobs/", methods=['GET', 'POST'])
+def handle_task_jobs(tid):
+    if request.method == 'POST':
+        j = hash_framework.manager.Jobs(db)
+        datas = request.get_json(force=True)
+        if type(datas) == dict:
+            datas = [datas]
+
+        if not j.verify(datas):
+            return "Invalid input data", 400
+
+        if t.add_all(datas) != None:
+            return "OK", 200
+
+        return "Internal Error", 500
+    elif request.method == 'GET':
+        t = hash_framework.manager.Task(db)
+        return jsonify(t.load_id(tid).get_jobs())
+
+@app.route("/task/<int:tid>/job/<int:jid>", methods=['GET', 'POST'])
+def handle_task_job(tid, jid):
+    if request.method == 'POST':
+        pass
+    elif request.method == 'GET':
+        pass
+
 @app.route("/hosts/", methods=['GET', 'POST'])
 def handle_hosts():
     h = hash_framework.manager.Hosts(db)
@@ -58,15 +89,16 @@ def handle_host(hid):
     h = hash_framework.manager.Host(db)
     return jsonify(h.load_id(hid).to_dict())
 
-@app.route("/task/<int:tid>/", methods=['GET'])
-def handle_task(tid):
-    t = hash_framework.manager.Task(db)
-    return jsonify(t.load_id(tid).to_dict())
+@app.route("/host/<int:hid>/heartbeat", methods=['GET'])
+def handle_host_heartbeat(hid):
+    h = hash_framework.manager.Host(db)
+    h.load_id(hid).heartbeat()
+    return "OK"
 
-@app.route("/task/<int:tid>/jobs/", methods=['GET', 'POST'])
-def handle_task_jobs(tid):
+@app.route("/jobs/", methods=['GET', 'POST'])
+def handle_jobs():
+    j = hash_framework.manager.Jobs(db)
     if request.method == 'POST':
-        j = hash_framework.manager.Jobs(db)
         datas = request.get_json(force=True)
         if type(datas) == dict:
             datas = [datas]
@@ -79,7 +111,10 @@ def handle_task_jobs(tid):
 
         return "Internal Error", 500
     elif request.method == 'GET':
-        t = hash_framework.manager.Task(db)
-        return jsonify(t.load_id(tid).get_jobs())
+        return jsonify(j.load_ids())
+
+@app.route("/assign/", methods=['GET', 'POST'])
+def handle_assign():
+    pass
 
 app.run(host="0.0.0.0", port=int(sys.argv[1]))

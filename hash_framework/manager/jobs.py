@@ -40,7 +40,14 @@ class Jobs:
         return True
 
     def add_all(self, datas):
-        current_time = datetime.datetime.now()
+        for i in range(0, len(datas)):
+            datas[i] = (datas[i]['task'], datas[i]['kernel'], datas[i]['algo'],
+                        datas[i]['args'], datas[i]['result_table'], 0)
+
+        q = "INSERT INTO jobs (task_id, kernel, algo, args, result_table, state) VALUES %s"
+
+        r = self.db.prepared_many(q, datas, commit=True, limit=1, cursor=True)
+        return r
 
 class Job:
     def __init__(self, db):
@@ -74,8 +81,8 @@ class Job:
 
         return self
 
-    def load(self, name):
-        assert(type(name) == str)
+    def load(self, jid):
+        assert(type(jid) == int)
         self.name = name
 
         self.__load__()
@@ -84,33 +91,53 @@ class Job:
 
     def __insert__(self):
         q = "INSERT INTO jobs"
-        q += " (kernel, algo, args, result_table)"
-        q += " VALUES (%s, %s, %s, %s, now())"
+        q += " (task_id, kernel, algo, args, result_table, state)"
+        q += " VALUES (%s, %s, %s, %s, %s, 0)"
         q += " RETURNING id;"
-        values = (self.name, self.algo, self.max_threads, self.priority)
+        values = (self.task_id, self.kernel, self.algo, self.args,
+                  self.result_table)
 
         r, rid = self.db.prepared(q, values, rowid=True)
         self.id = rid
 
 
     def __load__(self):
-        q = "SELECT id, algo, max_threads, priority"
-        q += " FROM tasks WHERE name=%s;"
-        values = tuple([self.name])
+        q = "SELECT task_id, kernel, algo, args, result_table, state,"
+        q += " start_time, compile_time, compile_return, run_time,"
+        q += " run_return, finalize_time, checked_back"
+        q += " FROM jobs WHERE id=%s;"
+        values = tuple([self.id])
 
         r, cursor = self.db.prepared(q, values, commit=False, cursor=True)
 
         data = cursor.fetchone()
         if data:
-            self.id = data[0]
-            self.algo = data[1]
-            self.max_threads = int(data[2])
-            self.priority = int(data[3])
+            self.task_id = int(data[0])
+            self.kernel = data[1]
+            self.algo = data[2]
+            self.args = data[3]
+            self.result_table = data[4]
+            self.state = data[5]
+            self.start_time = data[6]
+            self.compile_time = data[7]
+            self.compile_return = data[8]
+            self.run_time = data[9]
+            self.run_return = data[10]
+            self.finalize_time = data[11]
+            self.checked_back = data[12]
         else:
             self.id = None
-            self.name = None
+            self.task_id = None
+            self.kernel = None
             self.algo = None
-            self.max_threads = None
-            self.priority = None
+            self.args = None
+            self.result_table = None
+            self.start_time = None
+            self.compile_time = None
+            self.compile_return = None
+            self.run_time = None
+            self.run_return = None
+            self.finalize_time = None
+            self.checked_back = None
 
         cursor.close()

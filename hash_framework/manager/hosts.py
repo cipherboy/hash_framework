@@ -128,6 +128,15 @@ class Host:
         c.close()
         return value
 
+    def heartbeat(self):
+        if self.id == None:
+            return
+
+        q = "UPDATE hosts SET last_seen=now() WHERE id=%s"
+        self.db.prepared(q, [self.id], commit=True)
+
+        return
+
     def remove(self):
         self.__remove__()
 
