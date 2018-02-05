@@ -39,6 +39,17 @@ the base of the repository. See examples in `runs` for distributing jobs.
   - Zeros
 
 
+## TODO
+    - Finish building database abstraction
+    - Build manager API for remote clients
+    - Build remote client library
+    - Build worker with remote client library
+    - Build local client library
+    - Add efficient insertion to client library for large batch job insertion
+        - Base it on generator / callback?
+    - Update kernel
+
+
 ## Contributing
 
 `hash_framework` is licensed under the GLPv3. Contributions are welcome; please
