@@ -1,0 +1,2 @@
+input := AND(rcaa1 == claa1, rcaa2 == claa2, rcaa3 == claa3, rcaa4 == claa4, rcab1 == clab1, rcab2 == clab2, rcab3 == clab3, rcab4 == clab4);
+output := NOT(AND(rcas1 == clas1, rcas2 == clas2, rcas3 == clas3, rcas4 == clas4));
