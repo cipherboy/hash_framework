@@ -77,8 +77,75 @@ class Tasks:
         for tid in self.load_ids():
             t.update_job_counts(tid)
 
-    def assign_next_job(self):
+    def get_tasks_by_priority(self, cur):
+        q = "SELECT id FROM tasks WHERE remaining_jobs > 0 AND (current_threads < max_threads OR max_threads=-1) AND running=true ORDER BY priority DESC;"
+        cur.execute(q)
+        r = []
+        data = cur.fetchall()
+        for d in data:
+            r.append(d[0])
+
+        return r
+
+    def get_task_free_jobs(self, cur, tid, limit):
+        q = "SELECT id FROM jobs WHERE task_id=%s AND state=0 LIMIT %s;"
+        cur.execute(q, [tid, limit])
+
+        r = []
+        data = cur.fetchall()
+        for d in data:
+            r.append(d[0])
+
+        return r
+
+    def jobs_update_state(self, cur, jids, state):
+        q = "UPDATE jobs SET state=%s WHERE id=%s"
+        for jid in jids:
+            cur.execute(q, [state, jid])
+
+    def tasks_update_counts(self, cur, tids):
+        for tid in tids:
+            q = "UPDATE tasks SET total_jobs=total_jobs.count,"
+            q += " remaining_jobs=remaining_jobs.count FROM"
+            q += " ( SELECT COUNT(*) AS count FROM jobs WHERE task_id=%s )"
+            q += " AS total_jobs, ( SELECT COUNT(*) AS count FROM jobs WHERE"
+            q += " task_id=%s AND state=0 ) AS remaining_jobs WHERE id=%s;"
+
+            values = [tid, tid, tid]
+
+            cur.execute(q, values)
+
+    def assign_next_job(self, count=1):
         db_conn = self.db.conn
+        cur = db_conn.cursor()
+        cur.execute("LOCK ONLY tasks, jobs IN ACCESS EXCLUSIVE MODE")
+
+        tids = self.get_tasks_by_priority(cur)
+        if len(tids) == 0:
+            db_conn.commit()
+            cur.close()
+            print("NO tasks")
+            return []
+
+        jids = []
+        used_tids = set()
+        while len(jids) < count:
+            tid = tids.pop()
+            n_jids = self.get_task_free_jobs(cur, tid, count - len(jids))
+            if n_jids == 0:
+               continue
+
+            jids = jids + n_jids
+            tids.append(tid)
+
+        self.jobs_update_state(cur, jids, 1)
+        self.tasks_update_counts(cur, tids)
+
+        db_conn.commit()
+        cur.close()
+
+        return jids
+
 
 class Task:
     def __init__(self, db):
@@ -101,8 +168,8 @@ class Task:
         self.running = None
 
     def update_job_counts(self, tid):
-        q = "UPDATE tasks SET tasks.total_jobs=total_jobs.count,"
-        q += " tasks.remaining_jobs=remaining_jobs.count FROM"
+        q = "UPDATE tasks SET total_jobs=total_jobs.count,"
+        q += " remaining_jobs=remaining_jobs.count FROM"
         q += " ( SELECT COUNT(*) AS count FROM jobs WHERE task_id=%s ) AS total_jobs,"
         q += " ( SELECT COUNT(*) AS count FROM jobs WHERE task_id=%s AND state=0 )"
         q += " AS remaining_jobs WHERE id=%s;"
@@ -166,7 +233,7 @@ class Task:
     def get_jobs(self):
         results = []
 
-        q = "SELECT job_id FROM assigns WHERE task_id=%s"
+        q = "SELECT id FROM jobs WHERE task_id=%s"
 
         r, cur = self.db.prepared(q, [self.id], cursor=True)
 

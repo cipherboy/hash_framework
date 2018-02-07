@@ -11,20 +11,43 @@ from hash_framework import config
 
 app = Flask(__name__)
 
-db_pool = []
+db_free_pool = set()
+db_used_pool = set()
 
 def acquire_db():
-    if len(db_pool) == 0:
+    if len(db_free_pool) > 0:
+        db = db_free_pool.pop()
+        db.close()
+        db.init_psql()
+        db_used_pool.add(db)
+        print("Initial free")
+        return db
+
+    if len(db_free_pool) + len(db_used_pool) < 10:
         db = hash_framework.database()
         db.close()
         db.init_psql()
-        db_pool.append(db)
+        db_used_pool.add(db)
         print("Created worker")
         return db
 
-    return db_pool[0]
+    print("Waiting for a free db")
+    while len(db_free_pool) == 0:
+        pass
+
+    print("Received a free db")
+    db = db_free_pool.pop()
+    db.close()
+    db.init_psql()
+    db_used_pool.add(db)
+    return db
+
+    # return db_pool[0]
 
 def release_db(db):
+    print("Released db")
+    db_used_pool.remove(db)
+    db_free_pool.add(db)
     pass
 
 @app.route("/tasks/", methods=['GET', 'POST'])
@@ -73,7 +96,7 @@ def handle_task_jobs(tid):
             release_db(db)
             return "Invalid input data", 400
 
-        if t.add_all(datas) != None:
+        if j.add_all(datas) != None:
             release_db(db)
             return "OK", 200
 
@@ -164,13 +187,29 @@ def handle_host_metadata_query(hid, name):
         r = {'host_id': hid, 'name': name, 'value': value}
         return jsonify(r)
 
-@app.route("/assign/", methods=['GET', 'POST'])
+@app.route("/assign/", methods=['GET'])
 def handle_assign():
     db = acquire_db()
     t = hash_framework.manager.Tasks(db)
-    r = t.assign_next_job()
+    r = t.assign_next_job(count=1)
     release_db(db)
     return jsonify(r)
+
+@app.route("/assign/<int:count>", methods=['GET'])
+def handle_multi_assign(count):
+    db = acquire_db()
+    t = hash_framework.manager.Tasks(db)
+    r = t.assign_next_job(count)
+    release_db(db)
+    return jsonify(r)
+
+@app.route("/update/", methods=['GET'])
+def handle_update():
+    db = acquire_db()
+    t = hash_framework.manager.Tasks(db)
+    t.update_all_job_counts()
+    release_db(db)
+    return "OK"
 
 if __name__ == "__main__":
     app.run()

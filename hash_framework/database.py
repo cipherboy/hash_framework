@@ -142,7 +142,6 @@ class database:
 
         return None
 
-
     def query(self, table, cols, rowid=0, tag="", limit=0):
         assert(type(table) == str)
         assert(type(cols) == list and len(cols) > 0)

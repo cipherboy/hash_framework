@@ -2,8 +2,9 @@
 
 import hash_framework as hf
 import requests
+import time
 
-api = 'http://localhost:1325'
+api = 'http://localhost:8000'
 
 def tc_api_create_task():
     r = requests.post(api + '/tasks/', json=[{'name': 'test-1', 'algo': 'md4'}, {'name': 'test-2', 'algo': 'md5'}])
@@ -18,9 +19,35 @@ def tc_api_create_host():
 
     return True
 
+def tc_api_assign_benchmark():
+    count=20000
+    task_id = 1
+
+    data = []
+    for i in range(0, count):
+        obj = {
+            'task': task_id,
+            'kernel': 'benchmark',
+            'algo': 'md4',
+            'args': str(i),
+            'result_table': 'results'
+        }
+        data.append(obj)
+
+    print(len(data))
+
+    t1 = time.time()
+    r = requests.post(api + '/task/' + str(task_id) + '/jobs/', json=data)
+    print(r.status_code)
+    t2 = time.time()
+
+    print(t2 - t1)
+
+    return True
 
 def __main__():
-    tests = [tc_api_create_task, tc_api_create_host]
+    # tests = [tc_api_create_task, tc_api_create_host]
+    tests = [tc_api_assign_benchmark]
 
     for test in tests:
         ret = test()
