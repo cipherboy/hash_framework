@@ -3,18 +3,44 @@ import cla
 
 import hash_framework
 
+import time
+
 m = hash_framework.models()
 m.model_dir = '.'
 m.start('models', False)
 m.remote = False
 hash_framework.models.vars.write_header()
 
-rca.__main__()
-cla.__main__()
+bit_size = 1024
+rcaa = []
+rcab = []
+claa = []
+clab = []
+for i in range(0, bit_size):
+    rcaa.append('rcaa' + str(i))
+    rcab.append('rcab' + str(i))
+    claa.append('claa' + str(i))
+    clab.append('clab' + str(i))
+
+rca.__main__(rcaa, rcab, "rca")
+cla.__main__(claa, clab, "cla")
+
 
 f = open('01-inputs.txt', 'w')
-f.write("input := AND(rcaa1 == claa1, rcaa2 == claa2, rcaa3 == claa3, rcaa4 == claa4, rcab1 == clab1, rcab2 == clab2, rcab3 == clab3, rcab4 == clab4);\n")
-f.write("output := NOT(AND(rcas1 == clas1, rcas2 == clas2, rcas3 == clas3, rcas4 == clas4));\n")
+s = "AND("
+for i in range(0, bit_size):
+    s += "rcaa" + str(i) + " == claa" + str(i) + ","
+    s += "rcab" + str(i) + " == clab" + str(i) + ","
+
+s = s[:-1] + ")"
+f.write("input := " + s + ";\n")
+
+s = "NOT(AND("
+for i in range(0, bit_size):
+    s += "rcas" + str(i) + " == clas" + str(i) + ","
+
+s = s[:-1] + "))"
+f.write("output := " + s + ";\n")
 f.close()
 
 f = open('99-problem.txt', 'w')
@@ -23,20 +49,31 @@ f.close()
 
 m.collapse()
 m.build()
+t1 = time.time()
 m.run(count=1)
+t2 = time.time()
+print("Run time: " + str(t2-t1))
 rs = m.load_results()
 
 for r in rs:
-	a = ""
-	b = ""
-	rcas = ""
-	clas = ""
+    rcaa = ""
+    rcab = ""
+    rcas = ""
 
-	for i in range(1, 5):
-		a += r["rcaa" + str(i)]
-		b += r["rcab" + str(i)]
-		rcas += r["rcas" + str(i)]
-		clas += r["clas" + str(i)]
+    claa = ""
+    clab = ""
+    clas = ""
 
-	print("a:" + a + " - b:" + b + " - rs:" + rcas + " - cs:" + clas)
+    for i in range(0, bit_size):
+        rcaa += r["rcaa" + str(i)]
+        rcab += r["rcab" + str(i)]
+        rcas += r["rcas" + str(i)]
+
+        claa += r["claa" + str(i)]
+        clab += r["clab" + str(i)]
+        clas += r["clas" + str(i)]
+
+    print("ra:" + rcaa + " - rb:" + rcab + " - rs:" + rcas)
+    print("ca:" + claa + " - cb:" + clab + " - cs:" + clas)
+
 #print(rs)
