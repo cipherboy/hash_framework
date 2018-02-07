@@ -1,22 +1,21 @@
-from hash_framework import models
-from hash_framework import attacks
+import hash_framework
 
 class database:
     def setup(algo, db):
         # Create target queue
-        q = attacks.collision.create_table_query(algo, "t_" + algo.name)
+        q = hash_framework.attacks.collision.create_table_query(algo, "t_" + algo.name)
         db.execute(q)
 
         # Create neighborhood queue
-        q = attacks.collision.create_table_query(algo, "wq_" + algo.name)
+        q = hash_framework.attacks.collision.create_table_query(algo, "wq_" + algo.name)
         db.execute(q)
 
         # Create results
-        q = attacks.collision.create_table_query(algo, "r_" + algo.name)
+        q = hash_framework.attacks.collision.create_table_query(algo, "r_" + algo.name)
         db.execute(q)
 
         # Current working set
-        q = attacks.collision.create_table_query(algo, "ws_" + algo.name)
+        q = hash_framework.attacks.collision.create_table_query(algo, "ws_" + algo.name)
         db.execute(q)
 
         # Current edge list
@@ -26,15 +25,15 @@ class database:
         db.commit()
 
     def populate(algo, db, start, target):
-        attacks.collision.connected.loose.database.add(algo, db, start, "wq")
-        attacks.collision.connected.loose.database.add(algo, db, start, "r")
-        attacks.collision.connected.loose.database.add(algo, db, target, "t", True)
-        attacks.collision.connected.loose.database.add(algo, db, target, "r", True)
+        hash_framework.attacks.collision.connected.loose.database.add(algo, db, start, "wq")
+        hash_framework.attacks.collision.connected.loose.database.add(algo, db, start, "r")
+        hash_framework.attacks.collision.connected.loose.database.add(algo, db, target, "t", True)
+        hash_framework.attacks.collision.connected.loose.database.add(algo, db, target, "r", True)
 
     def pop(algo, db, prefix="wq"):
         name = prefix + "_" + algo.name
 
-        cols = attacks.collision.table_cols(algo)
+        cols = hash_framework.attacks.collision.table_cols(algo)
         cols.append('ROWID')
 
         r = db.query(name, cols, limit=1)
@@ -48,7 +47,7 @@ class database:
     def read(algo, db, prefix="wq"):
         name = prefix + "_" + algo.name
 
-        cols = attacks.collision.table_cols(algo)
+        cols = hash_framework.attacks.collision.table_cols(algo)
         cols.append('ROWID')
 
         r = db.query(name, cols, limit=1)
@@ -71,9 +70,9 @@ class database:
         h2s = b_hex_to_block(h2['state'])
         h2b = b_hex_to_block(h2['block'])
 
-        et = attacks.collision.build_col_row(algo, db, h1s, h1b, h2s, h2b, "")
+        et = hash_framework.attacks.collision.build_col_row(algo, db, h1s, h1b, h2s, h2b, "")
 
-        attacks.collision.__insert__(db, prefix + "_" + algo.name, et)
+        hash_framework.attacks.collision.__insert__(db, prefix + "_" + algo.name, et)
 
         if commit:
             db.commit()
@@ -99,10 +98,10 @@ def constraints(algo, start, step):
         else:
             differential.append(models.vars.differential(start[k], 'h1i', i*algo.int_size, "h2i", i*algo.int_size))
 
-    models.vars.write_clause('cdifferentials', tuple(differential), "07-differential.txt")
+    hash_framework.models.vars.write_clause('cdifferentials', tuple(differential), "07-differential.txt")
 
 def any_unit_step(algo, start, target):
-    pos = attacks.collision.metric.loose.delta(algo, start, target)
+    pos = hash_framework.attacks.collision.metric.loose.delta(algo, start, target)
     all_differentials = ['or']
     for step in pos:
         differential = ['and']
@@ -113,10 +112,10 @@ def any_unit_step(algo, start, target):
             else:
                 differential.append(models.vars.differential(start[k], 'h1i', i*algo.int_size, "h2i", i*algo.int_size))
         all_differentials.append(tuple(differential))
-    models.vars.write_clause('cdifferentials', tuple(all_differentials), "07-differential.txt")
+    hash_framework.models.vars.write_clause('cdifferentials', tuple(all_differentials), "07-differential.txt")
 
 def new_unit_step(algo, start, cols, target):
-    pos = attacks.collision.metric.loose.delta(algo, start, target)
+    pos = hash_framework.attacks.collision.metric.loose.delta(algo, start, target)
     all_differentials = ['or']
     for step in pos:
         differential = ['and']
@@ -135,7 +134,7 @@ def new_unit_step(algo, start, cols, target):
             differential.append(models.vars.differential(col[k], 'h1i', i*algo.int_size, "h2i", i*algo.int_size))
         negated.append(tuple(differential))
     raw_target = ('and', tuple(all_differentials), ('not', tuple(negated)))
-    models.vars.write_clause('cdifferentials', tuple(raw_target), "07-differential.txt")
+    hash_framework.models.vars.write_clause('cdifferentials', tuple(raw_target), "07-differential.txt")
 
 def distributed_new_neighbor(algo, base, existing, poses, name="07-differential.txt", prefixes=["h1", 'h2'], out_name="cdifferentials"):
     assert(type(prefixes) == list or type(prefixes) == tuple)
@@ -150,11 +149,11 @@ def distributed_new_neighbor(algo, base, existing, poses, name="07-differential.
             for e in existing[i]:
                 dlist.append([e, h1 + 'i', i*algo.int_size, h2 + 'i', i*algo.int_size])
             dlist.append([base[i], h1 + 'i', i*algo.int_size, h2 + 'i', i*algo.int_size])
-            differential.append(('not', models.vars.choice_differentials(dlist)))
+            differential.append(('not', hash_framework.models.vars.choice_differentials(dlist)))
         else:
             differential.append(models.vars.differential(base[i], 'h1i', i*algo.int_size, 'h2i', i*algo.int_size))
 
-    models.vars.write_clause(out_name, tuple(differential), name)
+    hash_framework.models.vars.write_clause(out_name, tuple(differential), name)
 
 def constraints_new_neighbor(algo, cols, pos):
     # Differential Path
@@ -169,31 +168,31 @@ def constraints_new_neighbor(algo, cols, pos):
             for e in dlist2:
                 dlist.append([e, 'h1i', i*algo.int_size, "h2i", i*algo.int_size])
             print(dlist)
-            differential.append(('not', models.vars.choice_differentials(dlist)))
+            differential.append(('not', hash_framework.models.vars.choice_differentials(dlist)))
         else:
             differential.append(models.vars.differential(cols[0][k], 'h1i', i*algo.int_size, "h2i", i*algo.int_size))
 
-    models.vars.write_clause('cdifferentials', tuple(differential), "07-differential.txt")
+    hash_framework.models.vars.write_clause('cdifferentials', tuple(differential), "07-differential.txt")
 
 
 def exists_unit_step(algo, start, target, tag="md4-wangs-sasakis-connected"):
-    pos = attacks.collision.metric.loose.delta(algo, start, target)
+    pos = hash_framework.attacks.collision.metric.loose.delta(algo, start, target)
     r = []
     i = 0
     for e in pos:
-        m = models()
+        m = hash_framework.models()
         m.start(tag, False)
-        models.vars.write_header()
+        hash_framework.models.vars.write_header()
         if i == 0:
-            models.generate(algo, ['h1', 'h2'])
+            hash_framework.models.generate(algo, ['h1', 'h2'])
 
         i += 1
-        attacks.collision.connected.loose.constraints(algo, start, e)
-        attacks.collision.write_constraints(algo)
-        attacks.collision.write_optional_differential(algo)
-        models.vars.write_values(algo.default_state_bits, 'h1s', "01-h1-state.txt")
-        models.vars.write_values(algo.default_state_bits, 'h2s', "01-h2-state.txt")
-        models.vars.write_assign(['ccollision', 'cblocks', 'cdifferentials'])
+        hash_framework.attacks.collision.connected.loose.constraints(algo, start, e)
+        hash_framework.attacks.collision.write_constraints(algo)
+        hash_framework.attacks.collision.write_optional_differential(algo)
+        hash_framework.models.vars.write_values(algo.default_state_bits, 'h1s', "01-h1-state.txt")
+        hash_framework.models.vars.write_values(algo.default_state_bits, 'h2s', "01-h2-state.txt")
+        hash_framework.models.vars.write_assign(['ccollision', 'cblocks', 'cdifferentials'])
         m.collapse()
         m.build()
         sat = m.run(count=1)
@@ -207,32 +206,32 @@ def exists_unit_step(algo, start, target, tag="md4-wangs-sasakis-connected"):
 
 def all_neighbors(algo, db, start, tag):
     cols = [start.copy()]
-    attacks.collision.insert_db_multiple(algo, db, cols, tag + "-original")
+    hash_framework.attacks.collision.insert_db_multiple(algo, db, cols, tag + "-original")
     for i in range(0, 48):
         j = 0
         while True:
-            m = models()
+            m = hash_framework.models()
             m.start(tag+"-r" + str(i), False)
-            models.vars.write_header()
+            hash_framework.models.vars.write_header()
 
             if j == 0:
-                models.generate(algo, ['h1', 'h2'])
+                hash_framework.models.generate(algo, ['h1', 'h2'])
 
-            attacks.collision.connected.loose.constraints_new_neighbor(algo, cols, i)
-            attacks.collision.write_constraints(algo)
-            attacks.collision.write_optional_differential(algo)
-            models.vars.write_values(algo.default_state_bits, 'h1s', "01-h1-state.txt")
-            models.vars.write_values(algo.default_state_bits, 'h2s', "01-h2-state.txt")
-            models.vars.write_assign(['ccollision', 'cblocks', 'cdifferentials'])
+            hash_framework.attacks.collision.connected.loose.constraints_new_neighbor(algo, cols, i)
+            hash_framework.attacks.collision.write_constraints(algo)
+            hash_framework.attacks.collision.write_optional_differential(algo)
+            hash_framework.models.vars.write_values(algo.default_state_bits, 'h1s', "01-h1-state.txt")
+            hash_framework.models.vars.write_values(algo.default_state_bits, 'h2s', "01-h2-state.txt")
+            hash_framework.models.vars.write_assign(['ccollision', 'cblocks', 'cdifferentials'])
             m.collapse()
             m.build()
             sat = m.run(count=1)
             if not sat:
                 break
             rs = m.results(algo)
-            ncols = attacks.collision.build_col_rows(algo, db, rs, tag)
+            ncols = hash_framework.attacks.collision.build_col_rows(algo, db, rs, tag)
             cols.extend(ncols)
-            attacks.collision.insert_db_multiple(algo, db, rs, tag)
+            hash_framework.attacks.collision.insert_db_multiple(algo, db, rs, tag)
             j += 1
 
     #attacks.collision.insert_db_multiple(algo, db, cols[1:], tag)
@@ -240,7 +239,7 @@ def all_neighbors(algo, db, start, tag):
 
 def parallel_all_neighbors(algo, db, start, tag):
     cols = [start.copy()]
-    attacks.collision.insert_db_multiple(algo, db, cols, tag + "-original")
+    hash_framework.attacks.collision.insert_db_multiple(algo, db, cols, tag + "-original")
     wq = []
     for i in range(0, 48):
         wq.append((i))
@@ -251,16 +250,16 @@ def parallel_all_neighbors(algo, db, start, tag):
         print(wq)
         i = wq.pop(0)
 
-        m = models()
+        m = hash_framework.models()
         m.start(tag+"-r" + str(i), False)
-        models.vars.write_header()
-        models.generate(algo, ['h1', 'h2'])
-        attacks.collision.connected.loose.constraints_new_neighbor(algo, cols, i)
-        attacks.collision.write_constraints(algo)
-        attacks.collision.write_optional_differential(algo)
-        models.vars.write_values(algo.default_state_bits, 'h1s', "01-h1-state.txt")
-        models.vars.write_values(algo.default_state_bits, 'h2s', "01-h2-state.txt")
-        models.vars.write_assign(['ccollision', 'cblocks', 'cdifferentials'])
+        hash_framework.models.vars.write_header()
+        hash_framework.models.generate(algo, ['h1', 'h2'])
+        hash_framework.attacks.collision.connected.loose.constraints_new_neighbor(algo, cols, i)
+        hash_framework.attacks.collision.write_constraints(algo)
+        hash_framework.attacks.collision.write_optional_differential(algo)
+        hash_framework.models.vars.write_values(algo.default_state_bits, 'h1s', "01-h1-state.txt")
+        hash_framework.models.vars.write_values(algo.default_state_bits, 'h2s', "01-h2-state.txt")
+        hash_framework.models.vars.write_assign(['ccollision', 'cblocks', 'cdifferentials'])
         m.collapse()
         m.build()
         jqj = compute.perform_sat("problem.cnf", "problem.out", count=1, no_wait=True)
@@ -279,23 +278,23 @@ def parallel_all_neighbors(algo, db, start, tag):
                     print("Found finished job:")
                     print((fj, jqe))
                     if fj_status:
-                        m = models()
+                        m = hash_framework.models()
                         m.start(tag + "-r" + str(jqr), False)
                         rs = m.results(algo)
-                        ncols = attacks.collision.build_col_rows(algo, db, rs, tag)
+                        ncols = hash_framework.attacks.collision.build_col_rows(algo, db, rs, tag)
                         cols.extend(ncols)
                         wq.append(jqr)
                     jq.remove(jq[j])
                     break
 
-    attacks.collision.insert_db_multiple(algo, db, cols[1:], tag)
+    hash_framework.attacks.collision.insert_db_multiple(algo, db, cols[1:], tag)
     return cols
 
 def parallel_find_path(algo, db, start, target, tag):
     cols = [start.copy()]
-    min_distance = attacks.collision.metric.loose.distance(algo, start, target)
+    min_distance = hash_framework.attacks.collision.metric.loose.distance(algo, start, target)
 
-    attacks.collision.insert_db_multiple(algo, db, cols, tag + "-original")
+    hash_framework.attacks.collision.insert_db_multiple(algo, db, cols, tag + "-original")
     wqs = {}
     wqs[0] = []
     wcols = {}
@@ -330,14 +329,14 @@ def parallel_find_path(algo, db, start, target, tag):
             continue
 
 
-        m = models()
+        m = hash_framework.models()
         m.start(tag + "-c" + str(wc) + "-r" + str(i), False)
-        models.vars.write_header()
-        models.generate(algo, ['h1', 'h2'])
-        attacks.collision.connected.loose.constraints_new_neighbor(algo, wcols[wc], i)
-        attacks.collision.write_constraints(algo)
-        attacks.collision.write_optional_differential(algo)
-        models.vars.write_assign(['ccollision', 'cblocks', 'cdifferentials'])
+        hash_framework.models.vars.write_header()
+        hash_framework.models.generate(algo, ['h1', 'h2'])
+        hash_framework.attacks.collision.connected.loose.constraints_new_neighbor(algo, wcols[wc], i)
+        hash_framework.attacks.collision.write_constraints(algo)
+        hash_framework.attacks.collision.write_optional_differential(algo)
+        hash_framework.models.vars.write_assign(['ccollision', 'cblocks', 'cdifferentials'])
         m.collapse()
         m.build()
         jqj = compute.perform_sat("problem.cnf", "problem.out", count=1, no_wait=True, ident=(wc, i))
@@ -358,21 +357,21 @@ def parallel_find_path(algo, db, start, target, tag):
                     print("Found finished job:")
                     print((fj, jqe))
                     if fj_status:
-                        m = models()
+                        m = hash_framework.models()
                         m.start(tag + "-c" + str(jqwc) + "-r" + str(jqi), False)
                         rs = m.results(algo)
-                        ncols = attacks.collision.build_col_rows(algo, db, rs, tag)
+                        ncols = hash_framework.attacks.collision.build_col_rows(algo, db, rs, tag)
                         if len(ncols) < 1:
                             continue
                         ncol = ncols[0]
-                        attacks.collision.insert_db_multiple(algo, db, ncols, tag)
+                        hash_framework.attacks.collision.insert_db_multiple(algo, db, ncols, tag)
 
                         # Check if min_distance needs updating
-                        ndist = attacks.collision.metric.loose.distance(algo, ncol, target)
+                        ndist = hash_framework.attacks.collision.metric.loose.distance(algo, ncol, target)
 
                         # Only add if not already in cols
                         nci = -1
-                        dte = list(map(lambda x: attacks.collision.metric.loose.distance(algo, ncol, x), cols))
+                        dte = list(map(lambda x: hash_framework.attacks.collision.metric.loose.distance(algo, ncol, x), cols))
                         if 0 not in dte:
                             nci = len(cols)
                             cols.append(ncol)
@@ -392,7 +391,7 @@ def parallel_find_path(algo, db, start, target, tag):
                             if dte[i] == 1:
                                 wcols[i].append(ncol)
                                 wdist[i].append(ndist)
-                                dr = attacks.collision.metric.loose.delta(algo, cols[i], cols[nci])
+                                dr = hash_framework.attacks.collision.metric.loose.delta(algo, cols[i], cols[nci])
                                 if dr[0][0] not in wqs[i]:
                                     wqs[i].append(dr[0][0])
 
@@ -415,21 +414,21 @@ def parallel_find_path(algo, db, start, target, tag):
                         working_cols = []
                         while len(working_cols) == 0 and offset < 4:
                             for i in range(0, len(cols)):
-                                if attacks.collision.metric.loose.distance(algo, target, cols[i]) <= (min_distance+offset) and len(wqs[i]) > 0:
+                                if hash_framework.attacks.collision.metric.loose.distance(algo, target, cols[i]) <= (min_distance+offset) and len(wqs[i]) > 0:
                                     working_cols.append(i)
                             offset += 1
 
                     jq.remove(jq[j])
                     break
 
-    attacks.collision.insert_db_multiple(algo, db, cols, tag)
+    hash_framework.attacks.collision.insert_db_multiple(algo, db, cols, tag)
     return cols
 
 def parallel_find_path_hybrid(algo, db, start, target, tag):
     cols = [start.copy()]
-    min_distance = attacks.collision.metric.loose.distance(algo, start, target)
+    min_distance = hash_framework.attacks.collision.metric.loose.distance(algo, start, target)
 
-    attacks.collision.insert_db_multiple(algo, db, cols, tag + "-original")
+    hash_framework.attacks.collision.insert_db_multiple(algo, db, cols, tag + "-original")
     wqs = {}
     wqs[0] = [-1] + list(range(0, 48))
     wcols = {}
@@ -464,14 +463,14 @@ def parallel_find_path_hybrid(algo, db, start, target, tag):
 
             print(len(wcols[wc]))
 
-            m = models()
+            m = hash_framework.models()
             m.start(tag + "-c" + str(wc) + "-r" + str(i), False)
-            models.vars.write_header()
-            models.generate(algo, ['h1', 'h2'])
-            attacks.collision.connected.loose.new_unit_step(algo, wcols[wc][0], wcols[wc], target)
-            attacks.collision.write_constraints(algo)
-            attacks.collision.write_optional_differential(algo)
-            models.vars.write_assign(['ccollision', 'cblocks', 'cdifferentials'])
+            hash_framework.models.vars.write_header()
+            hash_framework.models.generate(algo, ['h1', 'h2'])
+            hash_framework.attacks.collision.connected.loose.new_unit_step(algo, wcols[wc][0], wcols[wc], target)
+            hash_framework.attacks.collision.write_constraints(algo)
+            hash_framework.attacks.collision.write_optional_differential(algo)
+            hash_framework.models.vars.write_assign(['ccollision', 'cblocks', 'cdifferentials'])
             m.collapse()
             m.build()
             jqj = compute.perform_sat("problem.cnf", "problem.out", count=1, no_wait=True, ident=(wc, i))
@@ -496,14 +495,14 @@ def parallel_find_path_hybrid(algo, db, start, target, tag):
                     working_cols.append(wc)
                 override = True
             else:
-                m = models()
+                m = hash_framework.models()
                 m.start(tag + "-c" + str(wc) + "-r" + str(i), False)
-                models.vars.write_header()
-                models.generate(algo, ['h1', 'h2'])
-                attacks.collision.connected.loose.constraints_new_neighbor(algo, wcols[wc], i)
-                attacks.collision.write_constraints(algo)
-                attacks.collision.write_optional_differential(algo)
-                models.vars.write_assign(['ccollision', 'cblocks', 'cdifferentials'])
+                hash_framework.models.vars.write_header()
+                hash_framework.models.generate(algo, ['h1', 'h2'])
+                hash_framework.attacks.collision.connected.loose.constraints_new_neighbor(algo, wcols[wc], i)
+                hash_framework.attacks.collision.write_constraints(algo)
+                hash_framework.attacks.collision.write_optional_differential(algo)
+                hash_framework.models.vars.write_assign(['ccollision', 'cblocks', 'cdifferentials'])
                 m.collapse()
                 m.build()
                 jqj = compute.perform_sat("problem.cnf", "problem.out", count=1, no_wait=True, ident=(wc, i))
@@ -525,21 +524,21 @@ def parallel_find_path_hybrid(algo, db, start, target, tag):
                     print("Found finished job:")
                     print((fj, jqe))
                     if fj_status:
-                        m = models()
+                        m = hash_framework.models()
                         m.start(tag + "-c" + str(jqwc) + "-r" + str(jqi), False)
                         rs = m.results(algo)
-                        ncols = attacks.collision.build_col_rows(algo, db, rs, tag)
+                        ncols = hash_framework.attacks.collision.build_col_rows(algo, db, rs, tag)
                         if len(ncols) < 1:
                             continue
                         ncol = ncols[0]
-                        attacks.collision.insert_db_multiple(algo, db, ncols, tag)
+                        hash_framework.attacks.collision.insert_db_multiple(algo, db, ncols, tag)
 
                         # Check if min_distance needs updating
-                        ndist = attacks.collision.metric.loose.distance(algo, ncol, target)
+                        ndist = hash_framework.attacks.collision.metric.loose.distance(algo, ncol, target)
 
                         # Only add if not already in cols
                         nci = -1
-                        dte = list(map(lambda x: attacks.collision.metric.loose.distance(algo, ncol, x), cols))
+                        dte = list(map(lambda x: hash_framework.attacks.collision.metric.loose.distance(algo, ncol, x), cols))
                         if 0 not in dte:
                             nci = len(cols)
                             cols.append(ncol)
@@ -560,7 +559,7 @@ def parallel_find_path_hybrid(algo, db, start, target, tag):
                             if dte[i] == 1 and i in wqs:
                                 wcols[i].append(ncol)
                                 wdist[i].append(ndist)
-                                dr = attacks.collision.metric.loose.delta(algo, cols[i], cols[nci])
+                                dr = hash_framework.attacks.collision.metric.loose.delta(algo, cols[i], cols[nci])
                                 if dr[0][0] not in wqs[i]:
                                     wqs[i].append(dr[0][0])
 
@@ -581,7 +580,7 @@ def parallel_find_path_hybrid(algo, db, start, target, tag):
                                 jqwc.remove(-1)
 
                             for i in range(0, len(cols)):
-                                if attacks.collision.metric.loose.distance(algo, cols[i], cols[jqwc]) == 1:
+                                if hash_framework.attacks.collision.metric.loose.distance(algo, cols[i], cols[jqwc]) == 1:
                                     wcols[jqwc].append(cols[i])
                                     wdist[jqwc].append(wdist[i][0])
                                     if cols[jqwc] not in wcols[i]:
@@ -596,7 +595,7 @@ def parallel_find_path_hybrid(algo, db, start, target, tag):
                     offset = 0
                     while len(unit_cols) == 0 and offset < 1:
                         for i in range(0, len(cols)):
-                            if attacks.collision.metric.loose.distance(algo, target, cols[i]) <= (min_distance+offset) and -1 in wqs[i]:
+                            if hash_framework.attacks.collision.metric.loose.distance(algo, target, cols[i]) <= (min_distance+offset) and -1 in wqs[i]:
                                 found = False
                                 for job in jq:
                                     if job[0] == i:
@@ -614,11 +613,11 @@ def parallel_find_path_hybrid(algo, db, start, target, tag):
                     working_cols = []
                     while len(working_cols) == 0 and offset < 3:
                         for i in range(0, len(cols)):
-                            if attacks.collision.metric.loose.distance(algo, target, cols[i]) <= (min_distance+offset) and -1 not in wqs[i] and len(wqs[i]) > 0:
+                            if hash_framework.attacks.collision.metric.loose.distance(algo, target, cols[i]) <= (min_distance+offset) and -1 not in wqs[i] and len(wqs[i]) > 0:
                                 working_cols = [i] + working_cols
                         offset += 1
 
                     break
 
-    attacks.collision.insert_db_multiple(algo, db, cols, tag)
+    hash_framework.attacks.collision.insert_db_multiple(algo, db, cols, tag)
     return cols

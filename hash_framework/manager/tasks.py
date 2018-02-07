@@ -64,29 +64,59 @@ class Tasks:
                 datas[i]['running'] = default_running
 
             datas[i] = (datas[i]['name'], datas[i]['algo'],
-                        datas[i]['max_threads'], datas[i]['priority'],
+                        datas[i]['max_threads'], 0, 0, 0, datas[i]['priority'],
                         current_time, datas[i]['running'])
 
-        q = "INSERT INTO tasks (name, algo, max_threads, priority, started, running) VALUES %s"
+        q = "INSERT INTO tasks (name, algo, max_threads, current_threads, total_jobs, remaining_jobs, priority, started, running) VALUES %s"
 
         r = self.db.prepared_many(q, datas, commit=True, limit=1, cursor=True)
         return r
+
+    def update_all_job_counts(self):
+        t = hash_framework.manager.Task(self.db)
+        for tid in self.load_ids():
+            t.update_job_counts(tid)
+
+    def assign_next_job(self):
+        db_conn = self.db.conn
 
 class Task:
     def __init__(self, db):
         self.db = db
 
         self.id = None
+
+        self.max_threads = None
+        self.current_threads = None
+
+        self.total_jobs = None
+        self.remaining_jobs = None
+
         self.name = None
         self.algo = None
-        self.max_threads = None
+
         self.priority = None
+
+        self.started = None
         self.running = None
+
+    def update_job_counts(self, tid):
+        q = "UPDATE tasks SET tasks.total_jobs=total_jobs.count,"
+        q += " tasks.remaining_jobs=remaining_jobs.count FROM"
+        q += " ( SELECT COUNT(*) AS count FROM jobs WHERE task_id=%s ) AS total_jobs,"
+        q += " ( SELECT COUNT(*) AS count FROM jobs WHERE task_id=%s AND state=0 )"
+        q += " AS remaining_jobs WHERE id=%s;"
+
+        values = [tid, tid, tid]
+
+        self.db.prepared(q, values)
+
 
     def to_dict(self):
         return {'id': self.id, 'name': self.name, 'algo': self.algo,
-                'max_threads': self.max_threads, 'priority': self.priority,
-                'running': self.running}
+                'max_threads': self.max_threads, 'current_threads': self.current_threads,
+                'total_jobs': self.total_jobs, 'remaining_jobs': self.remaining_jobs,
+                'priority': self.priority, 'running': self.running, 'started': self.started}
 
     def new(self, name, algo, max_threads=-1, priority=100, running=False):
         assert(type(name) == str)
@@ -97,9 +127,17 @@ class Task:
 
         self.name = name
         self.algo = algo
+
         self.max_threads = max_threads
+        self.current_threads = 0
+
+        self.total_jobs = 0
+        self.remaining_jobs = 0
+
         self.priority = priority
+
         self.running = running
+        self.started = datetime.datetime.now()
 
         self.__insert__()
 
@@ -140,10 +178,13 @@ class Task:
 
     def __insert__(self):
         q = "INSERT INTO tasks"
-        q += " (name, algo, max_threads, priority, started, running)"
-        q += " VALUES (%s, %s, %s, %s, now(), %s)"
+        q += " (name, algo, max_threads, current_threads, total_jobs, "
+        q += " remaining_jobs, priority, started, running)"
+        q += " VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)"
         q += " RETURNING id;"
-        values = (self.name, self.algo, self.max_threads, self.priority, self.running)
+        values = (self.name, self.algo, self.max_threads, self.current_threads,
+                  self.total_jobs, self.remaining_jobs, self.priority, self.started,
+                  self.running)
 
         r, rid = self.db.prepared(q, values, rowid=True)
         self.id = rid
@@ -153,30 +194,33 @@ class Task:
         q = ""
         values = tuple()
 
+        q = "SELECT id, name, algo, max_threads, current_threads, total_jobs,"
+        q += " remaining_jobs, priority, started, running FROM tasks"
+
         if self.name != None:
-            q = "SELECT id, algo, max_threads, priority, running"
-            q += " FROM tasks WHERE name=%s;"
-            values = tuple([self.name])
+            q += " WHERE name=%s;"
+            values = [self.name]
         elif self.id != None:
-            q = "SELECT name, algo, max_threads, priority, running"
-            q += " FROM tasks WHERE id=%s;"
-            values = tuple([self.id])
+            q += " WHERE id=%s;"
+            values = [self.id]
 
         r, cursor = self.db.prepared(q, values, commit=False, cursor=True)
 
         data = cursor.fetchone()
         if data:
-            self.id = data[0]
-            self.algo = data[1]
-            self.max_threads = int(data[2])
-            self.priority = int(data[3])
-            self.running = bool(data[4])
+            (self.id, self.name, self.algo, self.max_threads, self.current_threads,
+                self.total_jobs, self.remaining_jobs, self.priority, self.started,
+                self.running) = data
         else:
             self.id = None
             self.name = None
             self.algo = None
             self.max_threads = None
+            self.current_threads = None
+            self.total_jobs = None
+            self.remaining_jobs = None
             self.priority = None
+            self.started = None
             self.running = None
 
         cursor.close()

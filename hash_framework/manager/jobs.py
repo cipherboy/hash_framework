@@ -100,6 +100,8 @@ class Job:
         r, rid = self.db.prepared(q, values, rowid=True)
         self.id = rid
 
+        t = hash_framework.manager.Task(self.db)
+        t.update_job_counts(self.task_id)
 
     def __load__(self):
         q = "SELECT task_id, kernel, algo, args, result_table, state,"

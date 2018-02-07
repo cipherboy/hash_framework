@@ -79,7 +79,8 @@ class database:
                     time.sleep(1)
                 self.conn.rollback()
                 pass
-
+            if c:
+                c.close()
         return None
 
     def prepared(self, q, values, commit=True, limit=20, rowid=False, cursor=False):
@@ -105,6 +106,9 @@ class database:
 
                 self.conn.rollback()
                 pass
+
+            if c:
+                c.close()
 
         return None
 
@@ -132,6 +136,9 @@ class database:
 
                 self.conn.rollback()
                 pass
+
+        if c:
+            c.close()
 
         return None
 
@@ -173,4 +180,5 @@ class database:
         self.conn.commit()
 
     def close(self):
+        self.conn.commit()
         self.conn.close()

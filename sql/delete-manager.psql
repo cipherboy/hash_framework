@@ -1,0 +1,5 @@
+DROP TABLE tasks;
+DROP TABLE hosts;
+DROP TABLE jobs;
+DROP TABLE host_metadata;
+DROP TABLE results;

@@ -105,6 +105,17 @@ class Host:
 
         return self
 
+    def metadata_keys(self):
+        q = "SELECT name FROM host_metadata WHERE host_id=%s"
+        r, c = self.db.prepared(q, [self.id], cursor=True)
+        datas = c.fetchall()
+
+        keys = []
+        for data in datas:
+            keys.append(data[0])
+
+        return keys
+
     def add_metadata(self, name, value):
         assert(type(name) == str)
         assert(type(value) == str)

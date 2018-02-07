@@ -2,6 +2,11 @@ CREATE TABLE tasks (
     id BIGSERIAL NOT NULL,
 
     max_threads INT NOT NULL,
+    current_threads INT NOT NULL,
+
+    total_jobs BIGINT NOT NULL,
+    remaining_jobs BIGINT NOT NULL,
+
     priority INT NOT NULL,
 
     name VARCHAR(1024) UNIQUE NOT NULL,
