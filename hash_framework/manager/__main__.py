@@ -52,7 +52,7 @@ def fill_task_obj(db):
     t = hash_framework.manager.Tasks(db)
     ots = t.get_task_objects_by_priority()
     for task in ots:
-        jobs[task['id']] = t.get_task_free_jobs(tid=task['id'], limit=5000)
+        jobs[task['id']] = t.get_task_free_jobs(tid=task['id'], limit=10000)
 
     next_task_obj['jobs'] = jobs
     next_task_obj['sent_jobs'] = set()
@@ -76,6 +76,7 @@ def pop_tasks(db, limit=1):
             while len(jids) < limit and len(jobs[task['id']]) > 0:
                 jid = jobs[task['id']][0]
                 jobs[task['id']] = jobs[task['id']][1:]
+                next_task_obj['sent_jobs'].add(jid)
                 jids.append(jid)
                 task['remaining_jobs'] -= 1
 

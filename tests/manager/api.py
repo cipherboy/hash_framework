@@ -46,7 +46,7 @@ def tc_api_assign_benchmark():
     return True
 
 def __main__():
-    # tests = [tc_api_create_task, tc_api_create_host]
+    #tests = [tc_api_create_task, tc_api_create_host]
     tests = [tc_api_assign_benchmark]
 
     for test in tests:

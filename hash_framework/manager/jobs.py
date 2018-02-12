@@ -40,13 +40,20 @@ class Jobs:
         return True
 
     def add_all(self, datas):
+        tids = set()
         for i in range(0, len(datas)):
+            tids.add(datas[i]['task'])
             datas[i] = (datas[i]['task'], datas[i]['kernel'], datas[i]['algo'],
                         datas[i]['args'], datas[i]['result_table'], 0)
 
         q = "INSERT INTO jobs (task_id, kernel, algo, args, result_table, state) VALUES %s"
 
         r = self.db.prepared_many(q, datas, commit=True, limit=1, cursor=True)
+
+        t = hash_framework.manager.Task(self.db)
+        for tid in tids:
+            t.update_job_counts(tid)
+
         return r
 
 class Job:
