@@ -11,44 +11,85 @@ from hash_framework import config
 
 app = Flask(__name__)
 
-db_free_pool = set()
-db_used_pool = set()
+db_pool = []
+next_task_obj = {}
 
 def acquire_db():
-    if len(db_free_pool) > 0:
-        db = db_free_pool.pop()
-        db.close()
-        db.init_psql()
-        db_used_pool.add(db)
-        print("Initial free")
-        return db
-
-    if len(db_free_pool) + len(db_used_pool) < 10:
+    if len(db_pool) == 0:
         db = hash_framework.database()
         db.close()
         db.init_psql()
-        db_used_pool.add(db)
-        print("Created worker")
+        db_pool.append(db)
         return db
 
-    print("Waiting for a free db")
-    while len(db_free_pool) == 0:
-        pass
-
-    print("Received a free db")
-    db = db_free_pool.pop()
-    db.close()
-    db.init_psql()
-    db_used_pool.add(db)
-    return db
+    return db_pool[0]
 
     # return db_pool[0]
 
 def release_db(db):
-    print("Released db")
-    db_used_pool.remove(db)
-    db_free_pool.add(db)
+    #db.close()
+    #db.init_psql()
     pass
+
+def fill_task_obj(db):
+    if 'sent_jobs' in next_task_obj:
+        q = "UPDATE jobs SET state=%s WHERE id=%s"
+        for jid in next_task_obj['sent_jobs']:
+            db.prepared(q, [1, jid], commit=False)
+
+    if 'ordered_tasks' in next_task_obj:
+        q = "UPDATE tasks SET remaining_jobs=%s,current_threads=%s WHERE id=%s"
+        for task in next_task_obj['ordered_tasks']:
+            db.prepared(q, [task['remaining_jobs'], task['current_threads'], task['id']], commit=True)
+
+
+    next_task_obj['jobs'] = {}
+    next_task_obj['sent_jobs'] = set()
+    next_task_obj['ordered_tasks'] = []
+
+    jobs = {}
+
+    t = hash_framework.manager.Tasks(db)
+    ots = t.get_task_objects_by_priority()
+    for task in ots:
+        jobs[task['id']] = t.get_task_free_jobs(tid=task['id'], limit=5000)
+
+    next_task_obj['jobs'] = jobs
+    next_task_obj['sent_jobs'] = set()
+    next_task_obj['ordered_tasks'] = ots
+    next_task_obj['regen'] = False
+
+def pop_tasks(db, limit=1):
+    if 'regen' not in next_task_obj or next_task_obj['regen']:
+        print("Regen")
+        fill_task_obj(db)
+
+    jobs = next_task_obj['jobs']
+    jids = []
+    tids = set()
+    for task in next_task_obj['ordered_tasks']:
+        remaining_threads = (task['current_threads'] < task['max_threads'] or
+                             task['max_threads'] == -1)
+        remaining_jobs = task['remaining_jobs']
+
+        if remaining_threads and remaining_jobs:
+            while len(jids) < limit and len(jobs[task['id']]) > 0:
+                jid = jobs[task['id']][0]
+                jobs[task['id']] = jobs[task['id']][1:]
+                jids.append(jid)
+                task['remaining_jobs'] -= 1
+
+                if len(jobs[task['id']]) == 0 and task['remaining_jobs'] > 0:
+                    next_task_obj['regen'] = True
+
+            if task['id'] not in tids:
+                tids.add(task['id'])
+                task['current_threads'] += 1
+
+        if len(jids) == limit:
+            break
+
+    return jids
 
 @app.route("/tasks/", methods=['GET', 'POST'])
 def handle_tasks():
@@ -190,16 +231,14 @@ def handle_host_metadata_query(hid, name):
 @app.route("/assign/", methods=['GET'])
 def handle_assign():
     db = acquire_db()
-    t = hash_framework.manager.Tasks(db)
-    r = t.assign_next_job(count=1)
+    r = pop_tasks(db, 1)
     release_db(db)
     return jsonify(r)
 
 @app.route("/assign/<int:count>", methods=['GET'])
 def handle_multi_assign(count):
     db = acquire_db()
-    t = hash_framework.manager.Tasks(db)
-    r = t.assign_next_job(count)
+    r = pop_tasks(db, count)
     release_db(db)
     return jsonify(r)
 

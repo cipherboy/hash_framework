@@ -77,24 +77,66 @@ class Tasks:
         for tid in self.load_ids():
             t.update_job_counts(tid)
 
-    def get_tasks_by_priority(self, cur):
+    def get_tasks_by_priority(self, i_cur=None):
         q = "SELECT id FROM tasks WHERE remaining_jobs > 0 AND (current_threads < max_threads OR max_threads=-1) AND running=true ORDER BY priority DESC;"
-        cur.execute(q)
+
+        cur = i_cur
+
+        if i_cur:
+            cur.execute(q)
+        else:
+            _, cur = self.db.execute(q, cursor=True)
+
         r = []
         data = cur.fetchall()
         for d in data:
             r.append(d[0])
+
+        if not i_cur:
+            cur.close()
 
         return r
 
-    def get_task_free_jobs(self, cur, tid, limit):
+    def get_task_objects_by_priority(self, limit=100):
+        q = "SELECT id,current_threads,max_threads,total_jobs,remaining_jobs"
+        q += " FROM tasks WHERE remaining_jobs > 0 AND running=true ORDER BY"
+        q += " priority DESC"
+
+        if limit != -1 and type(limit) == int and limit > 0:
+            q += " LIMIT " + str(limit)
+
+        _, cur = self.db.execute(q, cursor=True)
+        r = []
+        data = cur.fetchall()
+        for d in data:
+            o = {'id': d[0], 'current_threads': d[1],
+                 'max_threads': d[2], 'total_jobs': d[3],
+                 'remaining_jobs': d[4]}
+            r.append(o)
+
+        cur.close()
+        return r
+
+    def get_task_free_jobs(self, in_cur=None, tid=None, limit=100):
+        if tid is None:
+            return []
+
         q = "SELECT id FROM jobs WHERE task_id=%s AND state=0 LIMIT %s;"
-        cur.execute(q, [tid, limit])
+        cur = in_cur
+
+        if in_cur:
+            cur.execute(q, [tid, limit])
+        else:
+            print([tid, limit])
+            r, cur = self.db.prepared(q, [tid, limit], cursor=True)
 
         r = []
         data = cur.fetchall()
         for d in data:
             r.append(d[0])
+
+        if not in_cur:
+            cur.close()
 
         return r
 
@@ -105,13 +147,10 @@ class Tasks:
 
     def tasks_update_counts(self, cur, tids):
         for tid in tids:
-            q = "UPDATE tasks SET total_jobs=total_jobs.count,"
-            q += " remaining_jobs=remaining_jobs.count FROM"
-            q += " ( SELECT COUNT(*) AS count FROM jobs WHERE task_id=%s )"
-            q += " AS total_jobs, ( SELECT COUNT(*) AS count FROM jobs WHERE"
-            q += " task_id=%s AND state=0 ) AS remaining_jobs WHERE id=%s;"
+            q = "UPDATE tasks SET remaining_jobs=(remaining_jobs - %s) WHERE"
+            q += " id=%s;"
 
-            values = [tid, tid, tid]
+            values = [tids[tid], tid]
 
             cur.execute(q, values)
 
@@ -128,7 +167,7 @@ class Tasks:
             return []
 
         jids = []
-        used_tids = set()
+        used_tids = dict()
         while len(jids) < count:
             tid = tids.pop()
             n_jids = self.get_task_free_jobs(cur, tid, count - len(jids))
@@ -136,10 +175,14 @@ class Tasks:
                continue
 
             jids = jids + n_jids
+            if not tid in used_tids:
+                used_tids[tid] = 0
+
+            used_tids[tid] += len(n_jids)
             tids.append(tid)
 
         self.jobs_update_state(cur, jids, 1)
-        self.tasks_update_counts(cur, tids)
+        self.tasks_update_counts(cur, used_tids)
 
         db_conn.commit()
         cur.close()

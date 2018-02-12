@@ -47,10 +47,11 @@ CREATE TABLE jobs (
     algo VARCHAR(64) NOT NULL,
     args TEXT NOT NULL,
     result_table VARCHAR(64) NOT NULL,
+    timeout INTEGER,
 
     state INT NOT NULL,
 
-    start_time TIMESTAMP,
+    checked_out TIMESTAMP,
 
     compile_time INTEGER,
     compile_return INTEGER,
