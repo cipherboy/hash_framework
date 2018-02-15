@@ -153,21 +153,31 @@ class Job:
         self.db = db
 
         self.id = None
-        self.task = None
         self.owner = None
-
+        self.task_id = None
         self.kernel = None
         self.algo = None
         self.args = None
         self.result_table = None
-
-        self.start_time = None
+        self.timeout = None
+        self.state = None
+        self.checked_out = None
         self.compile_time = None
         self.compile_return = None
         self.run_time = None
         self.run_return = None
         self.finalize_time = None
         self.checked_back = None
+
+    def to_dict(self):
+        o = {'id': self.id, 'task_id': self.task_id, 'owner': self.owner,
+             'kernel': self.kernel, 'algo': self.algo, 'args': self.args,
+             'result_table': self.result_table, 'timeout': self.timeout,
+             'state': self.state, 'checked_out': self.checked_out,
+             'compile_time': self.compile_time,
+             'compile_return': self.compile_return, 'run_time': self.run_time,
+             'finalize_time': self.finalize_time, 'checked_back': self.checked_back}
+        return o
 
     def new(self, task, kernel, algo, args, result_table):
         self.task = task
@@ -182,7 +192,7 @@ class Job:
 
     def load(self, jid):
         assert(type(jid) == int)
-        self.name = name
+        self.id = jid
 
         self.__load__()
 
@@ -203,8 +213,8 @@ class Job:
         t.update_job_counts(self.task_id)
 
     def __load__(self):
-        q = "SELECT task_id, kernel, algo, args, result_table, state,"
-        q += " start_time, compile_time, compile_return, run_time,"
+        q = "SELECT task_id, owner, kernel, algo, args, result_table, timeout,"
+        q += " state, checked_out, compile_time, compile_return, run_time,"
         q += " run_return, finalize_time, checked_back"
         q += " FROM jobs WHERE id=%s;"
         values = tuple([self.id])
@@ -213,27 +223,31 @@ class Job:
 
         data = cursor.fetchone()
         if data:
-            self.task_id = int(data[0])
-            self.kernel = data[1]
-            self.algo = data[2]
-            self.args = data[3]
-            self.result_table = data[4]
-            self.state = data[5]
-            self.start_time = data[6]
-            self.compile_time = data[7]
-            self.compile_return = data[8]
-            self.run_time = data[9]
-            self.run_return = data[10]
-            self.finalize_time = data[11]
-            self.checked_back = data[12]
+            self.task_id = data[0]
+            self.owner = data[1]
+            self.kernel = data[2]
+            self.algo = data[3]
+            self.args = data[4]
+            self.result_table = data[5]
+            self.timeout = data[6]
+            self.state = data[7]
+            self.checked_out = data[8]
+            self.compile_time = data[9]
+            self.compile_return = data[10]
+            self.run_time = data[11]
+            self.run_return = data[12]
+            self.finalize_time = data[13]
+            self.checked_back = data[14]
         else:
             self.id = None
+            self.owner = None
             self.task_id = None
             self.kernel = None
             self.algo = None
             self.args = None
             self.result_table = None
-            self.start_time = None
+            self.state = None
+            self.checked_out = None
             self.compile_time = None
             self.compile_return = None
             self.run_time = None

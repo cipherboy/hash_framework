@@ -33,14 +33,14 @@ def release_db(db):
 
 def fill_task_obj(db):
     if 'sent_jobs' in next_task_obj:
-        q = "UPDATE jobs SET state=%s WHERE id=%s"
-        for jid in next_task_obj['sent_jobs']:
-            db.prepared(q, [1, jid], commit=False)
+        q = "UPDATE jobs SET state=%s, owner=%s WHERE id=%s"
+        for t in next_task_obj['sent_jobs']:
+            db.prepared(q, [1, t[0], t[1]], commit=False)
 
     if 'ordered_tasks' in next_task_obj:
-        q = "UPDATE tasks SET remaining_jobs=%s,current_threads=%s WHERE id=%s"
+        q = "UPDATE tasks SET remaining_jobs=(remaining_jobs-%s),current_threads=(current_threads+%s) WHERE id=%s"
         for task in next_task_obj['ordered_tasks']:
-            db.prepared(q, [task['remaining_jobs'], task['current_threads'], task['id']], commit=True)
+            db.prepared(q, [task['remaining_jobs_delta'], task['current_threads_delta'], task['id']], commit=True)
 
     next_task_obj['jobs'] = {}
     next_task_obj['sent_jobs'] = set()
@@ -75,9 +75,13 @@ def pop_tasks(db, host_id, limit=1):
             while len(jids) < limit and len(jobs[task['id']]) > 0:
                 jid = jobs[task['id']][0]
                 jobs[task['id']] = jobs[task['id']][1:]
-                next_task_obj['sent_jobs'].add(jid)
+                next_task_obj['sent_jobs'].add((host_id, jid))
                 jids.append(jid)
                 task['remaining_jobs'] -= 1
+                if 'remaining_jobs_delta' not in task:
+                    task['remaining_jobs_delta'] = 0
+
+                task['remaining_jobs_delta'] += 1
 
                 if len(jobs[task['id']]) == 0 and task['remaining_jobs'] > 0:
                     next_task_obj['regen'] = True
@@ -85,6 +89,11 @@ def pop_tasks(db, host_id, limit=1):
             if task['id'] not in tids:
                 tids.add(task['id'])
                 task['current_threads'] += 1
+
+                if 'current_threads_delta' not in task:
+                    task['current_threads_delta'] = 0
+
+                task['current_threads_delta'] += 1
 
         if len(jids) == limit:
             break
@@ -149,31 +158,31 @@ def handle_task_jobs(tid):
         release_db(db)
         return jsonify(r)
 
-@app.route("/task/<int:tid>/job/<int:jid>", methods=['GET', 'POST'])
-def handle_task_job(tid, jid):
+@app.route("/job/<int:jid>", methods=['GET', 'POST'])
+def handle_task_job(jid):
     db = acquire_db()
     j = hash_framework.manager.Job(db)
     if request.method == 'POST':
         pass
     elif request.method == 'GET':
-        j.load(self, jid)
+        j.load(jid)
         r = j.to_dict()
+        release_db(db)
+        return jsonify(r)
 
-@app.route("/task/<int:tid>/job/<int:jid>/status", methods=['GET', 'POST'])
-def handle_task_job(tid, jid):
+@app.route("/job/<int:jid>/update_status", methods=['POST'])
+def handle_task_job_update_status(jid):
     db = acquire_db()
     if request.method == 'POST':
         pass
-    elif request.method == 'GET':
-        pass
 
-@app.route("/task/<int:tid>/job/<int:jid>", methods=['GET', 'POST'])
-def handle_task_job(tid, jid):
-    db = acquire_db()
-    if request.method == 'POST':
-        pass
-    elif request.method == 'GET':
-        pass
+#@app.route("/task/<int:tid>/job/<int:jid>/", methods=['GET', 'POST'])
+#def handle_task_job(tid, jid):
+#    db = acquire_db()
+#    if request.method == 'POST':
+#        pass
+#    elif request.method == 'GET':
+#        pass
 
 @app.route("/hosts/", methods=['GET', 'POST'])
 def handle_hosts():
