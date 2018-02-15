@@ -5,13 +5,15 @@ class Client:
         self.uri = uri
 
     def register(self):
+        self._heartbeat()
         pass
 
-    def heartbeat(self):
+    def _heartbeat(self):
         pass
 
     def receive_jobs(self, count=1):
         assert(type(count) == int and count > 0)
+        self._heartbeat()
         r = requests.get(self.uri + "/assign/" + str(count))
 
         if r.status_code == 200:
@@ -19,13 +21,16 @@ class Client:
 
         return [], r.json()
 
-    def start_job(self, tid, jid):
+    def get_job(self, jid):
+        self._heartbeat()
         pass
 
     def end_job(self, tid, jid):
+        self._heartbeat()
         pass
 
     def send_results(self, results):
+        self._heartbeat()
         r = request.post(self.uri + "/results/", json=results)
 
         if r.status_code == 200:
