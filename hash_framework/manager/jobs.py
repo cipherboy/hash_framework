@@ -26,7 +26,7 @@ class Jobs:
             if type(data) != dict:
                 return False
 
-            if 'task' not in data or type(data['task']) != int:
+            if 'task' not in data or type(data['task']) != int or data['task'] <= 0:
                 return False
             if 'kernel' not in data or type(data['kernel']) != str:
                 return False
@@ -36,6 +36,98 @@ class Jobs:
                 return False
             if 'result_table' not in data or type(data['result_table']) != str:
                 return False
+
+        return True
+
+    def verify_results(self, datas):
+        if type(datas) != list:
+            return False
+
+        for data in datas:
+            if type(data) != dict:
+                return False
+
+            if 'id' not in data or type(data['id']) != int or data['id'] <= 0:
+                return False
+            if 'results' not in data or not self.verify_result(data['results']):
+                return False
+            if 'checked_out' not in data or type(data['checked_out']) != str:
+                return False
+            if 'compile_time' not in data or type(data['compile_time']) != int:
+                return False
+            if 'compile_return' not in data or type(data['compile_return']) != int:
+                return False
+            if 'run_time' not in data or type(data['run_time']) != int:
+                return False
+            if 'run_return' not in data or type(data['run_return']) != int:
+                return False
+            if 'finalize_time' not in data or type(data['finalize_time']) != int:
+                return False
+            if 'checked_back' not in data or type(data['checked_back']) != str:
+                return False
+
+        return True
+
+    def verify_result(self, results):
+        if type(results) != list:
+            return False
+
+        for result in results:
+            if type(result) != dict:
+                return False
+
+            if 'data' not in result or type(result['data']) != str:
+                return False
+            if 'row' not in result or type(result['row']) != dict:
+                return False
+
+        return True
+
+    def add_results(self, datas):
+        task_ids = set()
+
+        for data in datas:
+            # Update job state
+            # Get result_table
+            # Insert results into approprate result_table
+            # Update results with ids.
+
+            q = "UPDATE jobs SET checked_out=%s, compile_time=%s, compile_return=%s,"
+            q += " run_time=%s, run_return=%s, finalize_time=%s, checked_back=%s,"
+            q += " state=2 WHERE id=%s"
+            values = [data['checked_out'], data['compile_time'], data['compile_return'],
+                      data['run_time'], data['run_return'], data['finalize_time'],
+                      data['checked_back'], data['id']]
+            self.db.prepared(q, values, commit=True)
+
+            q = "SELECT task_id, result_table FROM jobs WHERE id=%s"
+            _, cur = self.db.prepared(q, [data['id']], cursor=True)
+            ret = cur.fetchall()
+            if len(ret) != 1 and len(ret[0]) != 2:
+                continue
+            task_id = ret[0][0]
+            result_table = ret[0][1]
+
+            task_ids.add(task_id)
+
+            for result in data['results']:
+                columns = list(result['row'])
+                q = "INSERT INTO " + result_table + " ("
+                q += ",".join(columns) + ") VALUES ("
+                q += ",".join(["%s"] * len(columns))
+                q += ") RETURNING id;"
+                values = []
+                for column in columns:
+                    values.append(result[column])
+                rowid = self.db.prepared(q, values, rowid=True)
+
+                q = "INSERT INTO results (job_id, result_table, result_id, data)"
+                q += " VALUES (%s, %s, %s, %s)"
+                self.db.prepared(q, [data['id'], result_table, rowid, result['data']], commit=True)
+
+        for task_id in task_ids:
+            q = "UPDATE tasks SET current_threads=(current_threads-1) WHERE id=%s"
+            self.db.prepared(q, [task_id], commit=True)
 
         return True
 

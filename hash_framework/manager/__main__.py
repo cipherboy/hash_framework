@@ -42,7 +42,6 @@ def fill_task_obj(db):
         for task in next_task_obj['ordered_tasks']:
             db.prepared(q, [task['remaining_jobs'], task['current_threads'], task['id']], commit=True)
 
-
     next_task_obj['jobs'] = {}
     next_task_obj['sent_jobs'] = set()
     next_task_obj['ordered_tasks'] = []
@@ -59,7 +58,7 @@ def fill_task_obj(db):
     next_task_obj['ordered_tasks'] = ots
     next_task_obj['regen'] = False
 
-def pop_tasks(db, limit=1):
+def pop_tasks(db, host_id, limit=1):
     if 'regen' not in next_task_obj or next_task_obj['regen']:
         print("Regen")
         fill_task_obj(db)
@@ -103,14 +102,14 @@ def handle_tasks():
 
         if not t.verify(datas):
             release_db(db)
-            return "Invalid input data", 400
+            return jsonify(hash_framework.manager.input_error), 400
 
         if t.add_all(datas) != None:
             release_db(db)
-            return "OK", 200
+            return jsonify(hash_framework.manager.success)
 
         release_db(db)
-        return "Internal Error", 500
+        return jsonify(hash_framework.manager.server_error), 500
 
     elif request.method == 'GET':
         r = t.load_ids()
@@ -136,19 +135,37 @@ def handle_task_jobs(tid):
 
         if not j.verify(datas):
             release_db(db)
-            return "Invalid input data", 400
+            return jsonify(hash_framework.manager.input_error), 400
 
         if j.add_all(datas) != None:
             release_db(db)
-            return "OK", 200
+            return jsonify(hash_framework.manager.success)
 
         release_db(db)
-        return "Internal Error", 500
+        return jsonify(hash_framework.manager.server_error), 500
     elif request.method == 'GET':
         t = hash_framework.manager.Task(db)
         r = t.load_id(tid).get_jobs()
         release_db(db)
         return jsonify(r)
+
+@app.route("/task/<int:tid>/job/<int:jid>", methods=['GET', 'POST'])
+def handle_task_job(tid, jid):
+    db = acquire_db()
+    j = hash_framework.manager.Job(db)
+    if request.method == 'POST':
+        pass
+    elif request.method == 'GET':
+        j.load(self, jid)
+        r = j.to_dict()
+
+@app.route("/task/<int:tid>/job/<int:jid>/status", methods=['GET', 'POST'])
+def handle_task_job(tid, jid):
+    db = acquire_db()
+    if request.method == 'POST':
+        pass
+    elif request.method == 'GET':
+        pass
 
 @app.route("/task/<int:tid>/job/<int:jid>", methods=['GET', 'POST'])
 def handle_task_job(tid, jid):
@@ -166,7 +183,7 @@ def handle_hosts():
         datas = request.get_json(force=True)
         if type(datas) != dict or not h.verify([datas]):
             release_db(db)
-            return "Invalid input data", 400
+            return jsonify(hash_framework.manager.input_error), 400
 
         h = hash_framework.manager.Host(db)
         h.new(datas['ip'], datas['hostname'], datas['cores'], datas['memory'],
@@ -174,7 +191,7 @@ def handle_hosts():
 
         if h.id == None:
             release_db(db)
-            return "Internal Error", 500
+            return jsonify(hash_framework.manager.server_error), 500
         else:
             release_db(db)
             return jsonify(h.id)
@@ -197,7 +214,7 @@ def handle_host_heartbeat(hid):
     h = hash_framework.manager.Host(db)
     h.load_id(hid).heartbeat()
     release_db(db)
-    return "OK"
+    return jsonify(hash_framework.manager.success)
 
 @app.route("/host/<int:hid>/metadata", methods=['GET', 'POST'])
 def handle_host_metadata(hid):
@@ -208,11 +225,11 @@ def handle_host_metadata(hid):
         datas = request.get_json(force=True)
         if type(datas) != dict or len(datas) != 2 or 'name' not in datas or 'value' not in datas:
             release_db(db)
-            return "Invalid input data", 400
+            return jsonify(hash_framework.manager.input_error), 400
 
         h.load_id(hid).add_metadata(datas['name'], datas['value'])
         release_db(db)
-        return "OK"
+        return jsonify(hash_framework.manager.success)
     elif request.method == 'GET':
         r = h.load_id(hid).metadata_keys()
         release_db(db)
@@ -229,27 +246,44 @@ def handle_host_metadata_query(hid, name):
         r = {'host_id': hid, 'name': name, 'value': value}
         return jsonify(r)
 
-@app.route("/assign/", methods=['GET'])
-def handle_assign():
+@app.route("/host/<int:hid>/assign/", methods=['GET'])
+def handle_assign(hid):
     db = acquire_db()
-    r = pop_tasks(db, 1)
+    r = pop_tasks(db, hid, 1)
     release_db(db)
     return jsonify(r)
 
-@app.route("/assign/<int:count>", methods=['GET'])
-def handle_multi_assign(count):
+@app.route("/host/<int:hid>/assign/<int:count>", methods=['GET'])
+def handle_multi_assign(hid, count):
     db = acquire_db()
-    r = pop_tasks(db, count)
+    r = pop_tasks(db, hid, count)
     release_db(db)
     return jsonify(r)
+
+@app.route("/results/", methods=['POST'])
+def handle_results():
+    db = acquire_db()
+
+    if request.method == 'POST':
+        j = hash_framework.manager.Jobs(db)
+        if not j.verify_results(datas):
+            release_db(db)
+            return jsonify(hash_framework.manager.input_error), 400
+
+        if j.add_results(datas) != True:
+            return jsonify(hash_framework.manager.server_error), 500
+
+        return jsonify(hash_framework.manager.success)
 
 @app.route("/update/", methods=['GET'])
 def handle_update():
     db = acquire_db()
     t = hash_framework.manager.Tasks(db)
     t.update_all_job_counts()
+    next_task_obj['regen'] = True
+    fill_task_obj(db)
     release_db(db)
-    return "OK"
+    return jsonify(hash_framework.manager.success)
 
 if __name__ == "__main__":
     app.run()
