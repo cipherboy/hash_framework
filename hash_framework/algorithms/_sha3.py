@@ -108,7 +108,7 @@ def sha3iota(w, s, i):
 
     return ns
 
-def sha3p(et, prefix, w, s, ir):
+def sha3ptheta(et, prefix, w, s, ir):
     ns = sha3theta(w, s)
     for i in range(0, len(ns)):
         name = prefix + "r" + str(ir) + "t" + str(i)
@@ -116,35 +116,78 @@ def sha3p(et, prefix, w, s, ir):
         if ns[i] not in ['T', 'F']:
             ns[i] = name
 
-    ns = sha3rho(w, ns)
+    return et, ns
+
+def sha3prho(et, prefix, w, s, ir):
+    ns = sha3rho(w, s)
     for i in range(0, len(ns)):
         name = prefix + "r" + str(ir) + "r" + str(i)
         et[name] = ns[i]
         if ns[i] not in ['T', 'F']:
             ns[i] = name
 
-    ns = sha3pi(w, ns)
+    return et, ns
+
+def sha3ppi(et, prefix, w, s, ir):
+    ns = sha3pi(w, s)
     for i in range(0, len(ns)):
-        name = prefix + "r" + str(ir) + "p" + str(i)
+        name = prefix + "r" + str(ir) + "r" + str(i)
         et[name] = ns[i]
         if ns[i] not in ['T', 'F']:
             ns[i] = name
 
-    ns = sha3chi(w, ns)
+    return et, ns
+
+def sha3pchi(et, prefix, w, s, ir):
+    ns = sha3chi(w, s)
     for i in range(0, len(ns)):
-        name = prefix + "r" + str(ir) + "c" + str(i)
+        name = prefix + "r" + str(ir) + "r" + str(i)
         et[name] = ns[i]
         if ns[i] not in ['T', 'F']:
             ns[i] = name
 
-    ns = sha3iota(w, ns, ir)
+    return et, ns
+
+def sha3piota(et, prefix, w, s, ir):
+    ns = sha3chi(w, s)
     for i in range(0, len(ns)):
-        name = prefix + "r" + str(ir) + "i" + str(i)
+        name = prefix + "r" + str(ir) + "r" + str(i)
         et[name] = ns[i]
         if ns[i] not in ['T', 'F']:
             ns[i] = name
+
+    return et, ns
+
+
+def sha3p(et, prefix, w, s, ir):
+    et, ns = sha3ptheta(et, prefix, w, s, ir)
+    et, ns = sha3prho(et, prefix, w, ns, ir)
+    et, ns = sha3ppi(et, prefix, w, ns, ir)
+    et, ns = sha3pchi(et, prefix, w, ns, ir)
+    et, ns = sha3piota(et, prefix, w, ns, ir)
 
     return (et, ns)
+
+def sha3pstr(et, prefix, w, s, rounds):
+    ir = 0
+    for r in rounds:
+        if r[0] == 't':
+            et, ns = sha3ptheta(et, prefix, w, s, ir)
+        elif r[0] == 'r':
+            et, ns = sha3prho(et, prefix, w, ns, ir)
+        elif r[0] == 'p':
+            et, ns = sha3ppi(et, prefix, w, ns, ir)
+        elif r[0] == 'c':
+            et, ns = sha3pchi(et, prefix, w, ns, ir)
+        elif r[0] == 'i':
+            if r[1] == 'o' and r[2] == 't' and r[3] == 'a':
+                ir = int(r[4:])
+            else:
+                ir = int(r[1:])
+            et, ns = sha3piota(et, prefix, w, ns, ir)
+        else:
+            assert("Invalid round specification" == "Should not happen.")
+        ir += 1
 
 def sha3f(et, prefix, w, s, rounds=24):
     ns = s.copy()
@@ -181,7 +224,10 @@ def perform_sha3(eval_table, original_state, f, prefix="", rounds=24, w=64):
         if state[i] not in ['T', 'F']:
             state[i] = name
 
-    eval_table, state = sha3f(eval_table, prefix, w, state, rounds)
+    if type(rounds) == int:
+        eval_table, state = sha3f(eval_table, prefix, w, state, rounds)
+    else:
+        eval_table, state = sha3pstr(eval_table, prefix, w, state, rounds)
 
     output_prefix = prefix + "out"
     for i in range(0, len(state)):
