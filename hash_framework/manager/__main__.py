@@ -3,13 +3,14 @@ import sys
 from flask import Flask
 from flask import request
 from flask import jsonify
+from flask import send_from_directory
 
 import hash_framework
 from hash_framework import config
 
 # config.port = int(sys.argv[1])
 
-app = Flask(__name__)
+app = Flask(__name__, static_url_path='', static_folder='../../static')
 
 db_pool = []
 next_task_obj = {}
@@ -99,6 +100,14 @@ def pop_tasks(db, host_id, limit=1):
             break
 
     return jids
+
+@app.route('/')
+def root():
+    return app.send_static_file('index.html')
+
+@app.route('/index.html')
+def index():
+    return app.send_static_file('index.html')
 
 @app.route("/tasks/", methods=['GET', 'POST'])
 def handle_tasks():
