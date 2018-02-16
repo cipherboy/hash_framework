@@ -1,5 +1,3 @@
-#!/usr/bin/python
-
 from hash_framework.boolean.simplify import *
 from hash_framework.boolean.translate import *
 
@@ -29,12 +27,6 @@ def b_andbit(b, x):
     for i in range(0, len(x)):
         r.append(b_and(b, x[i]))
     return r
-
-def b_fac(x, y, c):
-    return simplify(b_or(b_and(x, y), b_and(c, b_or(x, y))))
-
-def b_fav(x, y, c):
-    return simplify(b_xor(b_xor(x, y), c))
 
 def b_addl(x, y):
     c = "F"
