@@ -39,10 +39,10 @@ def b_rca(prefix, x, y, c="F"):
 
 def b_cla_carry(p, g, i):
     o = ['or', 'F']
-    for j in range(-1, i):
-        b = ['and', 'T', g[j+1]]
-        for i in range(j+1, i):
-            b.append(p[i])
+    for j in range(0, i+1):
+        b = ['and', 'T', g[j]]
+        for k in range(j, i):
+            b.append(p[k])
         o.append(simplify(tuple(b)))
 
     return simplify(tuple(o))
@@ -70,8 +70,25 @@ def b_cla(prefix, x, y, c="F"):
         cs.append(clause_dedupe(b_cla_carry(p, g, i), prefix))
 
     r = []
-    cs = [c] + cs
     for i in range(0, len(x)):
         r = [clause_dedupe(b_xor(p[i], cs[i]), prefix)] + r
 
     return r, cs[len(x)]
+
+# Carry Select Adder
+def b_csa(prefix, x, y, c="F", adder_func=b_rca):
+    assert(len(x) == len(y))
+
+    # Dedupe x, y
+    x = b_dedupe_list(prefix, x)
+    y = b_dedupe_list(prefix, y)
+
+    layer_one, carry_one = adder_func(prefix, x, y, "F")
+    layer_two, carry_two = adder_func(prefix, x, y, "T")
+
+    r = []
+    for i in range(0, len(layer_one)):
+        r.append(clause_dedupe(b_mux(layer_one[i], layer_two[i], c), prefix))
+
+    carry_out = clause_dedupe(b_mux(carry_one, carry_two, c), prefix)
+    return r, carry_out

@@ -90,6 +90,9 @@ def b_mul(a, b):
     for i in range(0, len(b)):
         pass
 
+def b_mux(a, b, s):
+    return simplify(b_or(b_and(b_not(s), a), b_and(s, b)))
+
 def b_rotl(x, l):
     return x[l:] + x[:l]
 
