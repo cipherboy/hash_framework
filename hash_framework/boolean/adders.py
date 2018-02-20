@@ -38,9 +38,9 @@ def b_rca(prefix, x, y, c="F"):
     return r, c
 
 def b_cla_carry(p, g, i):
-    o = ['or']
+    o = ['or', 'F']
     for j in range(-1, i):
-        b = ['and', g[j+1]]
+        b = ['and', 'T', g[j+1]]
         for i in range(j+1, i):
             b.append(p[i])
         o.append(simplify(tuple(b)))
@@ -70,7 +70,8 @@ def b_cla(prefix, x, y, c="F"):
         cs.append(clause_dedupe(b_cla_carry(p, g, i), prefix))
 
     r = []
+    cs = [c] + cs
     for i in range(0, len(x)):
-        r.append(clause_dedupe(b_xor(p[i], c[i]), prefix))
+        r = [clause_dedupe(b_xor(p[i], cs[i]), prefix)] + r
 
     return r, cs[len(x)]
