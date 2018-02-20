@@ -2,6 +2,8 @@ from hash_framework.boolean.simplify import *
 from hash_framework.boolean.translate import *
 from hash_framework.boolean.core import *
 
+default_adder = [{"chaining": None, "type": "cla"}]
+
 def b_dedupe_list(prefix, l):
     # We assume l is iterable; if x is a string, x[i] is a string
     # so it won't be deduped. Only nested tuple/list is deduped.
@@ -92,3 +94,87 @@ def b_csa(prefix, x, y, c="F", adder_func=b_rca):
 
     carry_out = clause_dedupe(b_mux(carry_one, carry_two, c), prefix)
     return r, carry_out
+
+# Ripple Carry helper for b_addl
+def b_addl_ripple_carry(prefix, x, y, c, e):
+    if e["type"] == "rca":
+        return b_rca(prefix, x, y, c=c)
+    elif e["type"] == "cla":
+        return b_cla(prefix, x, y, c=c)
+    elif type(e["type"]) == "list":
+        return b_addl(prefix, x, y, c=c, cfg=e["type"])
+    else:
+        assert(False)
+
+# Carry Select helper for b_addl
+def b_addl_carry_select(prefix, x, y, c, e):
+    if e["type"] == "rca":
+        return b_csa(prefix, x, y, c=c, adder_func=b_rca)
+    elif e["type"] == "cla":
+        return b_csa(prefix, x, y, c=c, adder_func=b_cla)
+    elif type(e["type"]) == list:
+        # Bind adder config to cfg in b_addl
+        return b_csa(prefix, x, y, c=c, adder_func=b_addl)
+    else:
+        assert(False)
+
+# Adder, with config
+def b_addl(prefix, x, y, c="F", cfg=default_adder):
+    assert(len(x) == len(y))
+    assert(type(cfg) == list)
+    print(cfg)
+
+    # LSB = end - 1
+    end = len(x)
+
+    # Carry In: c
+
+    r = []
+    for e in cfg:
+        start = 0
+        if "width" in e:
+            start = end - e["width"]
+            if start < 0:
+                start = 0
+
+        i_x = x[start:end]
+        i_y = y[start:end]
+        n_r = []
+        n_c = None
+
+        if e["chaining"] == None or e["chaining"] == "ripple":
+            # Assume Ripple Carry
+            n_r, n_c = b_addl_ripple_carry(prefix, in_x, in_y, c, e)
+        elif e["chaining"] == "csa":
+            n_r, n_c = b_addl_carry_select(prefix, in_x, in_y, c, e)
+
+        if len(n_r) != len(in_x) or n_c == None or n_r == []:
+            print("Bad adder")
+            assert(False)
+
+        r = n_r + r
+        c = n_c
+
+        end = start
+        if end <= 0:
+            break
+
+    return r, c
+
+def b_add4l(prefix, x1, x2, x3, x4, c="F", cfg=default_adder):
+    assert(type(cfg) == list)
+    x1234v = []
+    x1234c = None
+
+    if not 'shape' in cfg[0] or cfg[0]['shape'] == "tree":
+        x12v, x12c = b_addl(prefix, x1, x2, c=c, cfg=default_adder)
+        x34v, x34c = b_addl(prefix, x3, x4, c="F", cfg=default_adder)
+        x1234v, x1234c = b_addl(prefix, x12, x34, c="F", cfg=default_adder)
+    elif cfg[0]['shape'] == "incremental":
+        x12v, x12c = b_addl(prefix, x1, x2, c=c, cfg=default_adder)
+        x123v, x123c = b_addl(prefix, x12, x3, c="F", cfg=default_adder)
+        x1234v, x1234c = b_addl(prefix, x123, x4, c="F", cfg=default_adder)
+    else:
+        assert(False)
+
+    return x1234v, x1234c
