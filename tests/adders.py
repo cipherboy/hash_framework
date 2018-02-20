@@ -41,9 +41,22 @@ def tc_csa():
             assert(s_bin == [c_out] + out)
     return True
 
+def tc_addl():
+    for x in range(0, 256):
+        for y in range(0, 256):
+            cfg = [{"chaining": None, "type": "rca", "width": 4}, {"chaining": "csa", "type": "cla"}]
+            x_bin = hf.boolean.b_tobitl(x)[-8:]
+            y_bin = hf.boolean.b_tobitl(y)[-8:]
+            s_bin = hf.boolean.b_tobitl(x+y)[-9:]
+            out, c_out = hf.boolean.b_addl("", x_bin, y_bin, c='F', cfg=cfg)
+            if s_bin != [c_out] + out:
+                print((x_bin, y_bin, s_bin, out))
+            assert(s_bin == [c_out] + out)
+    return True
+
 def __main__():
-    # tests = [tc_rca, tc_cla, tc_csa]
-    tests = [tc_csa]
+    # tests = [tc_rca, tc_cla, tc_csa, tc_addl]
+    tests = [tc_addl]
 
     for test in tests:
         ret = test()

@@ -28,15 +28,15 @@ def b_andbit(b, x):
         r.append(b_and(b, x[i]))
     return r
 
-def b_addl(x, y):
-    c = "F"
-    r = []
-    assert(len(x) == len(y)) # Assert fixed-sized numbers
-    for i in range(len(x) - 1, -1, -1):
-        r.append(simplify(b_fav(x[i], y[i], c)))
-        c = simplify(b_fac(x[i], y[i], c))
-    r.reverse()
-    return r
+#def b_addl(x, y):
+#    c = "F"
+#    r = []
+#    assert(len(x) == len(y)) # Assert fixed-sized numbers
+#    for i in range(len(x) - 1, -1, -1):
+#        r.append(simplify(b_fav(x[i], y[i], c)))
+#        c = simplify(b_fac(x[i], y[i], c))
+#    r.reverse()
+#    return r
 
 def b_fav4(c0, c1, x1, x2, x3, x4):
     return simplify(('xor', c0, c1, x1, x2, x3, x4))

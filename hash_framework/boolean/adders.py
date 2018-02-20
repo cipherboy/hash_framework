@@ -122,7 +122,7 @@ def b_addl_carry_select(prefix, x, y, c, e):
 def b_addl(prefix, x, y, c="F", cfg=default_adder):
     assert(len(x) == len(y))
     assert(type(cfg) == list)
-    print(cfg)
+    # print(cfg)
 
     # LSB = end - 1
     end = len(x)
@@ -142,13 +142,13 @@ def b_addl(prefix, x, y, c="F", cfg=default_adder):
         n_r = []
         n_c = None
 
-        if e["chaining"] == None or e["chaining"] == "ripple":
+        if e["chaining"] == None or e["chaining"] == "ripple" or e["chaining"] == "rca":
             # Assume Ripple Carry
-            n_r, n_c = b_addl_ripple_carry(prefix, in_x, in_y, c, e)
-        elif e["chaining"] == "csa":
-            n_r, n_c = b_addl_carry_select(prefix, in_x, in_y, c, e)
+            n_r, n_c = b_addl_ripple_carry(prefix, i_x, i_y, c, e)
+        elif e["chaining"] == "csa" or e["chaining"] == "select":
+            n_r, n_c = b_addl_carry_select(prefix, i_x, i_y, c, e)
 
-        if len(n_r) != len(in_x) or n_c == None or n_r == []:
+        if len(n_r) != len(i_x) or n_c == None or n_r == []:
             print("Bad adder")
             assert(False)
 
@@ -158,6 +158,10 @@ def b_addl(prefix, x, y, c="F", cfg=default_adder):
         end = start
         if end <= 0:
             break
+
+    if len(r) != len(x):
+        print("Bad config")
+        assert(False)
 
     return r, c
 
