@@ -3,6 +3,8 @@ from benchmarks.adders import *
 def from_name(name):
     if name == 'associativity':
         return Associativity
+    if name == 'equality':
+        return Equality
 
 def run_benchmark(benchmark):
     print(benchmark)
