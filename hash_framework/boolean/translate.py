@@ -31,7 +31,7 @@ def var_rename(expr, eval_table):
     return cache_rename[expr]
 
 def is_var_expr(expr):
-    if type(expr) == type('a'):
+    if type(expr) == str:
         return True
     return False
 
@@ -39,7 +39,6 @@ def clause_dedupe_r(expr, prefix):
     global clause_dedupe_s
     global clause_count
     if is_var_expr(expr):
-        clause_dedupe_s[expr] = expr
         return expr
     if type(expr) == tuple and expr[0] == 'not' and len(expr) == 2:
         l_v = expr[1]

@@ -1,8 +1,7 @@
 from hash_framework.boolean.simplify import *
 from hash_framework.boolean.translate import *
 from hash_framework.boolean.core import *
-
-default_adder = [{"chaining": None, "type": "cla"}]
+from hash_framework.config import config
 
 def b_dedupe_list(prefix, l):
     # We assume l is iterable; if x is a string, x[i] is a string
@@ -88,6 +87,9 @@ def b_csa(prefix, x, y, c="F", adder_func=b_rca):
     layer_one, carry_one = adder_func(prefix, x, y, "F")
     layer_two, carry_two = adder_func(prefix, x, y, "T")
 
+    assert(len(x) == len(layer_one))
+    assert(len(x) == len(layer_two))
+
     r = []
     for i in range(0, len(layer_one)):
         r.append(clause_dedupe(b_mux(layer_one[i], layer_two[i], c), prefix))
@@ -119,10 +121,12 @@ def b_addl_carry_select(prefix, x, y, c, e):
         assert(False)
 
 # Adder, with config
-def b_addl(prefix, x, y, c="F", cfg=default_adder):
+def b_addl(prefix, x, y, c="F", cfg=None):
     assert(len(x) == len(y))
-    assert(type(cfg) == list)
-    # print(cfg)
+    assert(type(cfg) == list or cfg == None)
+
+    if cfg == None:
+        cfg = config.default_adder
 
     # LSB = end - 1
     end = len(x)
@@ -150,6 +154,9 @@ def b_addl(prefix, x, y, c="F", cfg=default_adder):
 
         if len(n_r) != len(i_x) or n_c == None or n_r == []:
             print("Bad adder")
+            print((len(n_r), len(i_x), n_c, n_r))
+            print(e)
+            print(cfg)
             assert(False)
 
         r = n_r + r
@@ -165,10 +172,13 @@ def b_addl(prefix, x, y, c="F", cfg=default_adder):
 
     return r, c
 
-def b_add4l(prefix, x1, x2, x3, x4, c="F", cfg=default_adder):
-    assert(type(cfg) == list)
+def b_add4l(prefix, x1, x2, x3, x4, c="F", cfg=None):
+    assert(type(cfg) == list or cfg == None)
     x1234v = []
     x1234c = None
+
+    if cfg == None:
+        cfg = config.default_adder
 
     if not 'shape' in cfg[0] or cfg[0]['shape'] == "tree":
         x12v, x12c = b_addl(prefix, x1, x2, c=c, cfg=default_adder)

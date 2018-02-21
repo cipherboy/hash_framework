@@ -11,7 +11,7 @@ class models:
         self.bc_bin = config.bc_bin
         self.bc_args = config.bc_args
         self.model_dir = config.model_dir
-        self.remote = True
+        self.remote = False
 
     def get_mapping(self, cnf="problem.cnf"):
         var_mapping = collections.defaultdict(list)
@@ -102,10 +102,12 @@ class models:
         print(ndir)
 
         if recreate:
+            os.chdir(self.model_dir)
             os.system("rm -rf " + self.model_dir + "/" + ndir)
 
         os.system("mkdir -p " + self.model_dir + "/" + ndir)
         os.chdir(self.model_dir + "/" + ndir)
+
 
     def build(self, bc="problem.bc", cnf="problem.cnf"):
         assert(type(bc) == str)
@@ -197,6 +199,19 @@ class models:
             for v in given_vars:
                 f.write(prefix + str(i) + ' := ' + v + ";\n")
                 i += 1
+            f.flush()
+            f.close()
+
+        def write_dedupe(prefix_match=None, name="02-dedupe.txt", mode='w'):
+            global clause_dedupe_s
+
+            f = open(name, mode)
+
+            for k in clause_dedupe_s:
+                if prefix_match == None or (prefix_match != None and
+                       len(prefix_match) > 0 and prefix == k[0:len(prefix)]):
+                    f.write(k + " := " + translate(clause_dedupe_s[k]) + ";\n")
+
             f.flush()
             f.close()
 

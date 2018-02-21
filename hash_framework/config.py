@@ -18,6 +18,8 @@ class config:
 
     results_dir = base_path + "/results"
 
+    default_adder = [{"chaining": None, "type": "cla"}]
+
     # Change during deploy
     psql_host = "localhost"
     psql_user = "hf"
