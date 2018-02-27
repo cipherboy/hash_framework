@@ -46,9 +46,7 @@ def __main__():
     m.collapse()
     m.build()
     r = m.run(count=count,random=random.randint(2, 1000000000))
-    res = m.results(algo)
-    print(len(res))
-    for rs in res:
+    for rs in m.results_generator(algo):
         obj = {}
         obj['w'] = w
         obj['rounds'] = rounds

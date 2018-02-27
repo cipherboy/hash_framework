@@ -72,7 +72,7 @@ def __main__():
     m.build()
     r = m.run(count=1)
     if r:
-        for rs in m.results(algo):
+        for rs in m.results_generator(algo):
             obj = {}
             obj['w'] = w
             obj['rounds'] = rounds
