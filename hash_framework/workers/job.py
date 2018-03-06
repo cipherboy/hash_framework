@@ -48,22 +48,39 @@ class Job:
         self._p = subprocess.Popen(cmd, stdin=subprocess.DEVNULL,
                                    stdout=self.of, shell=True)
 
+        # Timeout cleanup
         if timeout <= 0:
             timeout = None
 
+        # Wait for job to finish
         try:
             self.run_return = self._p.wait(timeout=self.timeout)
         except:
             self.run_return = -2
+
+            # Ensure on error that process gets fully terminated.
+            try:
+                self._p.kill()
+                self._p.terminate()
+            except:
+                pass
+
             print("Job timed out (" + str(self.timeout) + "s) - jid:" + str(self.id))
 
+        # Close output file descriptor
+        if not self.of.closed:
+            self.of.flush()
+            self.of.close()
+            self.of = None
+
+        self._p = None
         self.run_time = (time.time() - self.run_time)
 
     def to_dict(self, checked_back):
         obj = {}
 
         self.finalize_time = time.time()
-        results = self.kernel.load_result(db, rids)
+        results = self.kernel.post_run(self.run_return)
         self.finalize_time = (time.time() - self.finalize_time)
 
         obj['id'] = self.id

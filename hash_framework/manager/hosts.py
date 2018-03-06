@@ -84,6 +84,9 @@ class Host:
 
         self.__insert__()
 
+        if self.id == None:
+            self.load(ip, hostname)
+
         return self
 
     def load_id(self, hid):
@@ -160,7 +163,11 @@ class Host:
         q += " RETURNING id;"
         values = (self.ip, self.hostname, self.cores, self.memory, self.disk, self.version, self.in_use)
 
-        r, rid = self.db.prepared(q, values, rowid=True)
+        result = self.db.prepared(q, values, rowid=True, limit=1)
+        if result == None or type(result) != tuple:
+            return
+
+        r, rid = result
         self.id = rid
 
     def __load__(self):

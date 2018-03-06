@@ -26,6 +26,9 @@ class config:
     psql_password = "hash_framework"
     psql_database = "hash_framework"
 
+    job_count = 1
+    master_uri = "http://10.1.30.250:5000"
+
     def update_basepath(base_path):
         config.base_path = base_path
         config.tools = base_path + "/tools"
