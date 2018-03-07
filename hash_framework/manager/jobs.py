@@ -41,44 +41,59 @@ class Jobs:
 
     def verify_results(self, datas):
         if type(datas) != list:
+            print("nlist")
             return False
 
         for data in datas:
             if type(data) != dict:
+                print("ndict")
                 return False
 
             if 'id' not in data or type(data['id']) != int or data['id'] <= 0:
+                print("nid")
                 return False
             if 'results' not in data or not self.verify_result(data['results']):
+                print("nresults")
                 return False
             if 'checked_out' not in data or type(data['checked_out']) != str:
+                print("nchecked_out")
                 return False
             if 'compile_time' not in data or type(data['compile_time']) != int:
+                print("ncompile_time")
                 return False
             if 'compile_return' not in data or type(data['compile_return']) != int:
+                print("ncompile_return")
                 return False
             if 'run_time' not in data or type(data['run_time']) != int:
+                print("nrun_time")
                 return False
             if 'run_return' not in data or type(data['run_return']) != int:
+                print("nrun_return")
                 return False
             if 'finalize_time' not in data or type(data['finalize_time']) != int:
+                print("nfinalize_time")
                 return False
             if 'checked_back' not in data or type(data['checked_back']) != str:
+                print("nchecked_back")
                 return False
 
         return True
 
     def verify_result(self, results):
         if type(results) != list:
+            print("nrlist")
             return False
 
         for result in results:
             if type(result) != dict:
+                print("nrdict")
                 return False
 
             if 'data' not in result or type(result['data']) != str:
+                print("nrdata")
                 return False
             if 'row' not in result or type(result['row']) != dict:
+                print("nrrow")
                 return False
 
         return True
@@ -118,8 +133,11 @@ class Jobs:
                 q += ") RETURNING id;"
                 values = []
                 for column in columns:
-                    values.append(result[column])
-                rowid = self.db.prepared(q, values, rowid=True)
+                    values.append(result['row'][column])
+                rowid = 0
+                iresult = self.db.prepared(q, values, rowid=True)
+                if iresult != None:
+                    rowid = iresult[1]
 
                 q = "INSERT INTO results (job_id, result_table, result_id, data)"
                 q += " VALUES (%s, %s, %s, %s)"

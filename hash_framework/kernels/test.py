@@ -34,6 +34,8 @@ class Test(Kernel):
         compile_sleep = random.uniform(self.args['compile.min'], self.args['compile.max'])
         time.sleep(compile_sleep)
 
+        return 0
+
     def create_cache_dir(self, dir_path):
         pass
 
@@ -49,7 +51,7 @@ class Test(Kernel):
         time.sleep(results_sleep)
 
         row_test = {'name': self.args['row_name'], 'value': self.args['row_value']}
-        return [{'data': self.data, 'row': row_test}]
+        return [{'data': json.dumps(self.data), 'row': row_test}]
 
     def clean(self):
         pass

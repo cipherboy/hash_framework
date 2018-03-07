@@ -295,13 +295,17 @@ def handle_results():
 
     if request.method == 'POST':
         j = hash_framework.manager.Jobs(db)
+        datas = request.get_json(force=True)
         if not j.verify_results(datas):
+            print(datas)
             release_db(db)
             return jsonify(hash_framework.manager.input_error), 400
 
         if j.add_results(datas) != True:
+            release_db(db)
             return jsonify(hash_framework.manager.server_error), 500
 
+        release_db(db)
         return jsonify(hash_framework.manager.success)
 
 @app.route("/update/", methods=['GET'])

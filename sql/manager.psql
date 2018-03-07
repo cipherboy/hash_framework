@@ -83,3 +83,9 @@ CREATE TABLE results (
 
     UNIQUE (job_id, result_table, result_id)
 );
+
+CREATE TABLE test (
+    id BIGSERIAL,
+    name TEXT,
+    value TEXT
+);

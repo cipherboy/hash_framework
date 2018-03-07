@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 
 import hash_framework as hf
-import requests
-import time
+import requests, time, json
 
 api = 'http://localhost:8000'
 
@@ -11,7 +10,6 @@ def tc_api_create_task():
     assert(r.status_code == 200)
 
     return True
-
 
 def tc_api_create_host():
     r = requests.post(api + '/hosts/', json={'ip': '127.0.0.1', 'hostname': 'localhost', 'cores': 4, 'memory': 16288468, 'disk': 419343296, 'version': 'faa6a5d87eb63465d0628ac8f264e478aedc5352', 'in_use': True})
@@ -25,13 +23,19 @@ def tc_api_assign_benchmark():
 
     data = []
     for i in range(0, count):
+        args = {'id': i, 'test_install': 1, 'compile.min': 0.4,
+                'compile.max': 0.6, 'cmd.min': 0.01, 'cmd.max': 0.02,
+                'results.min': 0.01, 'results.max': 0.1, 'row_name': 'test',
+                'row_value': i}
+
         obj = {
             'task': task_id,
-            'kernel': 'benchmark',
-            'algo': 'md4',
-            'args': str(i),
-            'result_table': 'results'
+            'kernel': 'test',
+            'algo': 'test',
+            'args': json.dumps(args),
+            'result_table': 'test'
         }
+
         data.append(obj)
 
     print(len(data))

@@ -17,12 +17,9 @@ class Client:
         self.heartbeats = True
 
     def register(self):
-
         obj = {'ip': self.ip, 'hostname': self.hostname, 'cores': self.cores,
                'memory': self.memory, 'disk': self.disk, 'version': self.version,
                'in_use': self.in_use}
-
-        print(obj)
 
         r = requests.post(self.uri + "/hosts/", json=obj)
 
@@ -36,7 +33,7 @@ class Client:
         # Heartbeats are not critical, optional
         if self.hid == None or self.heartbeats == False:
             return
-        r = request.get(self.uri + "/host/" + str(self.hid) + "/heartbeat")
+        r = requests.get(self.uri + "/host/" + str(self.hid) + "/heartbeat")
 
     def receive_jobs(self, count=1):
         assert(type(count) == int and count > 0)
@@ -67,7 +64,7 @@ class Client:
 
     def send_results(self, results):
         self._heartbeat()
-        r = request.post(self.uri + "/results/", json=results)
+        r = requests.post(self.uri + "/results/", json=results)
 
         if r.status_code == 200:
             return None

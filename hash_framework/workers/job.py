@@ -42,19 +42,24 @@ class Job:
         # Get run command from the kernel
         cmd = self.kernel.run_cmd()
         out_path = self.kernel.out_path()
-        self.of = open(out_path, 'w')
+
+        print(cmd)
+
+        if out_path != "":
+            self.of = open(out_path, 'w')
 
         self.run_time = time.time()
         self._p = subprocess.Popen(cmd, stdin=subprocess.DEVNULL,
                                    stdout=self.of, shell=True)
 
         # Timeout cleanup
-        if timeout <= 0:
-            timeout = None
+        if type(self.timeout) == int and self.timeout <= 0:
+            self.timeout = None
 
         # Wait for job to finish
         try:
             self.run_return = self._p.wait(timeout=self.timeout)
+            print(self.run_return)
         except:
             self.run_return = -2
 
@@ -68,7 +73,7 @@ class Job:
             print("Job timed out (" + str(self.timeout) + "s) - jid:" + str(self.id))
 
         # Close output file descriptor
-        if not self.of.closed:
+        if self.of is not None and not self.of.closed:
             self.of.flush()
             self.of.close()
             self.of = None
@@ -84,13 +89,13 @@ class Job:
         self.finalize_time = (time.time() - self.finalize_time)
 
         obj['id'] = self.id
-        obj['checked_out'] = self.checked_out
-        obj['compile_time'] = self.compile_time
+        obj['checked_out'] = str(self.checked_out)
+        obj['compile_time'] = int(self.compile_time*1000)
         obj['compile_return'] = self.compile_return
-        obj['run_time'] = self.run_time
+        obj['run_time'] = int(self.run_time*1000)
         obj['run_return'] = self.run_return
-        obj['finalize_time'] = self.finalize_time
-        obj['checked_back'] = checked_back
+        obj['finalize_time'] = int(self.finalize_time*1000)
+        obj['checked_back'] = str(checked_back)
         obj['results'] = results
 
         return obj
