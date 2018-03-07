@@ -1,4 +1,4 @@
-import sys, time
+import sys, time, signal, atexit
 
 from flask import Flask
 from flask import request
@@ -60,10 +60,37 @@ def fill_task_obj(db):
     for task in ots:
         jobs[task['id']] = t.get_task_free_jobs(tid=task['id'], limit=10000)
 
+    job_datas = {}
+    jids = []
+    for tid in jobs:
+        for jid in jobs[tid]:
+            jids.append(jid)
+
+    cur = db.conn.cursor()
+    required_columns = ['id', 'kernel', 'args', 'task_id', 'timeout']
+    q = "SELECT " + ','.join(required_columns) + " FROM jobs WHERE id in (" + ','.join(map(str, jids)) + ");"
+    cur.execute(q)
+    rows = cur.fetchall()
+
+    if len(rows) != len(jids):
+        print("ERROR")
+        assert(False)
+
+    for row in rows:
+        obj = {}
+        for i in range(0, len(required_columns)):
+            obj[required_columns[i]] = row[i]
+
+        job_datas[obj['id']] = obj
+
+    cur.close()
+
     next_task_obj['jobs'] = jobs
+    next_task_obj['job_run'] = job_datas
     next_task_obj['sent_jobs'] = set()
     next_task_obj['ordered_tasks'] = ots
     next_task_obj['regen'] = False
+
     t2  = time.time() - t1
     stats['fill_task'].append(t2)
 
@@ -123,6 +150,9 @@ def results_extend(db, n_results):
 def results_write(db):
     if not 'results_write' in stats:
         stats['results_write'] = []
+
+    if not 'pool' in results_obj:
+        return True
 
     count = len(results_obj['pool'])
     t1 = time.time()
@@ -214,6 +244,20 @@ def handle_task_job(jid):
         r = j.to_dict()
         release_db(db)
         return jsonify(r)
+
+@app.route("/job/<int:jid>/run", methods=['GET'])
+def handle_task_job_run(jid):
+    if request.method == 'GET':
+        if jid in next_task_obj['job_run']:
+            return jsonify(next_task_obj['job_run'][jid])
+        else:
+            db = acquire_db()
+            j = hash_framework.manager.Job(db)
+            j.load(jid)
+            r = j.to_dict()
+            release_db(db)
+            return jsonify(r)
+
 
 @app.route("/job/<int:jid>/update_status", methods=['POST'])
 def handle_task_job_update_status(jid):
@@ -350,6 +394,7 @@ def handle_stats():
 
 @app.route("/update/", methods=['GET'])
 def handle_update():
+    print("Handling Update")
     db = acquire_db()
     t = hash_framework.manager.Tasks(db)
     t.update_all_job_counts()
@@ -358,6 +403,11 @@ def handle_update():
     results_write(db)
     release_db(db)
     return jsonify(hash_framework.manager.success)
+
+#atexit.register(handle_update)
+#signal.signal(signal.SIGTERM, handle_update)
+#signal.signal(signal.SIGHUP, handle_update)
+#signal.signal(signal.SIGKILL, handle_update)
 
 if __name__ == "__main__":
     from werkzeug.contrib.profiler import ProfilerMiddleware
