@@ -7,4 +7,4 @@ if [ "$py_gunicorn" == "" ]; then
     exit 1
 fi
 
-$py_gunicorn hash_framework.manager.__main__:app --workers 1 --backlog 8192 --bind '0.0.0.0:8000' $@
+$py_gunicorn hash_framework.manager.__main__:app --workers 1 --backlog 81920 --bind '0.0.0.0:8000' $@
