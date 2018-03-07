@@ -360,4 +360,8 @@ def handle_update():
     return jsonify(hash_framework.manager.success)
 
 if __name__ == "__main__":
+    from werkzeug.contrib.profiler import ProfilerMiddleware
+    app.debug = True
+    app.config['PROFILE'] = True
+    app.wsgi_app = ProfilerMiddleware(app.wsgi_app, restrictions=[30])
     app.run()
