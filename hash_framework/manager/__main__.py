@@ -14,6 +14,7 @@ app = Flask(__name__, static_url_path='', static_folder='../../static')
 
 db_pool = []
 next_task_obj = {}
+results_obj = {}
 
 def acquire_db():
     if len(db_pool) == 0:
@@ -100,6 +101,24 @@ def pop_tasks(db, host_id, limit=1):
             break
 
     return jids
+
+def results_extend(j, n_results):
+    if not 'pool' in results_obj:
+        results_obj['pool'] = []
+
+    results_obj['pool'].extend(n_results)
+
+    if len(results_obj['pool']) >= 10000:
+        return results_write(j)
+
+    return True
+
+def results_write(j):
+    if j.add_results(results_obj['pool']) != True:
+        return False
+
+    results_obj['pool'] = []
+    return True
 
 @app.route('/')
 def root():
@@ -301,10 +320,7 @@ def handle_results():
             release_db(db)
             return jsonify(hash_framework.manager.input_error), 400
 
-        if j.add_results(datas) != True:
-            release_db(db)
-            return jsonify(hash_framework.manager.server_error), 500
-
+        results_extend(j, datas)
         release_db(db)
         return jsonify(hash_framework.manager.success)
 
