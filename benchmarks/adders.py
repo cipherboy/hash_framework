@@ -10,6 +10,11 @@ class Associativity(Benchmark):
         self.args = args
         self.adder_cfg = args['adder_cfg']
         self.bits = args['bits']
+
+        self.bc_args = hf.config.bc_args
+        if 'bc_args' in args:
+            self.bc_args = args['bc_args']
+
         self.m = None
 
     def setup(self):
@@ -18,6 +23,7 @@ class Associativity(Benchmark):
         m = hf.models()
         m.remote = False
         m.start("benchmark-adders-associativity-" + str(self.bits), True)
+        m.bc_args = self.bc_args
         hf.models.vars.write_header()
 
         a = ['a' + str(i) for i in range(0, self.bits)]
@@ -114,6 +120,11 @@ class Equality(Benchmark):
         self.adder_cfg = args['adder_cfg']
         self.bits = args['bits']
         self.shape = args['shape']
+
+        self.bc_args = hf.config.bc_args
+        if 'bc_args' in args:
+            self.bc_args = args['bc_args']
+
         self.m = None
 
     def setup(self):
@@ -122,6 +133,7 @@ class Equality(Benchmark):
         m = hf.models()
         m.remote = False
         m.start("benchmark-adders-equality-" + str(self.bits), True)
+        m.bc_args = self.bc_args
         hf.models.vars.write_header()
 
         la = ['la' + str(i) for i in range(0, self.bits)]
