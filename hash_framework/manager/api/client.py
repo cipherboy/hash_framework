@@ -14,7 +14,7 @@ class Client:
         self.version = "n/a"
         self.in_use = True
         self.hid = None
-        self.heartbeats = True
+        self.heartbeats = False
 
     def register(self):
         obj = {'ip': self.ip, 'hostname': self.hostname, 'cores': self.cores,
