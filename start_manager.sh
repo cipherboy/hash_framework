@@ -7,4 +7,9 @@ if [ "$py_gunicorn" == "" ]; then
     exit 1
 fi
 
-$py_gunicorn hash_framework.manager.__main__:app --workers 1 --backlog 81920 --bind '0.0.0.0:8000' $@
+python3 -m hash_framework.scheduler &
+echo "scheduler pid: $!"
+$py_gunicorn hash_framework.manager.__main__:app --workers 8 --backlog 81920 --bind '0.0.0.0:8000' $@ &
+echo "manager pid: $!"
+
+wait

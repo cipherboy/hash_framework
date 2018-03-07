@@ -27,7 +27,8 @@ class config:
     psql_database = "hash_framework"
 
     job_count = 1
-    master_uri = "http://10.1.30.250:5000"
+    manager_uri = "http://10.1.30.250:8000"
+    scheduler_uri = "http://10.1.30.250:8001"
 
     def update_basepath(base_path):
         config.base_path = base_path

@@ -2,8 +2,9 @@ from hash_framework.config import config
 import requests, socket, psutil, subprocess
 
 class Client:
-    def __init__(self, uri):
-        self.uri = uri
+    def __init__(self, manager_uri, scheduler_uri):
+        self.uri = manager_uri
+        self.scheduler_uri = scheduler_uri
 
         r = requests.get(self.uri + "/ip/")
         self.ip = r.text
@@ -39,7 +40,7 @@ class Client:
         assert(type(count) == int and count > 0)
         self._heartbeat()
 
-        r = requests.get(self.uri + "/host/" + str(self.hid) + "/assign/" + str(count))
+        r = requests.get(self.scheduler_uri + "/host/" + str(self.hid) + "/assign/" + str(count))
 
         if r.status_code == 200:
             return r.json(), None
@@ -49,11 +50,12 @@ class Client:
     def get_job(self, jid):
         self._heartbeat()
 
-        r = requests.get(self.uri + "/job/" + str(jid) + "/run/")
+        r = requests.get(self.uri + "/job/" + str(jid))
 
         if r.status_code == 200:
             return r.json(), None
 
+        print((r.status_code, r.text))
         return None, r.json()
 
     def end_job(self, tid, jid):

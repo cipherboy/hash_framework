@@ -10,6 +10,9 @@ import hash_framework
 import hash_framework.workers.worker as worker
 
 if len(sys.argv) >= 2:
-    hash_framework.config.master_uri = sys.argv[1]
+    hash_framework.config.manager_uri = sys.argv[1]
+
+if len(sys.argv) >= 3:
+    hash_framework.config.scheduler_uri = sys.argv[2]
 
 worker.run()

@@ -28,7 +28,8 @@ class Test(Kernel):
             self.data['config.bc_path.valid'] = os.path.exists(config.bc_bin)
             self.data['config.cms_path'] = config.cms_bin
             self.data['config.cms_path.valid'] = os.path.exists(config.cms_bin)
-            self.data['config.master_uri'] = config.master_uri
+            self.data['config.manager_uri'] = config.manager_uri
+            self.data['config.scheduler_uri'] = config.scheduler_uri
             self.data['config.job_count'] = config.job_count
 
         compile_sleep = random.uniform(self.args['compile.min'], self.args['compile.max'])

@@ -3,7 +3,7 @@ import datetime, time, sys, json
 
 def run():
     jq = []
-    c = hash_framework.manager.api.Client(hash_framework.config.master_uri)
+    c = hash_framework.manager.api.Client(hash_framework.config.manager_uri, hash_framework.config.scheduler_uri)
     c.register()
     while True:
         jq, error = c.receive_jobs(hash_framework.config.job_count)
