@@ -1,4 +1,4 @@
-import sys, time, signal, atexit
+import sys, time
 
 from flask import Flask
 from flask import request
@@ -247,8 +247,22 @@ def handle_task_job(jid):
 
 @app.route("/job/<int:jid>/run/", methods=['GET'])
 def handle_task_job_run(jid):
+    if not 'job_run_min' in stats:
+        stats['job_run_min'] = 99999999
+        stats['job_run_max'] = 0
+        stats['job_run_count'] = 0
+        stats['job_run_sum'] = 0
+        stats['job_run_avg'] = 0
+
+    t1 = time.time()
     if request.method == 'GET':
         if jid in next_task_obj['job_run']:
+            t2 = time.time() - t1
+            stats['job_run_min'] = min(stats['job_run_min'], t2)
+            stats['job_run_max'] = max(stats['job_run_max'], t2)
+            stats['job_run_count'] += 1
+            stats['job_run_sum'] += t2
+            stats['job_run_avg'] = stats['job_run_sum'] / stats['job_run_count']
             return jsonify(next_task_obj['job_run'][jid])
         else:
             db = acquire_db()
@@ -256,6 +270,12 @@ def handle_task_job_run(jid):
             j.load(jid)
             r = j.to_dict()
             release_db(db)
+            t2 = time.time() - t1
+            stats['job_run_min'] = min(stats['job_run_min'], t2)
+            stats['job_run_max'] = max(stats['job_run_max'], t2)
+            stats['job_run_count'] += 1
+            stats['job_run_sum'] += t2
+            stats['job_run_avg'] = stats['job_run_sum'] / stats['job_run_count']
             return jsonify(r)
 
 
@@ -363,13 +383,35 @@ def handle_assign(hid):
 
 @app.route("/host/<int:hid>/assign/<int:count>", methods=['GET'])
 def handle_multi_assign(hid, count):
+    if not 'assign_min' in stats:
+        stats['assign_min'] = 99999999
+        stats['assign_max'] = 0
+        stats['assign_count'] = 0
+        stats['assign_sum'] = 0
+        stats['assign_avg'] = 0
+
+    t1 = time.time()
     db = acquire_db()
     r = pop_tasks(db, hid, count)
     release_db(db)
+    t2 = time.time() - t1
+    stats['assign_min'] = min(stats['assign_min'], t2)
+    stats['assign_max'] = max(stats['assign_max'], t2)
+    stats['assign_count'] += 1
+    stats['assign_sum'] += t2
+    stats['assign_avg'] = stats['assign_sum'] / stats['assign_count']
     return jsonify(r)
 
 @app.route("/results/", methods=['POST'])
 def handle_results():
+    if not 'results_min' in stats:
+        stats['results_min'] = 99999999
+        stats['results_max'] = 0
+        stats['results_count'] = 0
+        stats['results_sum'] = 0
+        stats['results_avg'] = 0
+
+    t1 = time.time()
     db = acquire_db()
 
     if request.method == 'POST':
@@ -378,14 +420,32 @@ def handle_results():
         if not j.verify_results(datas):
             print(datas)
             release_db(db)
+            t2 = time.time() - t1
+            stats['results_min'] = min(stats['results_min'], t2)
+            stats['results_max'] = max(stats['results_max'], t2)
+            stats['results_count'] += 1
+            stats['results_sum'] += t2
+            stats['results_avg'] = stats['results_sum'] / stats['results_count']
             return jsonify(hash_framework.manager.input_error), 400
 
         if not results_extend(db, datas):
             release_db(db)
+            t2 = time.time() - t1
+            stats['results_min'] = min(stats['results_min'], t2)
+            stats['results_max'] = max(stats['results_max'], t2)
+            stats['results_count'] += 1
+            stats['results_sum'] += t2
+            stats['results_avg'] = stats['results_sum'] / stats['results_count']
             return jsonify(hash_framework.manager.server_error), 500
 
 
         release_db(db)
+        t2 = time.time() - t1
+        stats['results_min'] = min(stats['results_min'], t2)
+        stats['results_max'] = max(stats['results_max'], t2)
+        stats['results_count'] += 1
+        stats['results_sum'] += t2
+        stats['results_avg'] = stats['results_sum'] / stats['results_count']
         return jsonify(hash_framework.manager.success)
 
 @app.route("/stats/", methods=['GET'])
@@ -403,11 +463,6 @@ def handle_update():
     results_write(db)
     release_db(db)
     return jsonify(hash_framework.manager.success)
-
-#atexit.register(handle_update)
-#signal.signal(signal.SIGTERM, handle_update)
-#signal.signal(signal.SIGHUP, handle_update)
-#signal.signal(signal.SIGKILL, handle_update)
 
 if __name__ == "__main__":
     from werkzeug.contrib.profiler import ProfilerMiddleware
