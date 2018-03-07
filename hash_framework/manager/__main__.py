@@ -1,4 +1,4 @@
-import sys
+import sys, time
 
 from flask import Flask
 from flask import request
@@ -15,6 +15,7 @@ app = Flask(__name__, static_url_path='', static_folder='../../static')
 db_pool = []
 next_task_obj = {}
 results_obj = {}
+stats = {}
 
 def acquire_db():
     if len(db_pool) == 0:
@@ -34,6 +35,10 @@ def release_db(db):
     pass
 
 def fill_task_obj(db):
+    if not 'fill_task' in stats:
+        stats['fill_task'] = []
+
+    t1 = time.time()
     if 'sent_jobs' in next_task_obj:
         q = "UPDATE jobs SET state=%s, owner=%s WHERE id=%s"
         for t in next_task_obj['sent_jobs']:
@@ -59,6 +64,8 @@ def fill_task_obj(db):
     next_task_obj['sent_jobs'] = set()
     next_task_obj['ordered_tasks'] = ots
     next_task_obj['regen'] = False
+    t2  = time.time() - t1
+    stats['fill_task'].append(t2)
 
 def pop_tasks(db, host_id, limit=1):
     if 'regen' not in next_task_obj or next_task_obj['regen']:
@@ -102,7 +109,7 @@ def pop_tasks(db, host_id, limit=1):
 
     return jids
 
-def results_extend(j, n_results):
+def results_extend(db, n_results):
     if not 'pool' in results_obj:
         results_obj['pool'] = []
 
@@ -113,8 +120,17 @@ def results_extend(j, n_results):
 
     return True
 
-def results_write(j):
-    if j.add_results(results_obj['pool']) != True:
+def results_write(db):
+    if not 'results_write' in stats:
+        stats['results_write'] = []
+
+    count = len(results_obj['pool'])
+    t1 = time.time()
+    result = hash_framework.manager.Jobs.add_results(db, results_obj['pool'])
+    t2 = time.time() - t1
+    stats['results_write'].append([count, t2])
+
+    if result != True:
         return False
 
     results_obj['pool'] = []
@@ -320,13 +336,17 @@ def handle_results():
             release_db(db)
             return jsonify(hash_framework.manager.input_error), 400
 
-        if not results_extend(j, datas):
+        if not results_extend(db, datas):
             release_db(db)
             return jsonify(hash_framework.manager.server_error), 500
 
 
         release_db(db)
         return jsonify(hash_framework.manager.success)
+
+@app.route("/stats/", methods=['GET'])
+def handle_stats():
+    return jsonify(stats)
 
 @app.route("/update/", methods=['GET'])
 def handle_update():
@@ -335,6 +355,7 @@ def handle_update():
     t.update_all_job_counts()
     next_task_obj['regen'] = True
     fill_task_obj(db)
+    results_write(db)
     release_db(db)
     return jsonify(hash_framework.manager.success)
 

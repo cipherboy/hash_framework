@@ -98,25 +98,25 @@ class Jobs:
 
         return True
 
-    def add_results(self, datas):
+    def add_results(db, datas):
         task_ids = set()
+        # Update job state
+        # Get result_table
+        # Insert results into approprate result_table
+        # Update results with ids.
 
         for data in datas:
-            # Update job state
-            # Get result_table
-            # Insert results into approprate result_table
-            # Update results with ids.
-
             q = "UPDATE jobs SET checked_out=%s, compile_time=%s, compile_return=%s,"
             q += " run_time=%s, run_return=%s, finalize_time=%s, checked_back=%s,"
             q += " state=2 WHERE id=%s"
             values = [data['checked_out'], data['compile_time'], data['compile_return'],
                       data['run_time'], data['run_return'], data['finalize_time'],
                       data['checked_back'], data['id']]
-            self.db.prepared(q, values, commit=True)
+            db.prepared(q, values, commit=False)
 
+        for data in datas:
             q = "SELECT task_id, result_table FROM jobs WHERE id=%s"
-            _, cur = self.db.prepared(q, [data['id']], cursor=True)
+            _, cur = db.prepared(q, [data['id']], cursor=True, commit=False)
             ret = cur.fetchall()
             if len(ret) != 1 and len(ret[0]) != 2:
                 continue
@@ -127,25 +127,24 @@ class Jobs:
 
             for result in data['results']:
                 columns = list(result['row'])
-                q = "INSERT INTO " + result_table + " ("
-                q += ",".join(columns) + ") VALUES ("
-                q += ",".join(["%s"] * len(columns))
-                q += ") RETURNING id;"
                 values = []
                 for column in columns:
                     values.append(result['row'][column])
-                rowid = 0
-                iresult = self.db.prepared(q, values, rowid=True)
-                if iresult != None:
-                    rowid = iresult[1]
 
-                q = "INSERT INTO results (job_id, result_table, result_id, data)"
-                q += " VALUES (%s, %s, %s, %s)"
-                self.db.prepared(q, [data['id'], result_table, rowid, result['data']], commit=True)
+                q = "WITH rtbid AS ("
+                q += "INSERT INTO " + result_table + " ("
+                q += ",".join(columns) + ") VALUES ("
+                q += ",".join(["%s"] * len(columns))
+                q += ") RETURNING id) "
+                q += "INSERT INTO results (job_id, result_table, result_id, data)"
+                q += " VALUES (%s, %s, (SELECT id FROM rtbid), %s)"
+                db.prepared(q, values + [data['id'], result_table, result['data']], commit=False)
 
         for task_id in task_ids:
             q = "UPDATE tasks SET current_threads=(current_threads-1) WHERE id=%s"
-            self.db.prepared(q, [task_id], commit=True)
+            db.prepared(q, [task_id], commit=False)
+
+        db.commit()
 
         return True
 
