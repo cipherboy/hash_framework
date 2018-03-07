@@ -13,6 +13,7 @@ has no guarantees about working in the future._
 
   - Python3
   - Flask
+  - Gunicorn
   - sqlite3
   - [CryptoMiniSat5](https://github.com/msoos/cryptominisat)
   - [bc2cnf](https://users.ics.aalto.fi/tjunttil/circuits/)
