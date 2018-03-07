@@ -116,7 +116,7 @@ def results_extend(db, n_results):
     results_obj['pool'].extend(n_results)
 
     if len(results_obj['pool']) >= 10000:
-        return results_write(j)
+        return results_write(db)
 
     return True
 
