@@ -49,7 +49,7 @@ class Client:
     def get_job(self, jid):
         self._heartbeat()
 
-        r = requests.get(self.uri + "/job/" + str(jid))
+        r = requests.get(self.uri + "/job/" + str(jid) + "/run/")
 
         if r.status_code == 200:
             return r.json(), None

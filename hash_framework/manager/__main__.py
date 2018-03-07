@@ -245,7 +245,7 @@ def handle_task_job(jid):
         release_db(db)
         return jsonify(r)
 
-@app.route("/job/<int:jid>/run", methods=['GET'])
+@app.route("/job/<int:jid>/run/", methods=['GET'])
 def handle_task_job_run(jid):
     if request.method == 'GET':
         if jid in next_task_obj['job_run']:
