@@ -7,10 +7,10 @@ mkdir -p ~/logs
 rm -rf ~/models ~/kernel_cache
 mkdir -p ~/models ~/kernel_cache ~/results
 
-for port in `seq $min_port $max_port`; do
+for proc in `seq 1 $num_process`; do
     echo "Starting..."
-    python3 -m hash_framework.workers $@ 2> ~/logs/worker-$port-err.log >~/logs/worker-$port.log &
+    python3 -m hash_framework.workers $@ 2> ~/logs/worker-$proc-err.log >~/logs/worker-$proc.log &
     pid="$!"
     echo "PID: $pid"
-    echo "$pid" > ~/logs/worker-$port.pid
+    echo "$pid" > ~/logs/worker-$proc.pid
 done
