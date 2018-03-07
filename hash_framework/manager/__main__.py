@@ -172,6 +172,7 @@ def handle_task_job(jid):
     db = acquire_db()
     j = hash_framework.manager.Job(db)
     if request.method == 'POST':
+        release_db(db)
         pass
     elif request.method == 'GET':
         j.load(jid)
@@ -184,6 +185,7 @@ def handle_task_job_update_status(jid):
     db = acquire_db()
     if request.method == 'POST':
         pass
+    release_db(db)
 
 #@app.route("/task/<int:tid>/job/<int:jid>/", methods=['GET', 'POST'])
 #def handle_task_job(tid, jid):
@@ -192,6 +194,15 @@ def handle_task_job_update_status(jid):
 #        pass
 #    elif request.method == 'GET':
 #        pass
+
+@app.route("/ip/", methods=['GET'])
+def handle_ip_request():
+    if 'REMOTE_ADDR' in request.headers:
+        return request.headers['REMOTE_ADDR']
+    elif 'HTTP_X_FORWARDED_FOR' in request.headers:
+        return request.headers['HTTP_X_FORWARDED_FOR']
+
+    return request.remote_addr
 
 @app.route("/hosts/", methods=['GET', 'POST'])
 def handle_hosts():
@@ -284,13 +295,17 @@ def handle_results():
 
     if request.method == 'POST':
         j = hash_framework.manager.Jobs(db)
+        datas = request.get_json(force=True)
         if not j.verify_results(datas):
+            print(datas)
             release_db(db)
             return jsonify(hash_framework.manager.input_error), 400
 
         if j.add_results(datas) != True:
+            release_db(db)
             return jsonify(hash_framework.manager.server_error), 500
 
+        release_db(db)
         return jsonify(hash_framework.manager.success)
 
 @app.route("/update/", methods=['GET'])

@@ -1,5 +1,6 @@
-DROP TABLE tasks;
-DROP TABLE hosts;
-DROP TABLE jobs;
-DROP TABLE host_metadata;
+DROP TABLE test;
 DROP TABLE results;
+DROP TABLE host_metadata;
+DROP TABLE jobs;
+DROP TABLE hosts;
+DROP TABLE tasks;

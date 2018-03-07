@@ -61,6 +61,38 @@ class models:
 
         return results
 
+    def load_results_generator(self, var_mapping=None, out="problem.out", cnf="problem.cnf"):
+        f_out = open(out, 'r')
+        if var_mapping == None:
+            var_mapping = self.get_mapping(cnf=cnf)
+
+        result = None
+        for l in f_out:
+            if l[0] == 's':
+                if result != None:
+                    yield result
+                result = {}
+            if l[0] == 'v':
+                end = -2
+                if l[end] == '0':
+                    end = -3
+                l_assigns = l[2:end].split(' ')
+                for v in l_assigns:
+                    if len(v) == 0:
+                        print(out)
+                        print(cnf)
+                        continue
+                    var = v
+                    val = 'T'
+                    if v[0] == '-':
+                        var = v[1:]
+                        val = 'F'
+                    if var in var_mapping:
+                        for loc in var_mapping[var]:
+                            result[loc] = val
+        if result != None and result != {}:
+            yield result
+
     def generate_raw(algo, prefixes, rounds=None):
         if rounds is None:
             rounds = algo.rounds
@@ -148,6 +180,14 @@ class models:
                 d = merge_dict([d, e])
             r.append(d)
         return r
+
+    def results_generator(self, algo, results=None, prefixes=["h1", "h2"], out="problem.out", cnf="problem.cnf"):
+        for result in self.load_results_generator(out=out, cnf=cnf):
+            d = {}
+            for prefix in prefixes:
+                e = prefix_keys(algo.sanitize(unprefix_keys(result, prefix)), prefix)
+                d = merge_dict([d, e])
+            yield d
 
     def collapse(self, bc="problem.bc"):
         if os.path.exists(bc):
@@ -281,6 +321,7 @@ class models:
                 elif delta[i] == 'F':
                     r.append(("and", ("equal", avar + str(aoffset + i), 'F'), ("equal", bvar + str(boffset + i), 'F')))
             if len(r) == 1:
+                r.append(("equal", 'T', 'T'))
                 r.append(("equal", 'T', 'T'))
             return tuple(r)
 

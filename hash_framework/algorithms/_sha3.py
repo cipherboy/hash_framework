@@ -131,7 +131,7 @@ def sha3prho(et, prefix, w, s, ir):
 def sha3ppi(et, prefix, w, s, ir):
     ns = sha3pi(w, s)
     for i in range(0, len(ns)):
-        name = prefix + "r" + str(ir) + "r" + str(i)
+        name = prefix + "r" + str(ir) + "p" + str(i)
         et[name] = ns[i]
         if ns[i] not in ['T', 'F']:
             ns[i] = name
@@ -141,7 +141,7 @@ def sha3ppi(et, prefix, w, s, ir):
 def sha3pchi(et, prefix, w, s, ir):
     ns = sha3chi(w, s)
     for i in range(0, len(ns)):
-        name = prefix + "r" + str(ir) + "r" + str(i)
+        name = prefix + "r" + str(ir) + "c" + str(i)
         et[name] = ns[i]
         if ns[i] not in ['T', 'F']:
             ns[i] = name
@@ -149,9 +149,9 @@ def sha3pchi(et, prefix, w, s, ir):
     return et, ns
 
 def sha3piota(et, prefix, w, s, ir):
-    ns = sha3chi(w, s)
+    ns = sha3iota(w, s, ir)
     for i in range(0, len(ns)):
-        name = prefix + "r" + str(ir) + "r" + str(i)
+        name = prefix + "r" + str(ir) + "i" + str(i)
         et[name] = ns[i]
         if ns[i] not in ['T', 'F']:
             ns[i] = name
