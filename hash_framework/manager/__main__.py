@@ -320,7 +320,11 @@ def handle_results():
             release_db(db)
             return jsonify(hash_framework.manager.input_error), 400
 
-        results_extend(j, datas)
+        if not results_extend(j, datas):
+            release_db(db)
+            return jsonify(hash_framework.manager.server_error), 500
+
+
         release_db(db)
         return jsonify(hash_framework.manager.success)
 

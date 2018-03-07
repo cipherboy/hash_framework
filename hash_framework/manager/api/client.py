@@ -69,4 +69,5 @@ class Client:
         if r.status_code == 200:
             return None
 
+        print(r.text)
         return r.json()
