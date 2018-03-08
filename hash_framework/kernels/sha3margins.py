@@ -97,18 +97,28 @@ class SHA3Margins(Kernel):
         base_path  = m.model_dir + "/" + tag
         os.system("ln -s " + cache_path + "/00-combined-model.bc " + base_path + "/00-combined-model.txt")
 
-        cstart = models.vars.differential(self.input_fill, 'h1i', self.input_margin, 'h2i', self.input_margin)
+        cstart = models.vars.differential(self.input_fill, 'h1in', self.input_margin, 'h2in', self.input_margin)
         models.vars.write_clause('cstart', cstart, '50-start.txt')
 
         tail = '*'*self.input_margin
-        cinput = models.vars.differential(tail, 'h1i', 0, 'h2i', 0)
+        cinput = models.vars.differential(tail, 'h1in', 0, 'h2in', 0)
         models.vars.write_range_clause('cinput', self.input_error, self.input_error, cinput, '50-input.txt')
 
         tail = '*'*self.output_margin
-        coutput = models.vars.differential(tail, 'h1o', 0, 'h2o', 0)
+        coutput = models.vars.differential(tail, 'h1out', 0, 'h2out', 0)
         models.vars.write_range_clause('coutput', self.output_margin, self.output_margin, coutput, '50-output.txt')
 
-        return 0
+        cnf_file = self.cnf_path()
+
+        model_files = "cat " + m.model_dir + "/" + tag + "/*.txt"
+        compile_model = m.bc_bin + " " + " ".join(m.bc_args)
+        cmd = model_files + " | " + compile_model
+
+        of = open(cnf_file, 'w')
+        oerr = open(cnf_file + ".err", 'w')
+
+        ret = subprocess.call(cmd, shell=True, stdout=of, stderr=oerr)
+        return ret
 
 
     def out_path(self):
@@ -136,22 +146,12 @@ class SHA3Margins(Kernel):
         out_file = self.out_path()
         cnf_file = self.cnf_path()
 
-        model_files = "cat " + m.model_dir + "/" + tag + "/*.txt"
-        compile_model = m.bc_bin + " " + " ".join(m.bc_args)
-        cmd = model_files + " | " + compile_model
-
-        of = open(cnf_file, 'w')
-        oerr = open(cnf_file + ".err", 'w')
-
-        ret = subprocess.call(cmd, shell=True, stdout=of, stderr=oerr)
-        if ret != 0:
-            return [{'data': "An unknown error occurred while recompiling the model (" + cmd + "): " + json.dumps(self.args), 'row': []}]
-
         m.start(tag, False)
         rg = m.results_generator(self.algo, out=out_file, cnf=cnf_file)
 
         result = []
         for r in rg:
+            print(r)
             result.append({'data': "", 'row': r})
 
         return result

@@ -1,6 +1,39 @@
 import hash_framework
 import datetime, time, sys, json
 
+def debug():
+    c = hash_framework.manager.api.Client(hash_framework.config.manager_uri, hash_framework.config.scheduler_uri)
+    c.register()
+    jq, error = c.receive_jobs(hash_framework.config.job_count)
+    print((jq, error))
+    if error != None:
+        print("[receive_jobs] Error: " + str(error))
+        time.sleep(10)
+
+    r = []
+    for jid in jq:
+        ji, error = c.get_job(jid)
+        print((jid, ji, error))
+        if error != None:
+            print("[get_job] Error: " + str(error))
+            continue
+
+        kernel_name = ji['kernel']
+        kernel_args = json.loads(ji['args'])
+        j = hash_framework.workers.Job(jid, kernel_name, kernel_args,
+                                       ji['timeout'],
+                                       datetime.datetime.now())
+
+        j.run()
+        result = j.to_dict(datetime.datetime.now())
+        print(result)
+        r.append(result)
+
+
+    error = c.send_results(r)
+    if error != None:
+        print("[send_results] Error: " + str(error))
+
 def run():
     jq = []
     c = hash_framework.manager.api.Client(hash_framework.config.manager_uri, hash_framework.config.scheduler_uri)

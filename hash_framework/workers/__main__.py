@@ -15,4 +15,7 @@ if len(sys.argv) >= 2:
 if len(sys.argv) >= 3:
     hash_framework.config.scheduler_uri = sys.argv[2]
 
-worker.run()
+if len(sys.argv) >= 4 and sys.argv[3] == 'debug':
+    worker.debug()
+else:
+    worker.run()
