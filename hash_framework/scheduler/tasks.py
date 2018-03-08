@@ -7,6 +7,19 @@ class Tasks:
     def __init__(self, db):
         self.db = db
 
+    def load_ids(self):
+        results = []
+
+        q = "SELECT id FROM tasks;"
+
+        r, cur = self.db.execute(q, cursor=True)
+
+        data = cur.fetchall()
+        for d in data:
+            results.append(d[0])
+
+        return results
+
     def update_all_job_counts(self):
         t = hash_framework.manager.Task(self.db)
         for tid in self.load_ids():

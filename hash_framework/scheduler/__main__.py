@@ -12,11 +12,19 @@ from hash_framework import config
 
 app = Flask(__name__, static_url_path='', static_folder='../../static')
 
+success = {'status': 'success', 'status_code': 200,
+           'message': 'OK'}
+
+server_error = {'status': 'failure', 'status_code': 500,
+                'message': 'Internal Server Error'}
+input_error = {'status': 'failure', 'status_code': 400,
+               'message': 'Supplied input data was of the wrong form'}
+
 db_pool = []
 next_task_obj = {}
 stats = {}
 
-max_cache_size = 100000
+max_cache_size = 100
 
 def acquire_db():
     if len(db_pool) == 0:
@@ -41,14 +49,15 @@ def fill_task_obj(db):
 
     t1 = time.time()
     if 'sent_jobs' in next_task_obj:
-        q = "UPDATE jobs SET state=%s, owner=%s WHERE id=%s"
+        q = "UPDATE jobs SET state=MAXIMUM(1, state), owner=%s WHERE id=%s"
         for t in next_task_obj['sent_jobs']:
-            db.prepared(q, [1, t[0], t[1]], commit=False)
+            db.prepared(q, [t[0], t[1]], commit=False)
 
     if 'ordered_tasks' in next_task_obj:
         q = "UPDATE tasks SET remaining_jobs=(remaining_jobs-%s),current_threads=(current_threads+%s) WHERE id=%s"
         for task in next_task_obj['ordered_tasks']:
-            db.prepared(q, [task['remaining_jobs_delta'], task['current_threads_delta'], task['id']], commit=True)
+            if 'remaining_jobs_delta' in task and 'current_threads_delta' in task:
+                db.prepared(q, [task['remaining_jobs_delta'], task['current_threads_delta'], task['id']], commit=True)
 
     next_task_obj['jobs'] = {}
     next_task_obj['sent_jobs'] = set()
@@ -146,10 +155,9 @@ def handle_update():
     t = hash_framework.scheduler.Tasks(db)
     next_task_obj['regen'] = True
     fill_task_obj(db)
-    results_write(db)
     t.update_all_job_counts()
     release_db(db)
-    return jsonify(hash_framework.scheduler.success)
+    return jsonify(success)
 
 if __name__ == "__main__":
     # Single threaded scheduler

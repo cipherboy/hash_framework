@@ -255,11 +255,10 @@ def handle_results():
             stats['results_count'] += 1
             return jsonify(hash_framework.manager.input_error), 400
 
-        if not results_extend(db, datas):
+        if not j.add_results(datas):
             release_db(db)
             stats['results_count'] += 1
             return jsonify(hash_framework.manager.server_error), 500
-
 
         release_db(db)
         stats['results_count'] += 1
