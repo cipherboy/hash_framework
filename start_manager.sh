@@ -9,10 +9,18 @@ fi
 
 mkdir -p ~/logs
 
-python3 -m hash_framework.scheduler 2> ~/logs/scheduler-err.log > ~/logs/scheduler.log &
+echo "Creating databases..."
+python3 -m hash_framework.manager db
 
-echo "scheduler pid: $!"
+python3 -m hash_framework.scheduler 2> ~/logs/scheduler-err.log > ~/logs/scheduler.log &
+spid="$!"
+echo "$spid" > ~/logs/scheduler.pid
+echo "scheduler pid: $spid"
+
 $py_gunicorn hash_framework.manager.__main__:app --workers 8 --backlog 81920 --bind '0.0.0.0:8000' $@ 2> ~/logs/manager-err.log > ~/logs/manager.log &
-echo "manager pid: $!"
+mpid="$!"
+echo "$mpid" > ~/logs/manager.pid
+echo "manager pid: $mpid"
+
 
 wait

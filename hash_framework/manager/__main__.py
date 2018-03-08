@@ -280,4 +280,15 @@ if __name__ == "__main__":
     #app.debug = True
     #app.config['PROFILE'] = True
     #app.wsgi_app = ProfilerMiddleware(app.wsgi_app, restrictions=[30])
+
+    if len(sys.argv) == 2 and sys.argv[1] == "db":
+        db = hash_framework.database()
+        db.close()
+        db.init_psql()
+        for algo_name in hash_framework.algorithms.all_algorithms:
+            algo = hash_framework.algorithms.lookup(algo_name)
+            hash_framework.attacks.collision.create_table(algo, db)
+            hash_framework.attacks.preimage.create_table(algo, db)
+        sys.exit(0)
+
     app.run(host='0.0.0.0', port='8000')
