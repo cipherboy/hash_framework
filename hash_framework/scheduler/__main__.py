@@ -24,7 +24,7 @@ db_pool = []
 next_task_obj = {}
 stats = {}
 
-max_cache_size = 100
+max_cache_size = 10000
 
 def acquire_db():
     if len(db_pool) == 0:
