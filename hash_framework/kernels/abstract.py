@@ -17,7 +17,7 @@ class Kernel:
         pass
 
     def pre_run(self):
-        pass
+        return 0
 
     def create_cache_dir(self, dir_path):
         os.system("mkdir -p " + dir_path)

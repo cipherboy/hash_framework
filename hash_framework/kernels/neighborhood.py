@@ -233,6 +233,8 @@ class Neighborhood(Kernel):
         cmd = model_files + " | " + compile_model
         ret = subprocess.call(cmd, stdin=subprocess.DEVNULL, stdout=o_cnf, stderr=o_err, shell=True)
 
+        return ret
+
 
     def out_path(self):
         m = models()
@@ -257,9 +259,13 @@ class Neighborhood(Kernel):
         cnf_file = self.cnf_path()
 
         m.start(tag, False)
-        rs = m.results(self.algo, out=out_file, cnf=cnf_file)
+        rg = m.results_generator(self.algo, out=out_file, cnf=cnf_file)
 
-        return rs
+        result = []
+        for r in rg:
+            result.append({'data': "", 'row': r})
+
+        return result
 
     def run_unsat(self):
         if '--maxsol' in self.args['cms_args']:

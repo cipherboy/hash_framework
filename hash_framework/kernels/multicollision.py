@@ -121,6 +121,8 @@ class Multicollision(Kernel):
         if self.h2_start_state != '':
             models.vars.write_values(self.h2_start_state, 'h2s', base_path + "/01-h2-state.txt")
 
+        return 0
+
     def out_path(self):
         m = models()
         tag = self.build_tag()
@@ -158,9 +160,13 @@ class Multicollision(Kernel):
             return "An unknown error occurred while compiling the model (" + cmd + "): " + json.dumps(self.args)
 
         m.start(tag, False)
-        rs = m.results(self.algo, out=out_file, cnf=cnf_file)
+        rg = m.results_generator(self.algo, out=out_file, cnf=cnf_file)
 
-        return rs
+        result = []
+        for r in rg:
+            result.append({'data': "", 'row': r})
+
+        return result
 
     def run_unsat(self):
         if '--maxsol' in self.args['cms_args']:
