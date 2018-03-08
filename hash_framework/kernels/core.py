@@ -6,6 +6,7 @@ from hash_framework.kernels.ones import Ones
 from hash_framework.kernels.ascii import ASCII
 from hash_framework.kernels.multicollision import Multicollision
 from hash_framework.kernels.minimal import Minimal
+from hash_framework.kernels.sha3margins import SHA3Margins
 from hash_framework.kernels.test import Test
 
 all_kernels = {
@@ -17,7 +18,8 @@ all_kernels = {
     'ascii': ASCII,
     'multicollision': Multicollision,
     'minimal': Minimal,
-    'test': Test
+    'test': Test,
+    'sha3margins': SHA3Margins
 }
 
 def lookup(name):

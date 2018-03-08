@@ -21,11 +21,17 @@ def run():
             print("[receive_jobs] Error: " + str(error))
             time.sleep(10)
             continue
+
+        if jq == []:
+            print("[receive_jobs] No Jobs")
+            time.sleep(10)
+            continue
         rtime += time.time() - t1
         rc += 1
 
         r = []
         for jid in jq:
+            print(jid)
             t1 = time.time()
             ji, error = c.get_job(jid)
             if error != None:

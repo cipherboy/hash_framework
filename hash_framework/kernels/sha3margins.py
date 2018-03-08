@@ -17,67 +17,54 @@ class SHA3Margins(Kernel):
 
         assert(self.args['algo'] == 'sha3')
 
+        self.w = self.args['w']
+        self.rounds = self.args['rounds']
         self.algo_type = algorithms.lookup(self.args['algo'])
-        self.algo = self.algo_type()
+        self.algo = self.algo_type(w=self.w, rounds=self.rounds)
         self.algo_name = self.args['algo']
         self.cms_args = self.args['cms_args']
-        self.rounds = self.args['rounds']
 
-        self.w = self.args['w']
-        self.algo.rounds = self.rounds
+        if type(self.rounds) == int:
+            self.srounds = str(self.rounds)
+        elif type(self.rounds) == list:
+            self.srounds = '-'.join(map(str, self.rounds))
 
         self.input_fill = self.args['input_fill']
         self.input_margin = self.args['input_margin']
+        self.input_error = self.args['input_error']
         self.intermediate_margins = self.args['intermediate_margins']
         self.output_margin = self.args['output_margin']
+        self.output_error = self.args['output_error']
 
-    def gen_work(rounds, bases):
-        work = []
+    def gen_work(rounds, w, input_errors, output_errors, input_fill=""):
+        # Function Margins
+        if input_fill == "":
+            input_fill = 'F' * (25*w)
 
-        print("TODO")
-
-        return work
-
-    def work_to_args(algo_name, work, start_state=None, start_block=None):
-        print("TODO")
-        rounds, base, ones = work
-        d =  {
-            "algo": algo_name,
-            "rounds": rounds,
-            "cms_args": [],
-            "base": base,
-            "ones": ones,
-        }
-
-        if start_state is not None:
-            d["h1_start_state"] = start_state
-            d["h2_start_state"] = start_state
-
-        return d
-
-    def on_result(algo, db, result):
-        print("TODO")
-        if type(result['results']) == list and len(result['results']) > 0:
-            attacks.collision.import_db_multiple(algo, db, result['results'])
-
-    def store_result(self, db, result):
-        algo = self.algo
-        rids = attacks.collision.insert_db_multiple_automatic_tag(algo, db, result['results'], False)
-        return rids
-
-    def load_result(self, db, rids):
-        algo = self.algo
-        results = []
-        for rid in rids:
-            r = attacks.collision.load_db_single(algo, db, rid)
-            results.append(r)
-        return results
+        for input_error in input_errors:
+            for output_error in output_errors:
+                for input_margin in range(input_error, 25*w):
+                    for output_margin in range(output_error, 25*w):
+                        args = {}
+                        args['algo'] = 'sha3'
+                        args['cms_args'] = []
+                        args['w'] = w
+                        args['rounds'] = rounds
+                        args['input_fill'] = input_fill[input_margin:25*w]
+                        args['input_margin'] = input_margin
+                        args['input_error'] = input_error
+                        args['intermediate_margins'] = []
+                        args['output_margin'] = output_margin
+                        args['output_error'] = output_error
+                        yield args
 
     def build_tag(self):
-        return str(self.jid) + self.build_cache_tag() + "-o" + str(self.ones)
+        tag = str(self.jid) + self.build_cache_tag() + "-i" + str(self.input_margin)
+        tag += "-o" + str(self.output_margin) + "-int" + '-'.join(map(str, self.intermediate_margins))
+        return tag
 
     def build_cache_tag(self):
-        base = "o-" + self.algo_name + "-r" + str(self.rounds)
+        base = "s3m-" + self.algo_name + "-r" + self.srounds + "-w" + str(self.w)
         return base
 
     def build_cache_path(self):
@@ -97,11 +84,8 @@ class SHA3Margins(Kernel):
                 m.start(cache_tag, False)
                 models.vars.write_header()
                 models.generate(self.algo, ['h1', 'h2'], rounds=self.rounds, bypass=True)
-                attacks.collision.write_constraints(self.algo)
-                attacks.collision.write_optional_differential(self.algo)
-                attacks.collision.write_same_state(self.algo)
 
-                models.vars.write_assign(['ccollision', 'cblocks', 'cstate', 'cdifferentials', 'cones'])
+                models.vars.write_assign(['cstart', 'cinput', 'cintermediate', 'coutput'])
                 m.collapse(bc="00-combined-model.bc")
 
         while not os.path.exists(cache_path) or not os.path.exists(cache_path + "/00-combined-model.bc"):
@@ -113,19 +97,16 @@ class SHA3Margins(Kernel):
         base_path  = m.model_dir + "/" + tag
         os.system("ln -s " + cache_path + "/00-combined-model.bc " + base_path + "/00-combined-model.txt")
 
-        attacks.collision.connected.loose.distributed_new_neighbor(self.algo, self.base, [], [], base_path + "/07-differential.txt")
+        cstart = models.vars.differential(self.input_fill, 'h1i', self.input_margin, 'h2i', self.input_margin)
+        models.vars.write_clause('cstart', cstart, '50-start.txt')
 
-        f = open(base_path + "/43-ones.txt", 'w')
-        f.write("cones := [" + str(self.ones) + "," + str(self.ones) + "](" + ','.join(map(lambda x: 'h1b' + str(x), range(512))) + ");")
-        f.flush()
-        f.close()
+        tail = '*'*self.input_margin
+        cinput = models.vars.differential(tail, 'h1i', 0, 'h2i', 0)
+        models.vars.write_range_clause('cinput', self.input_error, self.input_error, cinput, '50-input.txt')
 
-
-        if self.h1_start_state != '':
-            models.vars.write_values(self.h1_start_state, 'h1s', base_path + "/01-h1-state.txt")
-
-        if self.h2_start_state != '':
-            models.vars.write_values(self.h2_start_state, 'h2s', base_path + "/01-h2-state.txt")
+        tail = '*'*self.output_margin
+        coutput = models.vars.differential(tail, 'h1o', 0, 'h2o', 0)
+        models.vars.write_range_clause('coutput', self.output_margin, self.output_margin, coutput, '50-output.txt')
 
         return 0
 
@@ -164,7 +145,7 @@ class SHA3Margins(Kernel):
 
         ret = subprocess.call(cmd, shell=True, stdout=of, stderr=oerr)
         if ret != 0:
-            return "An unknown error occurred while compiling the model (" + cmd + "): " + json.dumps(self.args)
+            return [{'data': "An unknown error occurred while recompiling the model (" + cmd + "): " + json.dumps(self.args), 'row': []}]
 
         m.start(tag, False)
         rg = m.results_generator(self.algo, out=out_file, cnf=cnf_file)
