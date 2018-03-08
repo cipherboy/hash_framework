@@ -8,6 +8,7 @@ if [ "$py_gunicorn" == "" ]; then
 fi
 
 mkdir -p ~/logs
+bash stop_manager.sh
 
 echo "Creating databases..."
 python3 -m hash_framework.manager db

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-for i in ~/logs/*.pid; do
+for i in ~/logs/worker*.pid; do
     pid=`cat $i`
     kill $pid
     kill -9 $pid
