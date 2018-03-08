@@ -69,7 +69,7 @@ class Multicollision(Kernel):
             attacks.collision.import_db_multiple(algo, db, result['results'])
 
     def build_tag(self):
-        return self.jid + self.build_cache_tag()
+        return str(self.jid) + self.build_cache_tag()
 
     def build_cache_tag(self):
         base = "mc-" + self.algo_name + "-r" + str(self.rounds)

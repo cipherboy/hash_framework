@@ -98,7 +98,7 @@ class Families(Kernel):
         return results
 
     def build_tag(self):
-        return self.jid + self.build_cache_tag() + "-e" + '-'.join(list(map(str, self.places)))
+        return str(self.jid) + self.build_cache_tag() + "-e" + '-'.join(list(map(str, self.places)))
 
     def build_cache_tag(self):
         base = "sp-" + self.algo_name + "-r" + str(self.rounds)
@@ -192,7 +192,6 @@ class Families(Kernel):
 
     def run_cmd(self):
         m = models()
-
         run_model = m.cms_bin + " " + " ".join(m.cms_args) + " " + " ".join(self.cms_args) + " " + self.cnf_path()
         return run_model
 
@@ -209,6 +208,8 @@ class Families(Kernel):
         for r in rg:
             result.append({'data': "", 'row': r})
 
+        print(result)
+
         return result
 
     def run_unsat(self):
@@ -219,4 +220,4 @@ class Families(Kernel):
     def clean(self):
         m = models()
         tag = self.build_tag()
-        shutil.rmtree(m.model_dir + "/" + tag)
+        #shutil.rmtree(m.model_dir + "/" + tag)

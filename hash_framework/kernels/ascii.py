@@ -76,7 +76,7 @@ class ASCII(Kernel):
         both = 'F'
         if self.both:
             both = 'T'
-        return self.jid + self.build_cache_tag() + "-a" + str(both)
+        return str(self.jid) + self.build_cache_tag() + "-a" + str(both)
 
     def build_cache_tag(self):
         base = "a-" + self.algo_name + "-r" + str(self.rounds)

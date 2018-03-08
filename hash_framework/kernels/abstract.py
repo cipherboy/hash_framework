@@ -48,6 +48,7 @@ class Kernel:
         return "echo 'Please override Kernel and supply a run_cmd method.'"
 
     def post_run(self, return_code):
+        print("[post_run]: " + str(return_code))
         if return_code == 10:
             return self.run_sat()
         elif return_code == 20:

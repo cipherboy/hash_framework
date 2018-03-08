@@ -164,7 +164,7 @@ class Neighborhood(Kernel):
         return results
 
     def build_tag(self):
-        return self.jid + self.build_cache_tag() + "-e" + '-'.join(list(map(str, self.poses)))
+        return str(self.jid) + self.build_cache_tag() + "-e" + '-'.join(list(map(str, self.poses)))
 
     def build_cache_tag(self):
         base = "nh-" + self.algo_name + "-r" + str(self.rounds)

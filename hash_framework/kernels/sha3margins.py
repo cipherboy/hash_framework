@@ -74,7 +74,7 @@ class SHA3Margins(Kernel):
         return results
 
     def build_tag(self):
-        return self.jid + self.build_cache_tag() + "-o" + str(self.ones)
+        return str(self.jid) + self.build_cache_tag() + "-o" + str(self.ones)
 
     def build_cache_tag(self):
         base = "o-" + self.algo_name + "-r" + str(self.rounds)

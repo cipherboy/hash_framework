@@ -85,7 +85,7 @@ class Zeros(Kernel):
         return results
 
     def build_tag(self):
-        return self.jid + self.build_cache_tag() + "-z" + str(self.zeroes)
+        return str(self.jid) + self.build_cache_tag() + "-z" + str(self.zeroes)
 
     def build_cache_tag(self):
         base = "z-" + self.algo_name + "-r" + str(self.rounds)
