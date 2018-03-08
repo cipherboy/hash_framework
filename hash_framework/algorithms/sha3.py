@@ -43,38 +43,62 @@ class sha3:
         v = []
         for j in range(0, self.state_size):
             v.append(eval_table['in' + str(j)])
-        et['i'] = ''.join(v)
+        et['in'] = ''.join(v)
 
-        for i in range(0, self.rounds):
-            # theta
-            v = []
-            for j in range(0, self.state_size):
-                v.append(eval_table['r' + str(i) + 't' + str(j)])
-            et['r' + str(i) + 't'] = ''.join(v)
+        if type(self.rounds) == int:
+            for i in range(0, self.rounds):
+                # theta
+                v = []
+                for j in range(0, self.state_size):
+                    v.append(eval_table['r' + str(i) + 't' + str(j)])
+                et['r' + str(i) + 't'] = ''.join(v)
 
-            # rho
-            v = []
-            for j in range(0, self.state_size):
-                v.append(eval_table['r' + str(i) + 'r' + str(j)])
-            et['r' + str(i) + 'r'] = ''.join(v)
+                # rho
+                v = []
+                for j in range(0, self.state_size):
+                    v.append(eval_table['r' + str(i) + 'r' + str(j)])
+                et['r' + str(i) + 'r'] = ''.join(v)
 
-            # pi
-            v = []
-            for j in range(0, self.state_size):
-                v.append(eval_table['r' + str(i) + 'p' + str(j)])
-            et['r' + str(i) + 'p'] = ''.join(v)
+                # pi
+                v = []
+                for j in range(0, self.state_size):
+                    v.append(eval_table['r' + str(i) + 'p' + str(j)])
+                et['r' + str(i) + 'p'] = ''.join(v)
 
-            # chi
-            v = []
-            for j in range(0, self.state_size):
-                v.append(eval_table['r' + str(i) + 'c' + str(j)])
-            et['r' + str(i) + 'c'] = ''.join(v)
+                # chi
+                v = []
+                for j in range(0, self.state_size):
+                    v.append(eval_table['r' + str(i) + 'c' + str(j)])
+                et['r' + str(i) + 'c'] = ''.join(v)
 
-            # iota
-            v = []
-            for j in range(0, self.state_size):
-                v.append(eval_table['r' + str(i) + 'i' + str(j)])
-            et['r' + str(i) + 'i'] = ''.join(v)
+                # iota
+                v = []
+                for j in range(0, self.state_size):
+                    v.append(eval_table['r' + str(i) + 'i' + str(j)])
+                et['r' + str(i) + 'i'] = ''.join(v)
+        else:
+            irs = {'t': 0, 'r': 0, 'p': 0, 'c': 0}
+            for r in self.rounds:
+                if r[0] == 't' or r[0] == 'r' or r[0] == 'p' or r[0] == 'c':
+                    cir = irs[r[0]]
+                    v = []
+                    for j in range(0, self.state_size):
+                        v.append(eval_table['r' + str(cir) + r[0] + str(j)])
+                    et['r' + str(cir) + r[0]] = ''.join(v)
+                    irs[r[0]] += 1
+                elif r[0] == 'i':
+                    ir = 0
+                    if r[1] == 'o' and r[2] == 't' and r[3] == 'a':
+                        ir = int(r[4:])
+                    else:
+                        ir = int(r[1:])
+                    v = []
+                    for j in range(0, self.state_size):
+                        v.append(eval_table['r' + str(ir) + 'i' + str(j)])
+                    et['r' + str(ir) + 'i'] = ''.join(v)
+                else:
+                    assert("Invalid round specification" == "Should not happen.")
+
 
         v = []
         for j in range(0, self.state_size):

@@ -169,17 +169,26 @@ def sha3p(et, prefix, w, s, ir):
     return (et, ns)
 
 def sha3pstr(et, prefix, w, s, rounds):
-    ir = 0
+    tir = 0
+    rir = 0
+    pir = 0
+    cir = 0
+    ns = s
     for r in rounds:
         if r[0] == 't':
-            et, ns = sha3ptheta(et, prefix, w, s, ir)
+            et, ns = sha3ptheta(et, prefix, w, ns, tir)
+            tir += 1
         elif r[0] == 'r':
-            et, ns = sha3prho(et, prefix, w, ns, ir)
+            et, ns = sha3prho(et, prefix, w, ns, rir)
+            rir += 1
         elif r[0] == 'p':
-            et, ns = sha3ppi(et, prefix, w, ns, ir)
+            et, ns = sha3ppi(et, prefix, w, ns, pir)
+            pir += 1
         elif r[0] == 'c':
-            et, ns = sha3pchi(et, prefix, w, ns, ir)
+            et, ns = sha3pchi(et, prefix, w, ns, cir)
+            cir += 1
         elif r[0] == 'i':
+            ir = 0
             if r[1] == 'o' and r[2] == 't' and r[3] == 'a':
                 ir = int(r[4:])
             else:
@@ -187,7 +196,8 @@ def sha3pstr(et, prefix, w, s, rounds):
             et, ns = sha3piota(et, prefix, w, ns, ir)
         else:
             assert("Invalid round specification" == "Should not happen.")
-        ir += 1
+
+    return et, ns
 
 def sha3f(et, prefix, w, s, rounds=24):
     ns = s.copy()
