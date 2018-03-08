@@ -84,12 +84,14 @@ def handle_tasks():
             release_db(db)
             return jsonify(hash_framework.manager.input_error), 400
 
-        if t.add_all(datas) != None:
+        r = t.add_all(datas)
+        if r == None:
             release_db(db)
-            return jsonify(hash_framework.manager.success)
+            return jsonify(hash_framework.manager.server_error), 500
 
         release_db(db)
-        return jsonify(hash_framework.manager.server_error), 500
+        return jsonify(r)
+
 
     elif request.method == 'GET':
         r = t.load_ids()

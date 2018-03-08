@@ -73,3 +73,34 @@ class Client:
 
         print(r.text)
         return r.json()
+
+    def create_task(self, name, algo, running=True, max_threads=-1, priority=1):
+        obj = {'name': name, 'algo': algo, 'running': running,
+               'max_threads': max_threads, 'priority': priority}
+        r = requests.post(self.uri + "/tasks/", json=obj)
+
+        if r.status_code == 200:
+            return r.json()[0]
+
+        print((r.status_code, r.text))
+        return r.json()
+
+    def create_job(self, task, algo, kernel, args, result_table):
+        obj = {'task': task, 'algo': algo, 'kernel': kernel, 'args': args,
+               'result_table': result_table}
+        r = requests.post(self.uri + "/task/" + str(task) + "/jobs/", json=obj)
+
+        if r.status_code == 200:
+            return None
+
+        print((r.status_code, r.text))
+        return r.json()
+
+    def create_jobs(self, task, jobs):
+        r = requests.post(self.uri + "/task/" + str(task) + "/jobs/", json=jobs)
+
+        if r.status_code == 200:
+            return None
+
+        print((r.status_code, r.text))
+        return r.json()

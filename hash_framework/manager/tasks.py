@@ -1,7 +1,7 @@
 import hash_framework.config as config
 import hash_framework
 
-import datetime
+import datetime, sys
 
 class Tasks:
     def __init__(self, db):
@@ -22,27 +22,35 @@ class Tasks:
 
     def verify(self, datas):
         if type(datas) != list:
+            sys.stderr.write("rlist\n")
             return False
 
         for data in datas:
             if type(data) != dict:
+                sys.stderr.write("rdict\n")
                 return False
             if 'name' not in data or type(data['name']) != str:
+                sys.stderr.write("rname\n")
                 return False
             if 'algo' not in data or type(data['algo']) != str:
+                sys.stderr.write("ralgo\n")
                 return False
 
             keys = set(data)
             all_keys = {'max_threads', 'priority', 'running', 'name', 'algo'}
 
             if len(keys.difference(all_keys)) != 0:
+                sys.stderr.write("rdiff\n")
                 return False
 
             if 'max_threads' in data and type(data['max_threads']) != int:
+                sys.stderr.write("rmax_threads\n")
                 return False
             if 'priority' in data and type(data['priority']) != int:
+                sys.stderr.write("rpriority\n")
                 return False
-            if 'running' in data and type(data['priority']) != bool:
+            if 'running' in data and type(data['running']) != bool:
+                sys.stderr.write("rrunning\n")
                 return False
 
         return True
@@ -67,10 +75,18 @@ class Tasks:
                         datas[i]['max_threads'], 0, 0, 0, datas[i]['priority'],
                         current_time, datas[i]['running'])
 
-        q = "INSERT INTO tasks (name, algo, max_threads, current_threads, total_jobs, remaining_jobs, priority, started, running) VALUES %s"
+        q = "INSERT INTO tasks (name, algo, max_threads, current_threads, total_jobs, remaining_jobs, priority, started, running) VALUES %s RETURNING id;"
 
         r = self.db.prepared_many(q, datas, commit=True, limit=1, cursor=True)
-        return r
+        if r == None:
+            return r
+
+        cur = r[1]
+        result = []
+        for e in cur.fetchall():
+            result.append(e[0])
+
+        return result
 
     def update_all_job_counts(self):
         t = hash_framework.manager.Task(self.db)
