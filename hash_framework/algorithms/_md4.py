@@ -24,42 +24,42 @@ def md4g32(x, y, z):
 def md4h32(x, y, z):
     return md4apply32(md4h, x, y, z)
 
-def md4round1a(a, b, c, d, x, l):
-    return b_rotl(b_addl(b_addl(a, md4f32(b, c, d)), x), l)
+def md4round1a(prefix, a, b, c, d, x, l):
+    return b_rotl(b_addl(prefix, b_addl(prefix, a, md4f32(b, c, d)), x), l)
 
-def md4round2a(a, b, c, d, x, l):
-    return b_rotl(b_addl(b_addl(b_addl(a, b_tobitl(0x5A827999)), md4g32(b, c, d)), x), l)
+def md4round2a(prefix, a, b, c, d, x, l):
+    return b_rotl(b_addl(prefix, b_addl(prefix, b_addl(prefix, a, b_tobitl(0x5A827999)), md4g32(b, c, d)), x), l)
 
-def md4round3a(a, b, c, d, x, l):
-    return b_rotl(b_addl(b_addl(b_addl(a, b_tobitl(0x6ED9EBA1)), md4h32(b, c, d)), x), l)
+def md4round3a(prefix, a, b, c, d, x, l):
+    return b_rotl(b_addl(prefix, b_addl(prefix, b_addl(prefix, a, b_tobitl(0x6ED9EBA1)), md4h32(b, c, d)), x), l)
 
 def md4applyround(shift, xchoice, ivc, state, file_out, eval_table, roundfunc, prefix=""):
     r = 0
     rc = 0
     xx = buildxx(xchoice[rc], eval_table, prefix=prefix)
     for i in range(0, len(xchoice) // 4):
-        yy = roundfunc(state[0], state[1], state[2], state[3], xx, shift[r])
+        yy = roundfunc(prefix, state[0], state[1], state[2], state[3], xx, shift[r])
         r = (r + 1) % 4
         rc += 1
         ivc, eval_table = writeyy(file_out, prefix, yy, ivc, eval_table)
         xx = buildxx(xchoice[rc], eval_table, prefix=prefix)
         state[0] = replace_yy(ivc, eval_table, prefix=prefix)
 
-        yy = roundfunc(state[3], state[0], state[1], state[2], xx, shift[r])
+        yy = roundfunc(prefix, state[3], state[0], state[1], state[2], xx, shift[r])
         r = (r + 1) % 4
         rc += 1
         ivc, eval_table = writeyy(file_out, prefix, yy, ivc, eval_table)
         xx = buildxx(xchoice[rc], eval_table, prefix=prefix)
         state[3] = replace_yy(ivc, eval_table, prefix=prefix)
 
-        yy = roundfunc(state[2], state[3], state[0], state[1], xx, shift[r])
+        yy = roundfunc(prefix, state[2], state[3], state[0], state[1], xx, shift[r])
         r = (r + 1) % 4
         rc += 1
         ivc, eval_table = writeyy(file_out, prefix, yy, ivc, eval_table)
         xx = buildxx(xchoice[rc], eval_table, prefix=prefix)
         state[2] = replace_yy(ivc, eval_table, prefix=prefix)
 
-        yy = roundfunc(state[1], state[2], state[3], state[0], xx, shift[r])
+        yy = roundfunc(prefix, state[1], state[2], state[3], state[0], xx, shift[r])
         r = (r + 1) % 4
         rc += 1
         ivc, eval_table = writeyy(file_out, prefix, yy, ivc, eval_table)
@@ -184,10 +184,10 @@ def perform_md4(eval_table, original_state, f, f3, f2=None, prefix="", rounds=48
         f.flush()
         f.close()
 
-    oaa = b_addl(original_state[0], state[0])
-    obb = b_addl(original_state[1], state[1])
-    occ = b_addl(original_state[2], state[2])
-    odd = b_addl(original_state[3], state[3])
+    oaa = b_addl(prefix, original_state[0], state[0])
+    obb = b_addl(prefix, original_state[1], state[1])
+    occ = b_addl(prefix, original_state[2], state[2])
+    odd = b_addl(prefix, original_state[3], state[3])
 
     print(b_tonum(oaa))
     print(b_tonum(obb))

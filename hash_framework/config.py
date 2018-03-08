@@ -18,7 +18,7 @@ class config:
 
     results_dir = base_path + "/results"
 
-    default_adder = [{"chaining": None, "type": "cla"}]
+    default_adder = [{"chaining": None, "type": "rca"}]
 
     # Change during deploy
     psql_host = "localhost"

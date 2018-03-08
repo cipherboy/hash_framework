@@ -121,7 +121,7 @@ def b_addl_carry_select(prefix, x, y, c, e):
         assert(False)
 
 # Adder, with config
-def b_addl(prefix, x, y, c="F", cfg=None):
+def b_addl(prefix, x, y, c="F", cfg=None, cout=False):
     assert(len(x) == len(y))
     assert(type(cfg) == list or cfg == None)
 
@@ -170,9 +170,11 @@ def b_addl(prefix, x, y, c="F", cfg=None):
         print("Bad config")
         assert(False)
 
-    return r, c
+    if cout:
+        return r, c
+    return r
 
-def b_add4l(prefix, x1, x2, x3, x4, c="F", cfg=None):
+def b_add4l(prefix, x1, x2, x3, x4, c="F", cfg=None, cout=False):
     assert(type(cfg) == list or cfg == None)
     x1234v = []
     x1234c = None
@@ -181,14 +183,17 @@ def b_add4l(prefix, x1, x2, x3, x4, c="F", cfg=None):
         cfg = config.default_adder
 
     if not 'shape' in cfg[0] or cfg[0]['shape'] == "tree":
-        x12v, x12c = b_addl(prefix, x1, x2, c=c, cfg=default_adder)
-        x34v, x34c = b_addl(prefix, x3, x4, c="F", cfg=default_adder)
-        x1234v, x1234c = b_addl(prefix, x12, x34, c="F", cfg=default_adder)
+        x12v, x12c = b_addl(prefix, x1, x2, c=c, cfg=cfg, cout=True)
+        x34v, x34c = b_addl(prefix, x3, x4, c="F", cfg=cfg, cout=True)
+        x1234v, x1234c = b_addl(prefix, x12v, x34v, c="F", cfg=cfg, cout=True)
     elif cfg[0]['shape'] == "incremental":
-        x12v, x12c = b_addl(prefix, x1, x2, c=c, cfg=default_adder)
-        x123v, x123c = b_addl(prefix, x12, x3, c="F", cfg=default_adder)
-        x1234v, x1234c = b_addl(prefix, x123, x4, c="F", cfg=default_adder)
+        x12v, x12c = b_addl(prefix, x1, x2, c=c, cfg=cfg, cout=True)
+        x123v, x123c = b_addl(prefix, x12v, x3, c="F", cfg=cfg, cout=True)
+        x1234v, x1234c = b_addl(prefix, x123v, x4, c="F", cfg=cfg, cout=True)
     else:
         assert(False)
 
-    return x1234v, x1234c
+    if cout:
+        return x1234v, x1234c
+
+    return x1234v

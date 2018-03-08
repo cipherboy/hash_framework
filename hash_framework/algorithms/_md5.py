@@ -33,20 +33,20 @@ def md5i32(x, y, z):
     return md5apply32(md5i, x, y, z)
 
 def md5round1a(et, p, a, b, c, d, x, t, l):
-    r, et = b_add4l(et, p, md5f32(b, c, d), a, x, b_tobitl(t))
-    return b_addl(b, b_rotl(r, l)), et
+    r = b_add4l(p, md5f32(b, c, d), a, x, b_tobitl(t))
+    return b_addl(p, b, b_rotl(r, l)), et
 
 def md5round2a(et, p, a, b, c, d, x, t, l):
-    r, et = b_add4l(et, p, md5g32(b, c, d), a, x, b_tobitl(t))
-    return b_addl(b, b_rotl(r, l)), et
+    r = b_add4l(p, md5g32(b, c, d), a, x, b_tobitl(t))
+    return b_addl(p, b, b_rotl(r, l)), et
 
 def md5round3a(et, p, a, b, c, d, x, t, l):
-    r, et = b_add4l(et, p, md5h32(b, c, d), a, x, b_tobitl(t))
-    return b_addl(b, b_rotl(r, l)), et
+    r = b_add4l(p, md5h32(b, c, d), a, x, b_tobitl(t))
+    return b_addl(p, b, b_rotl(r, l)), et
 
 def md5round4a(et, p, a, b, c, d, x, t, l):
-    r, et = b_add4l(et, p, md5i32(b, c, d), a, x, b_tobitl(t))
-    return b_addl(b, b_rotl(r, l)), et
+    r = b_add4l(p, md5i32(b, c, d), a, x, b_tobitl(t))
+    return b_addl(p, b, b_rotl(r, l)), et
 
 def md5applyround(shift, xchoice, ts, ivc, state, file_out, eval_table, roundfunc, prefix=""):
     r = 0
@@ -156,10 +156,10 @@ def perform_md5(eval_table, original_state, f, f3, f2=None, prefix="", rounds=64
         f.flush()
         f.close()
 
-    oaa = b_addl(original_state[0], state[0])
-    obb = b_addl(original_state[1], state[1])
-    occ = b_addl(original_state[2], state[2])
-    odd = b_addl(original_state[3], state[3])
+    oaa = b_addl(prefix, original_state[0], state[0])
+    obb = b_addl(prefix, original_state[1], state[1])
+    occ = b_addl(prefix, original_state[2], state[2])
+    odd = b_addl(prefix, original_state[3], state[3])
 
     print("MD5: " + str(rounds))
     print(b_tonum(oaa))
