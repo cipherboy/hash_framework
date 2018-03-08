@@ -26,7 +26,7 @@ def import_from_other_tag(path, tag):
     insert_db_multiple(algo, db, cols, tag)
 
 def create_table(algo, db):
-    q = create_table_query(algo)
+    q = create_table_query(algo, db_type=db.type)
     db.execute(q, limit=1)
 
 def clean_table(algo, db):
@@ -64,6 +64,8 @@ def table_cols(algo):
         cols.append("family")
         cols.append("input_family")
         cols.append("rounds")
+        cols.append("min_round")
+        cols.append("max_round")
     elif algo.name == "sha3":
         cols.append("rounds")
         cols.append("min_round")
@@ -72,12 +74,16 @@ def table_cols(algo):
 
     return cols
 
-def create_table_query(algo, name=None):
+def create_table_query(algo, name=None, db_type="sqlite3"):
     if name == None:
         name = "c_" + algo.name
     cols = table_cols(algo)
     cols.append("tag")
     q = "CREATE TABLE " + name + " ("
+
+    if db_type == "psql":
+        q += "id BIGSERIAL, "
+
     for col in cols:
         q += col + " TEXT, "
     q = q[:-2] + ");"
