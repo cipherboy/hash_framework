@@ -39,7 +39,6 @@ class sha3:
 
     def sanitize(self, eval_table):
         et = {}
-        print(eval_table)
 
         v = []
         for j in range(0, self.state_size):

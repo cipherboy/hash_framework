@@ -12,7 +12,7 @@ def __main__():
     kernel_name = "sha3margins"
     kernel = hf.kernels.lookup(kernel_name)
     algo = "sha3"
-    for w in [1, 2, 4]:
+    for w in [8]:
         work = kernel.gen_work(['t'], w, [1, 2, 3, 4], [0])
 
         jobs = []

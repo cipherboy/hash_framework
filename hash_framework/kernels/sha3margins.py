@@ -151,7 +151,6 @@ class SHA3Margins(Kernel):
 
         result = []
         for r in rg:
-            print(r)
             result.append({'data': "", 'row': r})
 
         return result
@@ -164,4 +163,5 @@ class SHA3Margins(Kernel):
     def clean(self):
         m = models()
         tag = self.build_tag()
+        os.chdir(m.model_dir)
         shutil.rmtree(m.model_dir + "/" + tag)

@@ -43,8 +43,6 @@ class Job:
         cmd = self.kernel.run_cmd()
         out_path = self.kernel.out_path()
 
-        print(cmd)
-
         if out_path != "":
             self.of = open(out_path, 'w')
 
@@ -59,7 +57,6 @@ class Job:
         # Wait for job to finish
         try:
             self.run_return = self._p.wait(timeout=self.timeout)
-            print(self.run_return)
         except:
             self.run_return = -2
 
@@ -70,7 +67,7 @@ class Job:
             except:
                 pass
 
-            print("Job timed out (" + str(self.timeout) + "s) - jid:" + str(self.id))
+            print("Job timed out (" + str(self.timeout) + "s) - jid: " + str(self.id))
 
         # Close output file descriptor
         if self.of is not None and not self.of.closed:

@@ -50,7 +50,7 @@ class Client:
     def get_job(self, jid):
         self._heartbeat()
 
-        r = requests.get(self.uri + "/job/" + str(jid))
+        r = requests.get(self.uri + "/job/" + str(jid), timeout=120)
 
         if r.status_code == 200:
             return r.json(), None
@@ -66,7 +66,7 @@ class Client:
 
     def send_results(self, results):
         self._heartbeat()
-        r = requests.post(self.uri + "/results/", json=results)
+        r = requests.post(self.uri + "/results/", json=results, timeout=120)
 
         if r.status_code == 200:
             return None
