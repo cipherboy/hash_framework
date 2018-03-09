@@ -106,7 +106,7 @@ class SHA3Margins(Kernel):
 
         tail = '*'*self.output_margin
         coutput = models.vars.differential(tail, 'h1out', 0, 'h2out', 0)
-        models.vars.write_range_clause('coutput', self.output_margin, self.output_margin, coutput, '50-output.txt')
+        models.vars.write_range_clause('coutput', self.output_error, self.output_error, coutput, '50-output.txt')
 
         cnf_file = self.cnf_path()
 
