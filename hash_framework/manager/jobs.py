@@ -149,21 +149,31 @@ class Jobs:
         return True
 
     def add_all(self, datas):
-        tids = set()
+        tids = {}
         for i in range(0, len(datas)):
-            tids.add(datas[i]['task'])
+            tid = datas[i]['task']
+            if tid not in tids:
+                tids[tid] = 0
+            tids[tid] += 1
             datas[i] = (datas[i]['task'], datas[i]['kernel'], datas[i]['algo'],
                         datas[i]['args'], datas[i]['result_table'], 0)
 
         q = "INSERT INTO jobs (task_id, kernel, algo, args, result_table, state) VALUES %s"
 
-        r = self.db.prepared_many(q, datas, commit=True, limit=1, cursor=True)
+        r = self.db.prepared_many(q, datas, commit=False, limit=1, cursor=True)
 
-        t = hash_framework.manager.Task(self.db)
+        if r == None:
+            return None
+
         for tid in tids:
-            t.update_job_counts(tid)
+            q = "UPDATE tasks SET total_jobs=(total_jobs + %s),"
+            q += " remaining_jobs=(remaining_jobs + %s) WHERE id=%s;"
+            values = [tids[tid], tids[tid], tid]
+            self.db.prepared(q, values, commit=False)
 
-        return r
+        self.db.commit()
+
+        return True
 
 class Job:
     def __init__(self, db):

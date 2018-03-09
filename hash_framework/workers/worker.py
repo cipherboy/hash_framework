@@ -64,6 +64,7 @@ def run():
             time.sleep(10)
             continue
 
+        print("[receiving jobs]: " + str(len(jq)) + " jobs")
         r = []
         for jid in jq:
             ji, error = c.get_job(jid)
@@ -99,6 +100,5 @@ def run():
                     print("Manually dumping results and quitting:")
                     print(r)
                     sys.exit(1)
-
             else:
                 break
