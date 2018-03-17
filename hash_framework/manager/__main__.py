@@ -25,14 +25,13 @@ def acquire_db():
         db_pool.append(1)
         return db
 
-    db_pool[1] = db_pool[1] + 1
+    db_pool[1] += 1
     if db_pool[1] == 10000:
-        db_pool = []
         db = hash_framework.database()
         db.close()
         db.init_psql()
-        db_pool.append(db)
-        db_pool.append(1)
+        db_pool[0] = db
+        db_pool[1] = 1
 
     return db_pool[0]
 
