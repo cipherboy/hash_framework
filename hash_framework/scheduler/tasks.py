@@ -20,9 +20,22 @@ class Tasks:
 
         return results
 
+    def load_running_ids(self):
+        results = []
+
+        q = "SELECT id FROM tasks WHERE running=True;"
+
+        r, cur = self.db.execute(q, cursor=True)
+
+        data = cur.fetchall()
+        for d in data:
+            results.append(d[0])
+
+        return results
+
     def update_all_job_counts(self):
         t = hash_framework.manager.Task(self.db)
-        for tid in self.load_ids():
+        for tid in self.load_running_ids():
             t.update_job_counts(tid)
 
     def get_task_objects_by_priority(self, limit=100):
