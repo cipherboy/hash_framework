@@ -6,14 +6,14 @@ def __main__():
     scheduler_uri = 'http://127.0.0.1:8001'
     c = hf.manager.api.Client(manager_uri, scheduler_uri)
     #tid = c.create_task('sha3-margin-theta', 'sha3')
-    tid = 23
+    tid = 40
     print("Task ID: " + str(tid))
 
     kernel_name = "sha3margins"
     kernel = hf.kernels.lookup(kernel_name)
     algo = "sha3"
-    for w in [8]:
-        work = kernel.gen_work(['t'], w, [1, 2, 3, 4], [0])
+    for w in [32, 64]:
+        work = kernel.gen_work(['t'], w, [1, 2, 3, 4, 5, 6, 7, 8], [0])
 
         jobs = []
         for obj in work:

@@ -41,15 +41,15 @@ def __main__():
     db.close()
     db.init_psql()
 
-    tid = 23
+    tid = 43
 
     q = "SELECT id, run_return, args FROM jobs WHERE task_id=" + str(tid) + " AND state=2;"
     r, cur = db.execute(q, cursor=True)
 
     results = {}
-    for i in [1, 2, 3, 4]:
+    for i in [1, 2, 3, 4, 5, 6, 7, 8]:
         results[i] = {}
-        for w in [1, 2, 4]:
+        for w in [1, 2, 4, 8, 16]:
             arr = []
             for j in range(0, 25*w):
                 arr.append([0] * (25*w))
@@ -63,13 +63,16 @@ def __main__():
         input_error = obj['input_error']
         input_margin = obj['input_margin']
         output_margin = obj['output_margin']
-        results[input_error][w][input_margin][output_margin] = run_result
+        if input_error in results and w in results[input_error]:
+            results[input_error][w][input_margin][output_margin] = run_result
+        else:
+            print((w, input_error))
 
         row = cur.fetchone()
 
     for i in results:
         for w in results[i]:
-            draw_table(results[i][w], 25*w, "/tmp/table-w" + str(w) + "-i" + str(i) + "-o0.png")
+            draw_table(results[i][w], 25*w, "/tmp/table-trpc-w" + str(w) + "-i" + str(i) + "-o0.png")
 
 
 __main__()
