@@ -58,6 +58,44 @@ class SHA3Margins(Kernel):
                         args['output_error'] = output_error
                         yield args
 
+    def gen_input_difference_margins_work(rounds, w, input_margins_equiv):
+        input_fill = 'F' * (25*w)
+
+        for e_margin in input_margins_equiv:
+            margin = (25*w) - (2 * e_margin * w // 64)
+            for input_error in range(0, margin):
+                for output_error in range(0, 25*w):
+                    args = {}
+                    args['algo'] = 'sha3'
+                    args['cms_args'] = []
+                    args['w'] = w
+                    args['rounds'] = rounds
+                    args['input_fill'] = input_fill[margin:25*w]
+                    args['input_margin'] = margin
+                    args['input_error'] = input_error
+                    args['intermediate_margins'] = []
+                    args['output_margin'] = 25*w
+                    args['output_error'] = output_error
+                    yield args
+
+    def gen_output_difference_margins_work(rounds, w):
+        input_fill = 'F' * (25*w)
+
+        for input_error in range(0, 25*w):
+            for output_margin in range(0, 25*w):
+                args = {}
+                args['algo'] = 'sha3'
+                args['cms_args'] = []
+                args['w'] = w
+                args['rounds'] = rounds
+                args['input_fill'] = ''
+                args['input_margin'] = 25*w
+                args['input_error'] = input_error
+                args['intermediate_margins'] = []
+                args['output_margin'] = output_margin
+                args['output_error'] = 0
+                yield args
+
     def build_tag(self):
         tag = str(self.jid) + self.build_cache_tag() + "-i" + str(self.input_margin)
         tag += "-o" + str(self.output_margin) + "-int" + '-'.join(map(str, self.intermediate_margins))

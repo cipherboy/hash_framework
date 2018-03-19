@@ -5,18 +5,15 @@ def __main__():
     manager_uri = 'http://127.0.0.1:8000'
     scheduler_uri = 'http://127.0.0.1:8001'
     c = hf.manager.api.Client(manager_uri, scheduler_uri)
-
-    r = 'c'
-    #tid = c.create_task('sha3-differnces-' + r, 'sha3', running=True, priority=4)
-    tid = 59
+    tid = c.create_task('sha3-od-margin-c-trpc', 'sha3', running=True, priority=3)
+    #tid = 68
     print("Task ID: " + str(tid))
 
-    kernel_name = "sha3differences"
+    kernel_name = "sha3margins"
     kernel = hf.kernels.lookup(kernel_name)
     algo = "sha3"
-    for w in [8, 16]:
-        arr = list(range(0, 25*w))
-        work = kernel.gen_work([r], w, arr, arr)
+    for w in [1, 2, 4, 8]:
+        work = kernel.gen_output_difference_margins_work(['c', 't', 'r', 'p', 'c'], w)
 
         jobs = []
         for obj in work:
