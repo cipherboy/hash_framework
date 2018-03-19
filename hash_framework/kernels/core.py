@@ -8,6 +8,7 @@ from hash_framework.kernels.multicollision import Multicollision
 from hash_framework.kernels.minimal import Minimal
 from hash_framework.kernels.sha3margins import SHA3Margins
 from hash_framework.kernels.sha3differences import SHA3Differences
+from hash_framework.kernels.sha3distributivity import SHA3Distributivity
 from hash_framework.kernels.test import Test
 
 all_kernels = {
@@ -21,7 +22,8 @@ all_kernels = {
     'minimal': Minimal,
     'test': Test,
     'sha3margins': SHA3Margins,
-    'sha3differences': SHA3Differences
+    'sha3differences': SHA3Differences,
+    'sha3distributivity': SHA3Distributivity
 }
 
 def lookup(name):
