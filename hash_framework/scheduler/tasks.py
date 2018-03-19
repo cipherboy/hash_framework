@@ -62,7 +62,7 @@ class Tasks:
         if tid is None:
             return []
 
-        q = "SELECT id FROM jobs WHERE task_id=%s AND state=0 LIMIT %s;"
+        q = "SELECT id FROM jobs WHERE task_id=%s AND state=0 ORDER BY id LIMIT %s;"
         cur = in_cur
 
         if in_cur:
