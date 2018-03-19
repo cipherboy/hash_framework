@@ -25,7 +25,7 @@ def run():
 
             kernel_name = ji['kernel']
             kernel_args = json.loads(ji['args'])
-            c_count = len(kernel_args['rounds'])
+            c_count = len(kernel_args['rounds'])//4
             w = kernel_args['w']
             j = hash_framework.workers.Job(jid, kernel_name, kernel_args,
                                            ji['timeout'],
