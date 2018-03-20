@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import hash_framework as hf
-import json, png
+import json, png, sys
 
 
 def draw_table(results, size, out_name="/tmp/table.png"):
@@ -41,7 +41,8 @@ def __main__():
     db.close()
     db.init_psql()
 
-    tid = 43
+    assert(len(sys.argv) == 3)
+    tid = int(sys.argv[1])
 
     q = "SELECT id, run_return, args FROM jobs WHERE task_id=" + str(tid) + " AND state=2;"
     r, cur = db.execute(q, cursor=True)
@@ -72,7 +73,7 @@ def __main__():
 
     for i in results:
         for w in results[i]:
-            draw_table(results[i][w], 25*w, "/tmp/table-trpc-w" + str(w) + "-i" + str(i) + "-o0.png")
+            draw_table(results[i][w], 25*w, "/tmp/table-" + sys.argv[2] + "-w" + str(w) + "-i" + str(i) + "-o0.png")
 
 
 __main__()

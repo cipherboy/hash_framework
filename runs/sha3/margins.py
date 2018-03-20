@@ -5,14 +5,14 @@ def __main__():
     manager_uri = 'http://127.0.0.1:8000'
     scheduler_uri = 'http://127.0.0.1:8001'
     c = hf.manager.api.Client(manager_uri, scheduler_uri)
-    tid = c.create_task('sha3-margin-trpci0-trpc', 'sha3', running=True, priority=3)
-    print("Task ID: " + str(tid))
+    tid = c.create_task('sha3-margin-c', 'sha3', running=True, priority=8)
+    # print("Task ID: " + str(tid))
 
     kernel_name = "sha3margins"
     kernel = hf.kernels.lookup(kernel_name)
     algo = "sha3"
     for w in [1, 2, 4]:
-        work = kernel.gen_work(['t', 'r', 'p', 'c', 'i0', 't', 'r', 'p', 'c'], w, [1, 2, 3, 4, 5, 6, 7, 8], [0])
+        work = kernel.gen_work(['c'], w, [1, 2, 3, 4, 5, 6, 7, 8], [0])
 
         jobs = []
         for obj in work:
