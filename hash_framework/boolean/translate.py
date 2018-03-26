@@ -76,6 +76,10 @@ def clause_dedupe(expr, prefix):
     cache_clause_dedupe[(expr, prefix)] = clause_dedupe_r(expr, prefix)
     return cache_clause_dedupe[(expr, prefix)]
 
+def clause_dedupe_cache():
+    global clause_dedupe_s
+    return clause_dedupe_s
+
 def clause_reduce_r(expr):
     if type(expr) != tuple:
         return expr

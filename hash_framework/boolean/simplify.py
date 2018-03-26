@@ -98,6 +98,11 @@ def r_simplify(expr):
     print(expr)
     return 1/0
 
+def get_simplify_stats():
+    global cache_simplify
+    return {'hit': cache_simplify['hit'], 'miss': cache_simplify['miss']}
+
+
 def simplify(expr):
     global cache_simplify
     if expr in cache_simplify:
