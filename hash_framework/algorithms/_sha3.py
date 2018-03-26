@@ -231,8 +231,10 @@ def perform_sha3(eval_table, original_state, f, prefix="", rounds=24, w=64):
         if original_state[i] != None:
             eval_table[name] = original_state[i]
 
-        if state[i] not in ['T', 'F']:
+        if original_state[i] not in ['T', 'F']:
             state[i] = name
+        else:
+            state[i] = original_state[i]
 
     if type(rounds) == int:
         eval_table, state = sha3f(eval_table, prefix, w, state, rounds)

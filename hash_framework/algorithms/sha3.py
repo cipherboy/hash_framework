@@ -24,7 +24,7 @@ class sha3:
     def evaluate(self, block, state, rounds=None):
         if rounds is None:
             rounds = self.rounds
-        return compute_md5(block, state, rounds=rounds)
+        return compute_sha3(block, state, rounds=rounds)
 
     def generate(self, prefixes=['h1', 'h2'], rounds=None):
         if rounds is None:
