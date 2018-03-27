@@ -33,9 +33,11 @@ def debug(jid=None):
                                    datetime.datetime.now())
 
     j.run()
-    result = j.to_dict(datetime.datetime.now())
-    print(result)
-    r.append(result)
+    res = j.to_dict(datetime.datetime.now())
+    if res['results'] == None:
+        res['results'] = []
+    print(res)
+    r.append(res)
 
     error = c.send_results(r)
     if error != None:
@@ -87,7 +89,10 @@ def run():
                                            datetime.datetime.now())
 
             j.run()
-            r.append(j.to_dict(datetime.datetime.now()))
+            res = j.to_dict(datetime.datetime.now())
+            if res['results'] == None:
+                res['results'] = []
+            r.append(res)
             j.clean()
 
             error = c.end_job(ji['task_id'], jid)
