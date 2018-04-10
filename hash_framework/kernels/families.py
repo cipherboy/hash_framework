@@ -220,4 +220,4 @@ class Families(Kernel):
     def clean(self):
         m = models()
         tag = self.build_tag()
-        #shutil.rmtree(m.model_dir + "/" + tag)
+        shutil.rmtree(m.model_dir + "/" + tag)
