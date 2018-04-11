@@ -73,7 +73,7 @@ def __main__():
 
     for i in results:
         for w in results[i]:
-            draw_table(results[i][w], 25*w, "/tmp/table-" + sys.argv[2] + "-w" + str(w) + "-i" + str(i) + "-o0.png")
+            draw_table(results[i][w], 25*w, "/tmp/table-margins-" + sys.argv[2] + "-w" + str(w) + "-i" + str(i) + "-o0.png")
 
 
 __main__()
