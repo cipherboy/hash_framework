@@ -5,14 +5,14 @@ def __main__():
     manager_uri = 'http://127.0.0.1:8000'
     scheduler_uri = 'http://127.0.0.1:8001'
     c = hf.manager.api.Client(manager_uri, scheduler_uri)
-    #tid = c.create_task('md4-families-r8-12-16-20-24', 'md4')
-    tid = 78
+    #tid = c.create_task('md5-families-r8-12-16-20', 'md5', running=False)
+    tid = 80
     print("Task ID: " + str(tid))
 
     kernel_name = "families"
     kernel = hf.kernels.lookup(kernel_name)
-    algo = "md4"
-    work = kernel.gen_work([8, 12, 16, 20, 24], list(range(0, 20)))
+    algo = "md5"
+    work = kernel.gen_work([24], list(range(0, 20)))
 
     start_state = ""
     start_block = ""
