@@ -66,7 +66,7 @@ class Families(Kernel):
         print("Work: " + str(len(work)))
         return list(work)
 
-    def work_to_args(algo_name, start_state, start_block, work):
+    def work_to_args(algo_name, start_state, start_block, work, ascii=False):
         d =  {
             "algo": algo_name,
             "rounds": work[0],
@@ -75,10 +75,12 @@ class Families(Kernel):
             "h1_start_state": start_state,
             "h2_start_state": start_state,
             "h1_start_block": start_block,
-            "ascii": ['h1b', 'h2b'],
             #"invalid": True,
             #"specific": [['.'*32, 'h1b', i*32, 'h2b', i*32] for i in [0, 12]]
         }
+
+        if ascii:
+            d["ascii"] = ['h1b', 'h2b']
 
         return d
 
