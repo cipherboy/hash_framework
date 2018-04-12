@@ -12,13 +12,34 @@ def __main__():
     kernel_name = "families"
     kernel = hf.kernels.lookup(kernel_name)
     algo = "md5"
-    work = kernel.gen_work([24], list(range(0, 20)))
+    work = kernel.gen_work([20, 24], list(range(0, 20)))
 
     start_state = ""
     start_block = ""
 
     # Default start state
     # start_state = "FTTFFTTTFTFFFTFTFFTFFFTTFFFFFFFTTTTFTTTTTTFFTTFTTFTFTFTTTFFFTFFTTFFTTFFFTFTTTFTFTTFTTTFFTTTTTTTFFFFTFFFFFFTTFFTFFTFTFTFFFTTTFTTF"
+
+    f = open('md5-args.txt', 'r').read().split('\n')
+    cw = set()
+    for l in f:
+        if len(l) == 0:
+            continue
+        s = l.split(' ')
+        r = int(s[0])
+        places = tuple()
+        if len(s[1]) > 0:
+            places = tuple(map(int, s[1].split('-')))
+        cw.add((r, places))
+
+    print(work[0])
+    print(type(work))
+    print(len(cw))
+    sw = set(work)
+    work = list(sw.difference(cw))
+    print(len(work))
+
+    #return 0
 
     jobs = []
     for w in work:

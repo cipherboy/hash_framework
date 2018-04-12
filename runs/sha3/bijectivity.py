@@ -7,7 +7,6 @@ def __main__():
     c = hf.manager.api.Client(manager_uri, scheduler_uri)
 
     tid = c.create_task('sha3-bijectivity', 'sha3', running=True, priority=4)
-    #tid = 59
     print("Task ID: " + str(tid))
 
     kernel_name = "sha3bijectivity"

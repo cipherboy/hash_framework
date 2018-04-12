@@ -8,11 +8,12 @@ def get_cw():
 
     results = []
 
-    tid = 42
-    q = "SELECT run_return, args FROM jobs WHERE task_id=" + str(tid) + " AND state=2;"
+    mjid = 36791300
+    tid = 82
+    q = "SELECT run_return, args FROM jobs WHERE task_id=" + str(tid) + " AND state=2 AND id >= " + str(mjid) + ";"
     r, cur = db.execute(q, cursor=True)
 
-    last_round = ['r', 'c', 'i23']
+    last_round = ['r', 'p', 'c', 'i22', 't', 'r', 'p', 'c', 'i23']
 
     row = cur.fetchone()
     while row != None:
@@ -41,13 +42,13 @@ def __main__():
     #return
 
     #tid = c.create_task('sha3-output-256', 'sha3', running=True, priority=4)
-    tid = 42
+    tid = 82
     print("Task ID: " + str(tid))
 
     kernel_name = "sha3output"
     kernel = hf.kernels.lookup(kernel_name)
     algo = "sha3"
-    work = kernel.gen_work(1, get_cw(), 'r', 256)
+    work = kernel.gen_work(1, get_cw(), 't', 256)
 
     jobs = []
     for obj in work:
