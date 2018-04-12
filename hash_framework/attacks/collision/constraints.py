@@ -30,9 +30,9 @@ def write_same_blocks(algo, prefixes=['h1', 'h2'], name="08-blocks.txt", out_nam
     models.vars.write_clause(out_name, tuple(c), name)
 
 
-def write_ascii_constraints(prefixes=['h1b'], name="44-ascii.txt"):
+def write_ascii_constraints(prefixes=['h1b'], count=64, name="44-ascii.txt"):
     z = "cascii := AND(T==T,"
-    for i in range(0, 64):
+    for i in range(0, count):
         b = i*8
         for prefix in prefixes:
             z += "NOT(" + prefix + str(b) + "),"
