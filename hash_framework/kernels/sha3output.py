@@ -38,15 +38,28 @@ class SHA3Output(Kernel):
         margin = (effective_margin//64)*w
         if len(cdata) > 0:
             for d in cdata:
-                for nd in range(0, 25*w):
+                if next_round == 'r' or next_round == 'p' or next_round[0] == 'i':
                     args = {}
                     args['algo'] = 'sha3'
                     args['cms_args'] = []
                     args['w'] = w
                     args['rounds'] = [next_round] + d[0]
                     args['margin'] = margin
-                    args['differences'] = [nd] + d[1]
+                    args['differences'] = [d[1][0]] + d[1]
                     yield args
+                else:
+                    for nd in range(0, 25*w):
+                        if next_round == 't' and (nd % 2) != (d[1][0] % 2):
+                            continue
+                        args = {}
+                        args['algo'] = 'sha3'
+                        args['cms_args'] = []
+                        args['w'] = w
+                        args['rounds'] = [next_round] + d[0]
+                        args['margin'] = margin
+                        args['differences'] = [nd] + d[1]
+                        yield args
+
         else:
             for nd in range(0, 25*w):
                 args = {}
