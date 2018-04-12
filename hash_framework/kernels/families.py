@@ -53,6 +53,10 @@ class Families(Kernel):
         else:
             self.h2_start_block = ""
 
+        self.ascii = []
+        if 'ascii' in self.args:
+            self.ascii = self.args['ascii']
+
     def gen_work(round_set, size_set):
         work = set()
         for r in round_set:
@@ -71,6 +75,7 @@ class Families(Kernel):
             "h1_start_state": start_state,
             "h2_start_state": start_state,
             "h1_start_block": start_block,
+            "ascii": ['h1b', 'h2b'],
             #"invalid": True,
             #"specific": [['.'*32, 'h1b', i*32, 'h2b', i*32] for i in [0, 12]]
         }
@@ -132,7 +137,7 @@ class Families(Kernel):
                     invalid_differentials = models.vars.differentials([['.'*32, 'h1b', 96, 'h2b', 96], ['.'*32, 'h1b', 224, 'h2b', 224], ['.'*32, 'h1b', 352, 'h2b', 352], ['.'*32, 'h1b', 480, 'h2b', 480]])
                     models.vars.write_clause('cinvalid', invalid_differentials, '23-invalid.txt')
 
-                models.vars.write_assign(['ccollision', 'cblocks', 'cstate', 'cdifferentials', 'cinvalid', 'cnegated', 'cspecific'])
+                models.vars.write_assign(['ccollision', 'cblocks', 'cstate', 'cdifferentials', 'cinvalid', 'cnegated', 'cspecific', 'cascii'])
                 m.collapse(bc="00-combined-model.bc")
         while not os.path.exists(cache_path) or not os.path.exists(cache_path + "/00-combined-model.bc"):
             time.sleep(0.1)
@@ -157,6 +162,8 @@ class Families(Kernel):
             models.vars.write_clause('cspecific', specific_differentials, '28-specific.txt')
 
         attacks.collision.reduced.specified_difference(self.algo, self.places, base_path + "/07-differential.txt")
+
+        attacks.collision.write_ascii_constraints(self.ascii, 64)
 
         cnf = self.cnf_path()
         o_cnf = open(cnf, 'w')
