@@ -66,21 +66,37 @@ class Families(Kernel):
         print("Work: " + str(len(work)))
         return list(work)
 
-    def work_to_args(algo_name, start_state, start_block, work, ascii=False):
+    def gen_work_extension(existing, rounds):
+        ext_rounds = list(range(rounds-4, rounds))
+        for w in existing:
+            for r in range(0, 5):
+                for n in itertools.combinations(ext_rounds, r):
+                    ns = set(w[1]).union(set(n))
+                    yield (rounds, tuple(sorted(list(ns))))
+
+
+    def work_to_args(algo_name, work, cascii=False, h1_start_state = "", h1_start_block = "", h2_start_state="", h2_start_block=""):
         d =  {
             "algo": algo_name,
             "rounds": work[0],
             "cms_args": [],
             "places": work[1],
-            "h1_start_state": start_state,
-            "h2_start_state": start_state,
-            "h1_start_block": start_block,
-            #"invalid": True,
-            #"specific": [['.'*32, 'h1b', i*32, 'h2b', i*32] for i in [0, 12]]
         }
 
-        if ascii:
+        if cascii:
             d["ascii"] = ['h1b', 'h2b']
+
+        if h1_start_state != "":
+            d['h1_start_state'] = h1_start_state
+
+        if h1_start_block != "":
+            d['h1_start_block'] = h1_start_block
+
+        if h2_start_state != "":
+            d['h2_start_state'] = h2_start_state
+
+        if h2_start_block != "":
+            d['h2_start_block'] = h2_start_block
 
         return d
 
