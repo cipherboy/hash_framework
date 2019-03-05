@@ -8,5 +8,5 @@ setup(name='hash_framework',
       author_email='alexander.m.scheel@gmail.com',
       license='GPLv3',
       packages=['hash_framework'],
-      install_requires=['psycopg2', 'psutil', 'flask'],
+      install_requires=['psycopg2', 'psutil', 'flask', 'cmsh'],
       zip_safe=False)
