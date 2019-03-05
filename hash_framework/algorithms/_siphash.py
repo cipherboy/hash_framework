@@ -1,4 +1,3 @@
-from hash_framework.boolean import *
 import random
 
 def sipround(v0, v1, v2, v3, iv, et):

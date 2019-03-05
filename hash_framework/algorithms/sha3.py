@@ -1,4 +1,3 @@
-from hash_framework.boolean import *
 from hash_framework.algorithms._sha3 import *
 import functools, collections
 

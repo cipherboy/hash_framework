@@ -1,5 +1,4 @@
 from hash_framework.config import config
-from hash_framework.boolean.translate import *
 from hash_framework.utils import *
 
 import os, collections, subprocess

@@ -1,7 +1,6 @@
 from hash_framework.attacks import *
 from hash_framework.attacks.collision.metric.loose import abs as loose_abs
 
-from hash_framework.boolean import *
 from hash_framework.attacks.utils import table_cols as attacks_table_cols
 from hash_framework.database import database
 from hash_framework.models import models

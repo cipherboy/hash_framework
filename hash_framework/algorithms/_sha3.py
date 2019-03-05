@@ -1,4 +1,3 @@
-from hash_framework.boolean import *
 import math
 
 def sha3i(w, x, y, z):

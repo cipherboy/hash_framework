@@ -1,4 +1,3 @@
-from hash_framework.boolean import *
 
 def sha1f(t, b, c, d):
     if 0 <= t <= 19:
