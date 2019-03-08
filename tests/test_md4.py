@@ -1,5 +1,5 @@
 import cmsh
-from hash_framework.algorithms import _md4
+from hash_framework.algorithms.md4 import md4
 
 def gen_blocks(model, count, width):
     result = []
@@ -19,19 +19,21 @@ def split_hex(string, width=8):
 
 def test_known_value():
     model = cmsh.Model()
+    h = md4()
 
     block_hex = "8" + ("0" * 127)
     block = list(map(lambda x: model.to_vector(x, width=32), split_hex(block_hex)))
 
     res_hex = "31d6cfe0d16ae931b73c59d7e0c089c0"
     res_known = list(map(lambda x: model.to_vector(x, width=32), split_hex(res_hex)))
-    res, _ = _md4.md4(model, block)
+    res, _ = h.compute(model, block)
 
     assert list(map(int, res_known)) == list(map(int, res))
 
 
 def test_md4_known_collision():
     model = cmsh.Model()
+    h = md4()
 
     k1 = "839c7a4d7a92cb5678a5d5b9eea5a7573c8a74deb366c3dc20a083b69f5d2a3bb3719dc69891e9f95e809fd7e8b23ba6318edd45e51fe39708bf9427e9c3e8b9"
     k2 = "839c7a4d7a92cbd678a5d529eea5a7573c8a74deb366c3dc20a083b69f5d2a3bb3719dc69891e9f95e809fd7e8b23ba6318edc45e51fe39708bf9427e9c3e8b9"
@@ -42,13 +44,14 @@ def test_md4_known_collision():
     assert len(blocks_1) == 16
     assert len(blocks_2) == 16
 
-    res_1, _ = _md4.md4(model, blocks_1)
-    res_2, _ = _md4.md4(model, blocks_2)
+    res_1, _ = h.compute(model, blocks_1)
+    res_2, _ = h.compute(model, blocks_2)
     assert list(map(int, res_1)) == list(map(int, res_2))
 
 
 def test_md4_find_existing_collision():
     model = cmsh.Model()
+    h = md4()
 
     k1 = "839c7a4d7a92cb5678a5d5b9eea5a7573c8a74deb366c3dc20a083b69f5d2a3bb3719dc69891e9f95e809fd7e8b23ba6318edd45e51fe39708bf9427e9c3e8b9"
     k2 = "839c7a4d7a92cbd678a5d529eea5a7573c8a74deb366c3dc20a083b69f5d2a3bb3719dc69891e9f95e809fd7e8b23ba6318edc45e51fe39708bf9427e9c3e8b9"
@@ -60,8 +63,8 @@ def test_md4_find_existing_collision():
         if blocks_value_1[i] != blocks_value_2[i]:
             indices.append(i)
 
-    r_value_1, r_rounds_1 = _md4.md4(model, blocks_value_1)
-    r_value_2, r_rounds_2 = _md4.md4(model, blocks_value_2)
+    r_value_1, r_rounds_1 = h.compute(model, blocks_value_1)
+    r_value_2, r_rounds_2 = h.compute(model, blocks_value_2)
 
     blocks_1 = gen_blocks(model, 16, 32)
     blocks_2 = gen_blocks(model, 16, 32)
@@ -78,8 +81,8 @@ def test_md4_find_existing_collision():
         model.add_assert(blocks_2[i] == blocks_value_2[i])
 
     # But their MD4s must be the same
-    result_1, rounds_1 = _md4.md4(model, blocks_1)
-    result_2, rounds_2 = _md4.md4(model, blocks_2)
+    result_1, rounds_1 = h.compute(model, blocks_1)
+    result_2, rounds_2 = h.compute(model, blocks_2)
 
     for i in range(0, 4):
         model.add_assert(result_2[i] == result_2[i])
@@ -105,6 +108,7 @@ def test_md4_find_existing_collision():
 
 def test_md4_find_ivs():
     model = cmsh.Model()
+    h = md4()
 
     k1 = "839c7a4d7a92cb5678a5d5b9eea5a7573c8a74deb366c3dc20a083b69f5d2a3bb3719dc69891e9f95e809fd7e8b23ba6318edd45e51fe39708bf9427e9c3e8b9"
     k2 = "839c7a4d7a92cbd678a5d529eea5a7573c8a74deb366c3dc20a083b69f5d2a3bb3719dc69891e9f95e809fd7e8b23ba6318edc45e51fe39708bf9427e9c3e8b9"
@@ -115,8 +119,8 @@ def test_md4_find_ivs():
     bv1 = model.join_vec(blocks_value_1)
     bv2 = model.join_vec(blocks_value_2)
 
-    r_value_1, r_rounds_1 = _md4.md4(model, blocks_value_1)
-    r_value_2, r_rounds_2 = _md4.md4(model, blocks_value_2)
+    r_value_1, r_rounds_1 = h.compute(model, blocks_value_1)
+    r_value_2, r_rounds_2 = h.compute(model, blocks_value_2)
     rv1 = model.join_vec(r_value_1)
     rsv1 = model.join_vec(r_rounds_1)
 
@@ -136,8 +140,8 @@ def test_md4_find_ivs():
     model.add_assert(b2 == bv2)
 
     # But their MD4s must be the same
-    result_1_arr, rounds_1_arr = _md4.md4(model, blocks_1, iv=iv_1_arr)
-    result_2_arr, rounds_2_arr = _md4.md4(model, blocks_2, iv=iv_2_arr)
+    result_1_arr, rounds_1_arr = h.compute(model, blocks_1, iv=iv_1_arr)
+    result_2_arr, rounds_2_arr = h.compute(model, blocks_2, iv=iv_2_arr)
 
     result_1 = model.join_vec(result_1_arr)
     rounds_1 = model.join_vec(rounds_1_arr)

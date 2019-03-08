@@ -11,8 +11,7 @@ def md4h(x, y, z):
 
 
 def md4r1(a, b, c, d, x, l):
-    value = a + md4f(b, c, d) + x
-    return value.rotl(l)
+    return (a + md4f(b, c, d) + x).rotl(l)
 
 
 def md4r2(a, b, c, d, x, l):
