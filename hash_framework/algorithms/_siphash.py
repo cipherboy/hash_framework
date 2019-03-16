@@ -49,9 +49,7 @@ def siphash(model, key, block, v0=0x736f6d6570736575, v1=0x646f72616e646f6d,
         v1 = v1 ^ 0xee
 
     range_max = len(blocks) - (len(blocks) % 8)
-    print("range_max", range_max)
     for index in range(0, range_max, 8):
-        print(index)
         m = reversed(blocks[index:index+8])
         m = model.join_vec(m)
 
@@ -61,7 +59,6 @@ def siphash(model, key, block, v0=0x736f6d6570736575, v1=0x646f72616e646f6d,
             v0, v1, v2, v3 = sipround(v0, v1, v2, v3)
 
         v0 = v0 ^ m
-
 
     missing = [False, False, False, False, False, False, False, False] * (8 - (len(blocks) % 8))
     if len(missing) != 64:
@@ -73,12 +70,6 @@ def siphash(model, key, block, v0=0x736f6d6570736575, v1=0x646f72616e646f6d,
         assert len(missing) == 64
         missing = model.to_vector(missing)
         b = b | missing
-
-    print("v0", hex(int(v0)))
-    print("v1", hex(int(v1)))
-    print("v2", hex(int(v2)))
-    print("v3", hex(int(v3)))
-    print("b", hex(int(b)))
 
     v3 = v3 ^ b
 
