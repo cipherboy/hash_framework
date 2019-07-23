@@ -1,3 +1,5 @@
+import cmsh
+
 def prefix_keys(d, prefix):
     assert(type(d) == dict)
     assert(type(prefix) == str)
@@ -33,3 +35,19 @@ def merge_dict(ds):
             assert(not k in r)
             r[k] = d[k]
     return r
+
+def print_cmsh(obj):
+    print(repr_cmsh(obj))
+
+def repr_cmsh(obj):
+    if isinstance(obj, (list, tuple)):
+        return "[" + ", ".join([repr_cmsh(part) for part in obj]) + "]"
+    elif isinstance(obj, cmsh.Vector):
+        return str(int(obj))
+    elif isinstance(obj, cmsh.Variable):
+        if obj.model.sat:
+            return str(bool(obj))
+        else:
+            return "v" + int(obj)
+    else:
+        return str(obj)
