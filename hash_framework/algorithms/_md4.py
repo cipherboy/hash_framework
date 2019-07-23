@@ -29,6 +29,7 @@ def md4_round(block, round_func, state, x_i, l):
 
 
 def md4(model, block, iv=[0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476], rounds=48):
+    assert len(block) == 16
     assert len(iv) == 4
 
     if isinstance(iv[0], int):
