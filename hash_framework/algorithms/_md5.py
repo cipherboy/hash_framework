@@ -1,49 +1,28 @@
-
 def md5f(x, y, z):
-    #return b_or(b_and(x, y), b_and(b_not(x), z))
-    return b_xor(b_and(b_xor(y, z), x), z)
+    return ((y ^ z) & x) ^ z
 
 def md5g(x, y, z):
-    #return b_or(b_and(x, z), b_and(y, b_not(z)))
-    return b_xor(b_and(b_xor(x, y), z), y)
+    return ((x ^ y) & z) ^ y
 
 def md5h(x, y, z):
-    return b_xor(b_xor(x, y), z)
+    return x ^ y ^ z
 
 def md5i(x, y, z):
-    return b_xor(y, b_or(x, b_not(z)))
+    return y ^ (x | ~z)
 
-def md5apply32(func, x, y, z):
-    result = []
-    for i in range(0, 32):
-        result.append(func(x[i], y[i], z[i]))
-    return result
-
-def md5f32(x, y, z):
-    return md5apply32(md5f, x, y, z)
-
-def md5g32(x, y, z):
-    return md5apply32(md5g, x, y, z)
-
-def md5h32(x, y, z):
-    return md5apply32(md5h, x, y, z)
-
-def md5i32(x, y, z):
-    return md5apply32(md5i, x, y, z)
-
-def md5round1a(et, p, a, b, c, d, x, t, l):
+def md5r1(et, p, a, b, c, d, x, t, l):
     r = b_add4l(p, md5f32(b, c, d), a, x, b_tobitl(t))
     return b_addl(p, b, b_rotl(r, l)), et
 
-def md5round2a(et, p, a, b, c, d, x, t, l):
+def md5r2(et, p, a, b, c, d, x, t, l):
     r = b_add4l(p, md5g32(b, c, d), a, x, b_tobitl(t))
     return b_addl(p, b, b_rotl(r, l)), et
 
-def md5round3a(et, p, a, b, c, d, x, t, l):
+def md5r3(et, p, a, b, c, d, x, t, l):
     r = b_add4l(p, md5h32(b, c, d), a, x, b_tobitl(t))
     return b_addl(p, b, b_rotl(r, l)), et
 
-def md5round4a(et, p, a, b, c, d, x, t, l):
+def md5r4(et, p, a, b, c, d, x, t, l):
     r = b_add4l(p, md5i32(b, c, d), a, x, b_tobitl(t))
     return b_addl(p, b, b_rotl(r, l)), et
 

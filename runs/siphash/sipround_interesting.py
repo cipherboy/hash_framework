@@ -19,10 +19,10 @@ def main():
     ar = m.join_vec([ar0, ar1, ar2, ar3])
     br = m.join_vec([br0, br1, br2, br3])
 
-    eqv = av.external_eq(bv)
+    eqv = m.to_vec([av[i] == bv[i] for i in range(0, len(av))])
     m.add_assert(eqv.bit_sum() == 255)
 
-    eqr = ar.external_eq(br)
+    eqr = m.to_vec([ar[i] == br[i] for i in range(0, len(ar))])
     m.add_assert(eqr.bit_sum() == 250)
 
     sat = m.solve()
