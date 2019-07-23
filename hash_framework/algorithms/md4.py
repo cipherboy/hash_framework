@@ -40,7 +40,7 @@ class md4:
 
     def compute(self, model, block, iv=None, rounds=None):
         if iv == None:
-            iv = self.default_state
+            iv = self.default_state[:]
         if rounds == None:
             rounds = self.rounds
         return _md4.md4(model, block, iv=iv, rounds=rounds)
