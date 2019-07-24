@@ -6,9 +6,9 @@ import multiprocessing
 import cmsh
 from hash_framework.algorithms import md4
 
-def build_collision(locations, rounds):
+def build_collision(family, rounds):
     model = cmsh.Model()
-    hf = md4.md4()
+    hf = md4()
     hf.rounds = rounds
 
     block_1 = model.vec(512)
@@ -31,15 +31,15 @@ def build_collision(locations, rounds):
     assert len(rounds_2s) == rounds
 
     for r_index in range(0, rounds):
-        if r_index in locations:
+        if r_index in family:
             model.add_assert((rounds_1s[r_index] ^ rounds_2s[r_index]) != 0)
         else:
             model.add_assert((rounds_1s[r_index] ^ rounds_2s[r_index]) == 0)
 
     if model.solve():
-        print("SAT", locations, rounds)
+        print("SAT", family, rounds)
     else:
-        print("UNSAT", locations, rounds)
+        print("UNSAT", family, rounds)
 
     model.cleanup()
 
@@ -52,6 +52,7 @@ def main():
     for rounds in range(16, 33, 4):
         for fs in range(1, rounds):
             for family in itertools.permutations(range(0, rounds-4), fs):
+                # build_collision(family, rounds)
                 pool.apply_async(build_collision, args=(family, rounds))
 
     pool.close()
