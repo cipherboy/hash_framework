@@ -10,7 +10,7 @@ class sha1:
         0xC3D2E1F0
     ]
 
-    name = "md5"
+    name = "sha1"
     rounds = 80
     block_size = 512
     state_size = 160

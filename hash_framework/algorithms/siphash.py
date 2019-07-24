@@ -10,25 +10,26 @@ class siphash:
     ]
 
     name = "siphash"
+    outlen = 8
     cROUNDS = 2
     dROUNDS = 4
     rounds = cROUNDS + dROUNDS
     key_size = 128
-    block_size = 512
-    state_size = 160
-    int_size = 32
+    state_size = 256
+    int_size = 64
     block_map = {}
     round_funcs = []
 
     def __init__(self):
-        self.round_funcs = [
-            functools.partial(_sha1.sha1_roundfunc, t=i)
-            for i in range(0, 64)
-        ]
+        self.round_func = _siphash.sipround
 
-    def compute(self, model, block, iv=None, rounds=None):
+    def compute(self, model, key, block, iv=None, outlen=None, cROUNDS=None, dROUNDS=None):
         if iv == None:
             iv = self.default_state[:]
-        if rounds == None:
-            rounds = self.rounds
-        return _sha1.sha1(model, block, iv=iv, rounds=rounds)
+        if cROUNDS == None:
+            cROUNDS = self.cROUNDS
+        if dROUNDS == None:
+            dROUNDS = self.dROUNDS
+        if outlen == None:
+            outlen = self.outlen
+        return _siphash.siphash(model, key, block, v0=iv[0], v1=iv[1], v2=iv[2], v3=iv[3], outlen=outlen, cROUNDS=cROUNDS, dROUNDS=dROUNDS)
