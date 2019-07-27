@@ -2,7 +2,7 @@ from hash_framework.algorithms.md4 import md4
 from hash_framework.algorithms.md5 import md5
 from hash_framework.algorithms.sha1 import sha1
 from hash_framework.algorithms.sha3 import sha3
-from hash_framework.algorithms.siphsah import siphash
+from hash_framework.algorithms.siphash import siphash
 
 all_algorithms = {
     'md4': md4,
@@ -14,3 +14,9 @@ all_algorithms = {
 
 def lookup(name):
     return all_algorithms[name]
+
+def resolve(name):
+    if isinstance(name, str):
+        name = lookup(name)
+
+    return name()

@@ -1,5 +1,3 @@
-import random
-
 def sipround(v0, v1, v2, v3):
     v0 = v0 + v1
     v1 = v1.rotl(13)

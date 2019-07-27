@@ -15,6 +15,7 @@ class sha1:
     block_size = 512
     state_size = 160
     int_size = 32
+    round_size = 160
     block_map = {}
     round_funcs = []
 
@@ -23,6 +24,13 @@ class sha1:
             functools.partial(_sha1.sha1_roundfunc, t=i)
             for i in range(0, 64)
         ]
+
+    def columns(self):
+        cols = ["iv", "block"]
+        for i in range(0, self.rounds):
+            cols.append("round" + str(i))
+        cols.append("result");
+        return cols
 
     def compute(self, model, block, iv=None, rounds=None):
         if iv == None:

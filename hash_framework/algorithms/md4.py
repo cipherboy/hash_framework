@@ -23,6 +23,7 @@ class md4:
     block_size = 512
     state_size = 128
     int_size = 32
+    round_size = 32
     shifts = [3, 7, 11, 19]*4 + [3, 5, 9, 13]*4 + [3, 9, 11, 15]*4
     block_schedule = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15] + [0, 4, 8, 12, 1, 5, 9, 13, 2, 6, 10, 14, 3, 7, 11, 15] + [0, 8, 4, 12, 2, 10, 6, 14, 1, 9, 5, 13, 3, 11, 7, 15]
     block_map = {}
@@ -37,6 +38,13 @@ class md4:
         self.block_map = collections.defaultdict(list)
         for i in range(0, self.rounds):
             self.block_map[self.block_schedule[i]].append(i)
+
+    def columns(self):
+        cols = ["iv", "block"]
+        for i in range(0, self.rounds):
+            cols.append("round" + str(i))
+        cols.append("result");
+        return cols
 
     def compute(self, model, block, iv=None, rounds=None):
         if iv == None:

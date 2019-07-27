@@ -23,6 +23,13 @@ class siphash:
     def __init__(self):
         self.round_func = _siphash.sipround
 
+    def columns(self):
+        cols = ["iv", "block"]
+        for i in range(0, self.rounds):
+            cols.append("round" + str(i))
+        cols.append("result");
+        return cols
+
     def compute(self, model, key, block, iv=None, outlen=None, cROUNDS=None, dROUNDS=None):
         if iv == None:
             iv = self.default_state[:]
