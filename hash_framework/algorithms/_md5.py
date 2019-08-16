@@ -1,3 +1,6 @@
+import cmsh
+from .utils import reshape
+
 def md5f(x, y, z):
     return ((y ^ z) & x) ^ z
 
@@ -28,16 +31,9 @@ def md5_roundfunc(block, round_func, state, x_i, l, t):
     return d, new_a, b, c
 
 def md5(model, block, iv=[0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476], rounds=64):
-    assert len(block) == 16
-    assert len(iv) == 4
+    block = reshape(model, block, 16, 32)
+    iv = reshape(model, iv, 4, 32)
 
-    if isinstance(iv[0], int):
-        iv = tuple([
-            model.to_vector(iv[0], width=32),
-            model.to_vector(iv[1], width=32),
-            model.to_vector(iv[2], width=32),
-            model.to_vector(iv[3], width=32)
-        ])
     state = tuple(iv[:])
     result_rounds = []
 

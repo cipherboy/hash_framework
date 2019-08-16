@@ -1,4 +1,5 @@
-from hash_framework.utils import print_cmsh
+import cmsh
+from .utils import reshape
 
 def sha1f(t, b, c, d):
     if 0 <= t <= 19:
@@ -33,19 +34,7 @@ def sha1_roundfunc(t, state, w):
     a = tmp
     return a, b, c, d, e
 
-def sha1(model, block, iv=[0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476, 0xC3D2E1F0], rounds=80):
-    assert len(block) == 16
-    assert len(iv) == 5
-
-    if isinstance(iv[0], int):
-        iv = tuple([
-            model.to_vector(iv[0], width=32),
-            model.to_vector(iv[1], width=32),
-            model.to_vector(iv[2], width=32),
-            model.to_vector(iv[3], width=32),
-            model.to_vector(iv[4], width=32)
-        ])
-
+def sha1_blockschedule(model, block, rounds=80):
     w = [None] * rounds
     for w_index in range(0, 16):
         if w_index >= len(w):
@@ -60,7 +49,22 @@ def sha1(model, block, iv=[0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476, 0xC3D
             break
         w[w_index] = (w[w_index-3] ^ w[w_index - 8] ^ w[w_index - 14] ^ w[w_index - 16]).rotl(1)
 
-    print_cmsh(w)
+    return w
+
+def sha1(model, block, iv=[0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476, 0xC3D2E1F0], rounds=80):
+    block = reshape(model, block, 16, 32)
+    iv = reshape(model, iv, 5, 32)
+
+    if isinstance(iv[0], int):
+        iv = tuple([
+            model.to_vector(iv[0], width=32),
+            model.to_vector(iv[1], width=32),
+            model.to_vector(iv[2], width=32),
+            model.to_vector(iv[3], width=32),
+            model.to_vector(iv[4], width=32)
+        ])
+
+    w = sha1_blockschedule(model, block, rounds)
 
     state = tuple(iv[:])
     result_rounds = []

@@ -32,6 +32,9 @@ class sha1:
         cols.append("result");
         return cols
 
+    def block_schedule(self, model, block):
+        return _sha1.sha1_blockschedule(model, block)
+
     def compute(self, model, block, iv=None, rounds=None):
         if iv == None:
             iv = self.default_state[:]

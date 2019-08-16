@@ -1,44 +1,33 @@
+import cmsh
+from .utils import reshape
+
 def md4f(x, y, z):
     return (x & y) | ((-x) & z)
-
 
 def md4g(x, y, z):
     return (x & y) | (x & z) | (y & z)
 
-
 def md4h(x, y, z):
     return x ^ y ^ z
-
 
 def md4r1(a, b, c, d, x, l):
     return (a + md4f(b, c, d) + x).rotl(l)
 
-
 def md4r2(a, b, c, d, x, l):
     return ((a + md4g(b, c, d) + x) + 0x5A827999).rotl(l)
 
-
 def md4r3(a, b, c, d, x, l):
     return ((a + md4h(b, c, d) + x) + 0x6ED9EBA1).rotl(l)
-
 
 def md4_round(block, round_func, state, x_i, l):
     a, b, c, d = state
     new_a = round_func(a, b, c, d, block[x_i], l)
     return d, new_a, b, c
 
-
 def md4(model, block, iv=[0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476], rounds=48):
-    assert len(block) == 16
-    assert len(iv) == 4
+    block = reshape(model, block, 16, 32)
+    iv = reshape(model, iv, 4, 32)
 
-    if isinstance(iv[0], int):
-        iv = tuple([
-            model.to_vector(iv[0], width=32),
-            model.to_vector(iv[1], width=32),
-            model.to_vector(iv[2], width=32),
-            model.to_vector(iv[3], width=32)
-        ])
     state = tuple(iv[:])
     result_rounds = []
 
