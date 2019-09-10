@@ -1,6 +1,7 @@
 import hash_framework.config as config
 import hash_framework
 
+
 class Hosts:
     def __init__(self, db):
         self.db = db
@@ -23,22 +24,23 @@ class Hosts:
             return False
 
         for data in datas:
-            if 'ip' not in data or type(data['ip']) != str:
+            if "ip" not in data or type(data["ip"]) != str:
                 return False
-            if 'hostname' not in data or type(data['hostname']) != str:
+            if "hostname" not in data or type(data["hostname"]) != str:
                 return False
-            if 'cores' not in data or type(data['cores']) != int:
+            if "cores" not in data or type(data["cores"]) != int:
                 return False
-            if 'memory' not in data or type(data['memory']) != int:
+            if "memory" not in data or type(data["memory"]) != int:
                 return False
-            if 'disk' not in data or type(data['disk']) != int:
+            if "disk" not in data or type(data["disk"]) != int:
                 return False
-            if 'version' not in data or type(data['version']) != str:
+            if "version" not in data or type(data["version"]) != str:
                 return False
-            if 'in_use' not in data or type(data['in_use']) != bool:
+            if "in_use" not in data or type(data["in_use"]) != bool:
                 return False
 
         return True
+
 
 class Host:
     def __init__(self, db):
@@ -60,19 +62,26 @@ class Host:
         self.in_use = None
 
     def to_dict(self):
-        return {'ip': self.ip, 'hostname': self.hostname, 'cores': self.cores,
-                'memory': self.memory, 'disk': self.disk,
-                'registered': self.registered, 'last_seen': self.last_seen,
-                'version': self.version, 'in_use': self.in_use}
+        return {
+            "ip": self.ip,
+            "hostname": self.hostname,
+            "cores": self.cores,
+            "memory": self.memory,
+            "disk": self.disk,
+            "registered": self.registered,
+            "last_seen": self.last_seen,
+            "version": self.version,
+            "in_use": self.in_use,
+        }
 
     def new(self, ip, hostname, cores, memory, disk, version, in_use):
-        assert(type(ip) == str)
-        assert(type(hostname) == str)
-        assert(type(cores) == int)
-        assert(type(memory) == int)
-        assert(type(disk) == int)
-        assert(type(version) == str)
-        assert(type(in_use) == bool)
+        assert type(ip) == str
+        assert type(hostname) == str
+        assert type(cores) == int
+        assert type(memory) == int
+        assert type(disk) == int
+        assert type(version) == str
+        assert type(in_use) == bool
 
         self.ip = ip
         self.hostname = hostname
@@ -90,7 +99,7 @@ class Host:
         return self
 
     def load_id(self, hid):
-        assert(type(hid) == int)
+        assert type(hid) == int
 
         self.id = hid
 
@@ -98,8 +107,8 @@ class Host:
         return self
 
     def load(self, ip, hostname):
-        assert(type(ip) == str)
-        assert(type(hostname) == str)
+        assert type(ip) == str
+        assert type(hostname) == str
 
         self.ip = ip
         self.hostname = hostname
@@ -120,8 +129,8 @@ class Host:
         return keys
 
     def add_metadata(self, name, value):
-        assert(type(name) == str)
-        assert(type(value) == str)
+        assert type(name) == str
+        assert type(value) == str
 
         try:
             q = "DELETE FROM host_metadata WHERE host_id=%s AND name=%s"
@@ -161,7 +170,15 @@ class Host:
         q += " (ip, hostname, cores, memory, disk, registered, last_seen, version, in_use)"
         q += " VALUES (%s, %s, %s, %s, %s, now(), now(), %s, %s)"
         q += " RETURNING id;"
-        values = (self.ip, self.hostname, self.cores, self.memory, self.disk, self.version, self.in_use)
+        values = (
+            self.ip,
+            self.hostname,
+            self.cores,
+            self.memory,
+            self.disk,
+            self.version,
+            self.in_use,
+        )
 
         result = self.db.prepared(q, values, rowid=True, limit=1)
         if result == None or type(result) != tuple:
@@ -205,7 +222,6 @@ class Host:
             self.running = None
 
         cursor.close()
-
 
     def __remove__(self):
         q = ""

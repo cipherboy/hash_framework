@@ -7,6 +7,7 @@ from hash_framework.config import config
 import hash_framework.kernels as kernels
 from multiprocessing import Process
 
+
 class Job:
     def __init__(self, jid, kernel_name, kernel_args, timeout, checked_out):
         # Copy config
@@ -35,20 +36,21 @@ class Job:
         # pre_run == compile_time
         # Includes building shared module (if not available), building
         # specific module, and compiling module
-        self.compile_time   = time.time()
+        self.compile_time = time.time()
         self.compile_return = self.kernel.pre_run()
-        self.compile_time   = (time.time() - self.compile_time)
+        self.compile_time = time.time() - self.compile_time
 
         # Get run command from the kernel
         cmd = self.kernel.run_cmd()
         out_path = self.kernel.out_path()
 
         if out_path != "":
-            self.of = open(out_path, 'w')
+            self.of = open(out_path, "w")
 
         self.run_time = time.time()
-        self._p = subprocess.Popen(cmd, stdin=subprocess.DEVNULL,
-                                   stdout=self.of, shell=True)
+        self._p = subprocess.Popen(
+            cmd, stdin=subprocess.DEVNULL, stdout=self.of, shell=True
+        )
 
         # Timeout cleanup
         if type(self.timeout) == int and self.timeout <= 0:
@@ -76,24 +78,24 @@ class Job:
             self.of = None
 
         self._p = None
-        self.run_time = (time.time() - self.run_time)
+        self.run_time = time.time() - self.run_time
 
     def to_dict(self, checked_back):
         obj = {}
 
         self.finalize_time = time.time()
         results = self.kernel.post_run(self.run_return)
-        self.finalize_time = (time.time() - self.finalize_time)
+        self.finalize_time = time.time() - self.finalize_time
 
-        obj['id'] = self.id
-        obj['checked_out'] = str(self.checked_out)
-        obj['compile_time'] = int(self.compile_time*1000)
-        obj['compile_return'] = self.compile_return
-        obj['run_time'] = int(self.run_time*1000)
-        obj['run_return'] = self.run_return
-        obj['finalize_time'] = int(self.finalize_time*1000)
-        obj['checked_back'] = str(checked_back)
-        obj['results'] = results
+        obj["id"] = self.id
+        obj["checked_out"] = str(self.checked_out)
+        obj["compile_time"] = int(self.compile_time * 1000)
+        obj["compile_return"] = self.compile_return
+        obj["run_time"] = int(self.run_time * 1000)
+        obj["run_return"] = self.run_return
+        obj["finalize_time"] = int(self.finalize_time * 1000)
+        obj["checked_back"] = str(checked_back)
+        obj["results"] = results
 
         return obj
 

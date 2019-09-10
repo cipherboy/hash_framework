@@ -2,7 +2,7 @@ import sqlite3, json
 import hash_framework as hf
 import png
 
-DOT="/tmp/lattice.dot"
+DOT = "/tmp/lattice.dot"
 
 
 db = hash_framework.database()
@@ -12,7 +12,19 @@ results = []
 for r in rs:
     results.append(r[0])
 
-points = list(map(lambda y: tuple([y[0], tuple(y[1:])]), list(map(lambda x: list(map(int, x.replace('e', '').replace('r', '').split("-")[1:])), results))[:-2]))
+points = list(
+    map(
+        lambda y: tuple([y[0], tuple(y[1:])]),
+        list(
+            map(
+                lambda x: list(
+                    map(int, x.replace("e", "").replace("r", "").split("-")[1:])
+                ),
+                results,
+            )
+        )[:-2],
+    )
+)
 
 
 w_graph = {}
@@ -33,16 +45,18 @@ for a in range(0, len(points)):
 print(w_graph)
 
 
-f = open(DOT, 'w')
+f = open(DOT, "w")
 f.write("digraph dataviz {\n")
 f.write('size="10,10";' + "\n")
 f.write("overlap = false;\n")
 f.write("splines = true;\n")
-f.write('node [\ncolor="#7C2529";\nfontcolor="#7C2529";\n];\nedge [\ncolor="#F1BE48";\n];\n')
+f.write(
+    'node [\ncolor="#7C2529";\nfontcolor="#7C2529";\n];\nedge [\ncolor="#F1BE48";\n];\n'
+)
 f.write("\n\n")
 
 for e in w_graph:
-    f.write("v" + str(e) + " [label=\"" + str(points[e]) + "\"];\n")
+    f.write("v" + str(e) + ' [label="' + str(points[e]) + '"];\n')
 
 f.write("\n\n")
 for u in w_graph:

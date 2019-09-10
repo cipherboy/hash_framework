@@ -1,6 +1,7 @@
 import cmsh
 import hash_framework.algorithms._siphash as _siphash
 
+
 def main():
     m = cmsh.Model()
     key = m.vec(128)

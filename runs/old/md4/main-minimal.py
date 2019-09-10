@@ -6,12 +6,14 @@ from compute import cset
 def __main__():
     pass
 
+
 def _h(host, processes):
     r = []
     min_port = 5000
     for i in range(0, processes):
         r.append("http://" + host + ":" + str(min_port + i))
     return r
+
 
 def from_db(algo, db, kernel):
     rounds = [8]
@@ -23,24 +25,28 @@ def from_db(algo, db, kernel):
     for r in rounds:
         c = []
         for i in range(0, r):
-            c.append('ri' + str(i))
+            c.append("ri" + str(i))
 
-        query = "SELECT " + ','.join(c) + " FROM c_" + algo.name + " WHERE tag LIKE '%" + str(r) + "%' AND ROWID > 24695;"
+        query = (
+            "SELECT "
+            + ",".join(c)
+            + " FROM c_"
+            + algo.name
+            + " WHERE tag LIKE '%"
+            + str(r)
+            + "%' AND ROWID > 24695;"
+        )
         rs = db.execute(query)
         for row in rs:
-            jr = ''.join(row)
-            c = jr.count('*')
+            jr = "".join(row)
+            c = jr.count("*")
             if c in bits:
-                locs = [i for i in range(len(jr)) if jr[i] == '*']
+                locs = [i for i in range(len(jr)) if jr[i] == "*"]
                 all_work.remove((r, tuple(locs)))
 
     print(len(all_work))
 
     return all_work
-
-
-
-
 
 
 if __name__ == "__main__":
@@ -79,10 +85,21 @@ if __name__ == "__main__":
     print(len(work))
     # assert(False)
 
-
     # neighborhood
     tags = []
-    work_mapped = list(map(lambda y: kernel.work_to_args("md4", y, start_state=start_state, start_block=start_block, ascii_block=False, both_ascii=False), work))
+    work_mapped = list(
+        map(
+            lambda y: kernel.work_to_args(
+                "md4",
+                y,
+                start_state=start_state,
+                start_block=start_block,
+                ascii_block=False,
+                both_ascii=False,
+            ),
+            work,
+        )
+    )
 
     on_result = functools.partial(kernel.on_result, algo, db)
 
@@ -90,7 +107,7 @@ if __name__ == "__main__":
     rs = hash_framework.manager.run(cs, work_mapped, kernel_name, on_result)
     for rid in rs:
         r = rs[rid]
-        if r != None and 'results' in r and len(r['results']) > 0:
+        if r != None and "results" in r and len(r["results"]) > 0:
             sat_list.add(work[rid])
 
     print(sat_list)

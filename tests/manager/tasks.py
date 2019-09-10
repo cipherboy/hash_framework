@@ -2,6 +2,7 @@
 
 import hash_framework as hf
 
+
 def tc_create_task():
     db = hf.database()
     db.close()
@@ -9,9 +10,10 @@ def tc_create_task():
 
     t = hf.manager.Task(db)
     t.new("test-md4-test", "md4", 10, 10000)
-    assert(t.id != None)
+    assert t.id != None
 
     return True
+
 
 def tc_load_task():
     db = hf.database()
@@ -20,12 +22,13 @@ def tc_load_task():
 
     t = hf.manager.Task(db)
     t.load("test-md4-test")
-    assert(t.name == "test-md4-test")
-    assert(t.algo == "md4")
-    assert(t.max_threads == 10)
-    assert(t.priority == 10000)
+    assert t.name == "test-md4-test"
+    assert t.algo == "md4"
+    assert t.max_threads == 10
+    assert t.priority == 10000
 
     return True
+
 
 def tc_delete_task():
     db = hf.database()
@@ -48,6 +51,7 @@ def __main__():
         else:
             print(test.__name__ + "... Failed")
             break
+
 
 if __name__ == "__main__":
     __main__()

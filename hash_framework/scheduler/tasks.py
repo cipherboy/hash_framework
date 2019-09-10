@@ -3,6 +3,7 @@ import hash_framework
 
 import datetime
 
+
 class Tasks:
     def __init__(self, db):
         self.db = db
@@ -50,9 +51,13 @@ class Tasks:
         r = []
         data = cur.fetchall()
         for d in data:
-            o = {'id': d[0], 'current_threads': d[1],
-                 'max_threads': d[2], 'total_jobs': d[3],
-                 'remaining_jobs': d[4]}
+            o = {
+                "id": d[0],
+                "current_threads": d[1],
+                "max_threads": d[2],
+                "total_jobs": d[3],
+                "remaining_jobs": d[4],
+            }
             r.append(o)
 
         cur.close()

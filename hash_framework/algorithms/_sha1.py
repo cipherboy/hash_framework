@@ -1,6 +1,7 @@
 import cmsh
 from .utils import reshape
 
+
 def sha1f(t, b, c, d):
     if 0 <= t <= 19:
         return (b & c) | ((-b) & d)
@@ -10,7 +11,8 @@ def sha1f(t, b, c, d):
         return (b & c) | (b & d) | (c & d)
     elif 60 <= t <= 79:
         return b ^ c ^ d
-    return 1//0
+    return 1 // 0
+
 
 def sha1k(t):
     if 0 <= t <= 19:
@@ -21,7 +23,8 @@ def sha1k(t):
         return 0x8F1BBCDC
     elif 60 <= t <= 79:
         return 0xCA62C1D6
-    return 1//0
+    return 1 // 0
+
 
 def sha1_roundfunc(t, state, w):
     a, b, c, d, e = state
@@ -33,6 +36,7 @@ def sha1_roundfunc(t, state, w):
     b = a
     a = tmp
     return a, b, c, d, e
+
 
 def sha1_blockschedule(model, block, rounds=80):
     w = [None] * rounds
@@ -47,22 +51,32 @@ def sha1_blockschedule(model, block, rounds=80):
     for w_index in range(16, 80):
         if w_index >= len(w):
             break
-        w[w_index] = (w[w_index-3] ^ w[w_index - 8] ^ w[w_index - 14] ^ w[w_index - 16]).rotl(1)
+        w[w_index] = (
+            w[w_index - 3] ^ w[w_index - 8] ^ w[w_index - 14] ^ w[w_index - 16]
+        ).rotl(1)
 
     return w
 
-def sha1(model, block, iv=[0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476, 0xC3D2E1F0], rounds=80):
+
+def sha1(
+    model,
+    block,
+    iv=[0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476, 0xC3D2E1F0],
+    rounds=80,
+):
     block = reshape(model, block, 16, 32)
     iv = reshape(model, iv, 5, 32)
 
     if isinstance(iv[0], int):
-        iv = tuple([
-            model.to_vector(iv[0], width=32),
-            model.to_vector(iv[1], width=32),
-            model.to_vector(iv[2], width=32),
-            model.to_vector(iv[3], width=32),
-            model.to_vector(iv[4], width=32)
-        ])
+        iv = tuple(
+            [
+                model.to_vector(iv[0], width=32),
+                model.to_vector(iv[1], width=32),
+                model.to_vector(iv[2], width=32),
+                model.to_vector(iv[3], width=32),
+                model.to_vector(iv[4], width=32),
+            ]
+        )
 
     w = sha1_blockschedule(model, block, rounds)
 
@@ -73,12 +87,14 @@ def sha1(model, block, iv=[0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476, 0xC3D
         state = sha1_roundfunc(round_index, state, w[round_index])
         result_rounds.append(state)
 
-    result = tuple([
-        state[0] + iv[0],
-        state[1] + iv[1],
-        state[2] + iv[2],
-        state[3] + iv[3],
-        state[4] + iv[4]
-    ])
+    result = tuple(
+        [
+            state[0] + iv[0],
+            state[1] + iv[1],
+            state[2] + iv[2],
+            state[3] + iv[3],
+            state[4] + iv[4],
+        ]
+    )
 
     return result, result_rounds

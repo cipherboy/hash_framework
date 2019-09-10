@@ -5,6 +5,7 @@ import multiprocessing
 import cmsh
 from hash_framework.algorithms import md4
 
+
 def build_collision(differential_path, offset, rounds):
     model = cmsh.Model()
     hf = md4.md4()
@@ -43,11 +44,12 @@ def main():
     rounds = 32
     pool = multiprocessing.Pool(processes=4)
 
-    for i in range(0, rounds*32):
+    for i in range(0, rounds * 32):
         pool.apply_async(build_collision, args=(1 << i, i, rounds))
 
     pool.close()
     pool.join()
+
 
 if __name__ == "__main__":
     main()

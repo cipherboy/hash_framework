@@ -16,13 +16,15 @@ class SimpleDifferentials(cmsfabric.Loom):
             tag = self.tag_base + "-r" + str(r)
             m.start(tag, False)
             models.vars.write_header()
-            models.generate(self.algo, ['h1', 'h2'], rounds=r, bypass=True)
-            models.vars.write_values(self.start_state, 'h1s', "01-h1-state.txt")
-            models.vars.write_values(self.start_state, 'h2s', "01-h2-state.txt")
-            models.vars.write_values(self.start_block, 'h1b', "15-h1-state.txt")
+            models.generate(self.algo, ["h1", "h2"], rounds=r, bypass=True)
+            models.vars.write_values(self.start_state, "h1s", "01-h1-state.txt")
+            models.vars.write_values(self.start_state, "h2s", "01-h2-state.txt")
+            models.vars.write_values(self.start_block, "h1b", "15-h1-state.txt")
             attacks.collision.write_constraints(self.algo)
             attacks.collision.write_optional_differential(self.algo)
-            models.vars.write_assign(['ccollision', 'cblocks', 'cstate', 'cdifferentials', 'cnegated'])
+            models.vars.write_assign(
+                ["ccollision", "cblocks", "cstate", "cdifferentials", "cnegated"]
+            )
             m.collapse(bc="00-combined-model.txt")
 
     def gen_work(self):
@@ -30,7 +32,7 @@ class SimpleDifferentials(cmsfabric.Loom):
 
         for r in self.rounds:
             for s in self.sizes:
-                for e in itertools.combinations(list(range(0, r-4)), s):
+                for e in itertools.combinations(list(range(0, r - 4)), s):
                     work.add((type(self.algo), r, s, e, self.tag_base))
 
         return list(work)
@@ -42,10 +44,30 @@ class SimpleDifferentials(cmsfabric.Loom):
         algo.rounds = r
 
         m = models()
-        tag = tag_base + "-r" + str(r) + "-s" + str(s) + "-e" + '-'.join(list(map(str, e)))
+        tag = (
+            tag_base
+            + "-r"
+            + str(r)
+            + "-s"
+            + str(s)
+            + "-e"
+            + "-".join(list(map(str, e)))
+        )
 
         m.start(tag, False)
-        os.system("ln -s " + m.model_dir + "/" + tag_base + "-r" + str(r) + "/00-combined-model.txt " + m.model_dir + "/" + tag + "/00-combined-model.txt")
+        os.system(
+            "ln -s "
+            + m.model_dir
+            + "/"
+            + tag_base
+            + "-r"
+            + str(r)
+            + "/00-combined-model.txt "
+            + m.model_dir
+            + "/"
+            + tag
+            + "/00-combined-model.txt"
+        )
         attacks.collision.reduced.specified_difference(algo, e)
         m.collapse()
         m.build()
@@ -57,15 +79,23 @@ class SimpleDifferentials(cmsfabric.Loom):
         self.sat.append((r, s, e))
         print((r, s, e))
 
-def fabric_simple_differentials(algo, db, start_state, start_block, rounds, sizes, tag_base):
-    loom = attacks.collision.second_preimage.SimpleDifferentials(algo, db, start_state, start_block, rounds, sizes, tag_base)
+
+def fabric_simple_differentials(
+    algo, db, start_state, start_block, rounds, sizes, tag_base
+):
+    loom = attacks.collision.second_preimage.SimpleDifferentials(
+        algo, db, start_state, start_block, rounds, sizes, tag_base
+    )
     fabric = cmsfabric.Weave()
     fabric.set_loom(loom)
     fabric.spin_from_object(cmsfabric_config)
     fabric.run()
     print(loom.sat)
 
-def parallel_simple_differentials(algo, db, start_state, start_block, rounds, sizes, tag_base):
+
+def parallel_simple_differentials(
+    algo, db, start_state, start_block, rounds, sizes, tag_base
+):
     wq = []
     jq = []
     found_collisions = {}
@@ -76,23 +106,45 @@ def parallel_simple_differentials(algo, db, start_state, start_block, rounds, si
         tag = tag_base + "-r" + str(r)
         m.start(tag, False)
         models.vars.write_header()
-        models.generate(algo, ['h1', 'h2'], rounds=r, bypass=True)
-        models.vars.write_values(start_state, 'h1s', "01-h1-state.txt")
-        models.vars.write_values(start_state, 'h2s', "01-h2-state.txt")
-        models.vars.write_values(start_block, 'h1b', "15-h1-state.txt")
+        models.generate(algo, ["h1", "h2"], rounds=r, bypass=True)
+        models.vars.write_values(start_state, "h1s", "01-h1-state.txt")
+        models.vars.write_values(start_state, "h2s", "01-h2-state.txt")
+        models.vars.write_values(start_block, "h1b", "15-h1-state.txt")
         attacks.collision.write_same_state(algo)
         attacks.collision.write_constraints(algo)
         attacks.collision.write_optional_differential(algo)
-        models.vars.write_assign(['ccollision', 'cblocks', 'cstate', 'cdifferentials', 'cnegated'])
+        models.vars.write_assign(
+            ["ccollision", "cblocks", "cstate", "cdifferentials", "cnegated"]
+        )
         m.collapse(bc="00-combined-model.txt")
 
         for s in sizes:
-            for e in itertools.combinations(list(range(0, r-4)), s):
+            for e in itertools.combinations(list(range(0, r - 4)), s):
                 algo.rounds = r
                 m = models()
-                tag = tag_base + "-r" + str(r) + "-s" + str(s) + "-e" + '-'.join(list(map(str, e)))
+                tag = (
+                    tag_base
+                    + "-r"
+                    + str(r)
+                    + "-s"
+                    + str(s)
+                    + "-e"
+                    + "-".join(list(map(str, e)))
+                )
                 m.start(tag, False)
-                os.system("cp -r " + m.model_dir + "/" + tag_base + "-r" + str(r) + "/00-combined-model.txt " + m.model_dir + "/" + tag + "/00-combined-model.txt")
+                os.system(
+                    "cp -r "
+                    + m.model_dir
+                    + "/"
+                    + tag_base
+                    + "-r"
+                    + str(r)
+                    + "/00-combined-model.txt "
+                    + m.model_dir
+                    + "/"
+                    + tag
+                    + "/00-combined-model.txt"
+                )
                 attacks.collision.reduced.specified_difference(algo, e)
                 m.collapse()
                 m.build()
@@ -112,9 +164,19 @@ def parallel_simple_differentials(algo, db, start_state, start_block, rounds, si
         e = w[2]
         algo.rounds = r
         m = models()
-        tag = tag_base + "-r" + str(r) + "-s" + str(s) + "-e" + '-'.join(list(map(str, e)))
+        tag = (
+            tag_base
+            + "-r"
+            + str(r)
+            + "-s"
+            + str(s)
+            + "-e"
+            + "-".join(list(map(str, e)))
+        )
         m.start(tag, False)
-        j = compute.perform_sat("problem.cnf", "problem.out", count=1, no_wait=True, ident=(w))
+        j = compute.perform_sat(
+            "problem.cnf", "problem.out", count=1, no_wait=True, ident=(w)
+        )
         jq.append((w, j))
         print("Done handling job.")
 
@@ -135,13 +197,21 @@ def parallel_simple_differentials(algo, db, start_state, start_block, rounds, si
                     if fj_status:
                         w = fj_w
                         print(w)
-                        #wq.append(w)
+                        # wq.append(w)
                         r = fj_w[0]
                         s = fj_w[1]
                         e = fj_w[2]
                         algo.rounds = r
                         m = models()
-                        tag = tag_base + "-r" + str(r) + "-s" + str(s) + "-e" + '-'.join(list(map(str, e)))
+                        tag = (
+                            tag_base
+                            + "-r"
+                            + str(r)
+                            + "-s"
+                            + str(s)
+                            + "-e"
+                            + "-".join(list(map(str, e)))
+                        )
                         m.start(tag, False)
                         rs = m.results(algo)
                         ncols = attacks.collision.build_col_rows(algo, db, rs, tag)
@@ -159,7 +229,6 @@ def parallel_simple_differentials(algo, db, start_state, start_block, rounds, si
 
                     jq.remove(jq[j])
                     break
-
 
             if not found:
                 print("Did not find job..." + str(jq) + " || " + str(fj))

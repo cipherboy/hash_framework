@@ -17,9 +17,18 @@ def sipround(v0, v1, v2, v3):
     return v0, v1, v2, v3
 
 
-def siphash(model, key, block, v0=0x736f6d6570736575, v1=0x646f72616e646f6d,
-            v2=0x6c7967656e657261, v3=0x7465646279746573, outlen=8, cROUNDS=2,
-            dROUNDS=4):
+def siphash(
+    model,
+    key,
+    block,
+    v0=0x736F6D6570736575,
+    v1=0x646F72616E646F6D,
+    v2=0x6C7967656E657261,
+    v3=0x7465646279746573,
+    outlen=8,
+    cROUNDS=2,
+    dROUNDS=4,
+):
     assert len(key) == 128
     assert outlen in [8, 16]
     assert isinstance(cROUNDS, int)
@@ -44,11 +53,11 @@ def siphash(model, key, block, v0=0x736f6d6570736575, v1=0x646f72616e646f6d,
     v0 = v0 ^ k0
 
     if outlen == 16:
-        v1 = v1 ^ 0xee
+        v1 = v1 ^ 0xEE
 
     range_max = len(blocks) - (len(blocks) % 8)
     for index in range(0, range_max, 8):
-        m = reversed(blocks[index:index+8])
+        m = reversed(blocks[index : index + 8])
         m = model.join_vec(m)
 
         v3 = v3 ^ m
@@ -58,7 +67,9 @@ def siphash(model, key, block, v0=0x736f6d6570736575, v1=0x646f72616e646f6d,
 
         v0 = v0 ^ m
 
-    missing = [False, False, False, False, False, False, False, False] * (8 - (len(blocks) % 8))
+    missing = [False, False, False, False, False, False, False, False] * (
+        8 - (len(blocks) % 8)
+    )
     if len(missing) != 64:
         last_block = len(blocks) - (len(blocks) % 8)
         for block in reversed(blocks[last_block:]):
@@ -77,9 +88,9 @@ def siphash(model, key, block, v0=0x736f6d6570736575, v1=0x646f72616e646f6d,
     v0 = v0 ^ b
 
     if outlen == 16:
-        v2 = v2 ^ 0xee
+        v2 = v2 ^ 0xEE
     else:
-        v2 = v2 ^ 0xff
+        v2 = v2 ^ 0xFF
 
     for _ in range(0, dROUNDS):
         v0, v1, v2, v3 = sipround(v0, v1, v2, v3)
@@ -89,7 +100,7 @@ def siphash(model, key, block, v0=0x736f6d6570736575, v1=0x646f72616e646f6d,
     if outlen == 8:
         return out
 
-    v1 = v1 ^ 0xdd
+    v1 = v1 ^ 0xDD
 
     for _ in range(0, dROUNDS):
         v0, v1, v2, v3 = sipround(v0, v1, v2, v3)

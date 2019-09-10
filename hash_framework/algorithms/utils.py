@@ -1,5 +1,6 @@
 import cmsh
 
+
 def reshape(model: cmsh.Model, vec, num_elements: int, width: int):
     # Three types here that we support passing for vec
     #

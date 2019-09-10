@@ -1,6 +1,7 @@
 import hash_framework.config as config
 import hash_framework
 
+
 class Result:
     def __init__(self, db):
         self.db = db

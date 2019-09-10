@@ -2,6 +2,7 @@ import hash_framework
 from compute import cset
 import functools
 
+
 def __main__():
     print(len(cset))
     cs = hash_framework.manager.build_client_set(cset)
@@ -17,6 +18,7 @@ def __main__():
 
     on_result = functools.partial(kernel.on_result, algo, db)
     hash_framework.manager.core.wait_results(cs, c_jids, on_result)
+
 
 if __name__ == "__main__":
     __main__()

@@ -1,8 +1,11 @@
 import hash_framework
 import datetime, time, sys, json
 
+
 def debug(jid=None):
-    c = hash_framework.manager.api.Client(hash_framework.config.manager_uri, hash_framework.config.scheduler_uri)
+    c = hash_framework.manager.api.Client(
+        hash_framework.config.manager_uri, hash_framework.config.scheduler_uri
+    )
     c.register()
 
     if jid == None:
@@ -26,16 +29,16 @@ def debug(jid=None):
         print("[get_job] Error: " + str(error))
         return
 
-    kernel_name = ji['kernel']
-    kernel_args = json.loads(ji['args'])
-    j = hash_framework.workers.Job(jid, kernel_name, kernel_args,
-                                   ji['timeout'],
-                                   datetime.datetime.now())
+    kernel_name = ji["kernel"]
+    kernel_args = json.loads(ji["args"])
+    j = hash_framework.workers.Job(
+        jid, kernel_name, kernel_args, ji["timeout"], datetime.datetime.now()
+    )
 
     j.run()
     res = j.to_dict(datetime.datetime.now())
-    if res['results'] == None:
-        res['results'] = []
+    if res["results"] == None:
+        res["results"] = []
     print(res)
     r.append(res)
 
@@ -43,9 +46,12 @@ def debug(jid=None):
     if error != None:
         print("[send_results] Error: " + str(error))
 
+
 def run():
     jq = []
-    c = hash_framework.manager.api.Client(hash_framework.config.manager_uri, hash_framework.config.scheduler_uri)
+    c = hash_framework.manager.api.Client(
+        hash_framework.config.manager_uri, hash_framework.config.scheduler_uri
+    )
     error = True
 
     while error:
@@ -81,21 +87,21 @@ def run():
                 print("[get_job] Error: " + str(error))
                 continue
 
-            kernel_name = ji['kernel']
-            kernel_args = json.loads(ji['args'])
+            kernel_name = ji["kernel"]
+            kernel_args = json.loads(ji["args"])
 
-            j = hash_framework.workers.Job(jid, kernel_name, kernel_args,
-                                           ji['timeout'],
-                                           datetime.datetime.now())
+            j = hash_framework.workers.Job(
+                jid, kernel_name, kernel_args, ji["timeout"], datetime.datetime.now()
+            )
 
             j.run()
             res = j.to_dict(datetime.datetime.now())
-            if res['results'] == None:
-                res['results'] = []
+            if res["results"] == None:
+                res["results"] = []
             r.append(res)
             j.clean()
 
-            error = c.end_job(ji['task_id'], jid)
+            error = c.end_job(ji["task_id"], jid)
             if error != None:
                 print("[end_job] Ignoring Error: " + str(error))
 

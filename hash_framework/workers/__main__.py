@@ -15,9 +15,9 @@ if len(sys.argv) >= 2:
 if len(sys.argv) >= 3:
     hash_framework.config.scheduler_uri = sys.argv[2]
 
-if len(sys.argv) == 4 and sys.argv[3] == 'debug':
+if len(sys.argv) == 4 and sys.argv[3] == "debug":
     worker.debug()
-elif len(sys.argv) >= 5 and sys.argv[3] == 'debug':
+elif len(sys.argv) >= 5 and sys.argv[3] == "debug":
     jid = int(sys.argv[4])
     worker.debug(jid)
 else:

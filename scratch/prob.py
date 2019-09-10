@@ -4,25 +4,32 @@ import random
 
 sr = random.SystemRandom()
 
+
 def sample(prob):
     if sr.uniform(0, 1) <= (1 - prob):
         return False
     return True
 
+
 def l_not(a):
     return not a
+
 
 def l_and(a, b):
     return a and b
 
+
 def l_or(a, b):
     return a or b
+
 
 def l_xor(a, b):
     return l_or(l_and(a, b), l_and(l_not(a), l_not(b)))
 
+
 def f(a, b, c):
     return l_or(l_and(a, b), l_or(l_and(a, c), l_and(b, c)))
+
 
 def __main__():
     count = 1000000 * 10
@@ -41,6 +48,7 @@ def __main__():
         f_t += 1
 
     print(f_c / f_t)
+
 
 if __name__ == "__main__":
     __main__()

@@ -1,6 +1,7 @@
 import requests, json
 from hash_framework.config import config
 
+
 class Client:
     def __init__(self, uri):
         self.uri = uri
@@ -14,7 +15,7 @@ class Client:
         return jids
 
     def add_sat(self, kernel_name, kernel_args):
-        obj = {'kernel_name': kernel_name, 'kernel_args': kernel_args}
+        obj = {"kernel_name": kernel_name, "kernel_args": kernel_args}
         r = requests.post(self.uri + "/jobs/", json=obj)
         if r.status_code != 200:
             return False
@@ -68,7 +69,7 @@ class Client:
                 return {}
 
             if count > 2:
-                f = open("/tmp/error-body.txt", 'wb')
+                f = open("/tmp/error-body.txt", "wb")
                 f.write(r.content)
                 f.close()
                 return r.json()

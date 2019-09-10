@@ -18,11 +18,11 @@ class models:
     def get_mapping(self, cnf="problem.cnf"):
         var_mapping = collections.defaultdict(list)
 
-        f_cnf = open(cnf, 'r')
+        f_cnf = open(cnf, "r")
 
         for l in f_cnf:
-            if len(l) > 0 and l[0] == 'c' and ' <-> ' in l:
-                l_var = l[1:].split(' <-> ')
+            if len(l) > 0 and l[0] == "c" and " <-> " in l:
+                l_var = l[1:].split(" <-> ")
                 l_var[0] = l_var[0].strip()
                 l_var[1] = l_var[1].strip()
                 var_mapping[l_var[1]].append(l_var[0])
@@ -30,31 +30,31 @@ class models:
         return dict(var_mapping)
 
     def load_results(self, var_mapping=None, out="problem.out", cnf="problem.cnf"):
-        f_out = open(out, 'r')
+        f_out = open(out, "r")
         if var_mapping == None:
             var_mapping = self.get_mapping(cnf=cnf)
         results = []
         result = None
         for l in f_out:
-            if l[0] == 's':
+            if l[0] == "s":
                 if result != None:
                     results.append(result)
                 result = {}
-            if l[0] == 'v':
+            if l[0] == "v":
                 end = -2
-                if l[end] == '0':
+                if l[end] == "0":
                     end = -3
-                l_assigns = l[2:end].split(' ')
+                l_assigns = l[2:end].split(" ")
                 for v in l_assigns:
                     if len(v) == 0:
                         print(out)
                         print(cnf)
                         continue
                     var = v
-                    val = 'T'
-                    if v[0] == '-':
+                    val = "T"
+                    if v[0] == "-":
                         var = v[1:]
-                        val = 'F'
+                        val = "F"
                     if var in var_mapping:
                         for loc in var_mapping[var]:
                             result[loc] = val
@@ -63,32 +63,34 @@ class models:
 
         return results
 
-    def load_results_generator(self, var_mapping=None, out="problem.out", cnf="problem.cnf"):
-        f_out = open(out, 'r')
+    def load_results_generator(
+        self, var_mapping=None, out="problem.out", cnf="problem.cnf"
+    ):
+        f_out = open(out, "r")
         if var_mapping == None:
             var_mapping = self.get_mapping(cnf=cnf)
 
         result = None
         for l in f_out:
-            if l[0] == 's':
+            if l[0] == "s":
                 if result != None:
                     yield result
                 result = {}
-            if l[0] == 'v':
+            if l[0] == "v":
                 end = -2
-                if l[end] == '0':
+                if l[end] == "0":
                     end = -3
-                l_assigns = l[2:end].split(' ')
+                l_assigns = l[2:end].split(" ")
                 for v in l_assigns:
                     if len(v) == 0:
                         print(out)
                         print(cnf)
                         continue
                     var = v
-                    val = 'T'
-                    if v[0] == '-':
+                    val = "T"
+                    if v[0] == "-":
                         var = v[1:]
-                        val = 'F'
+                        val = "F"
                     if var in var_mapping:
                         for loc in var_mapping[var]:
                             result[loc] = val
@@ -132,7 +134,7 @@ class models:
                 os.system("cp " + d + "/" + f + " " + f)
 
     def start(self, ndir, recreate=False):
-        assert(type(ndir) == str)
+        assert type(ndir) == str
         print(ndir)
 
         if recreate:
@@ -143,8 +145,8 @@ class models:
         os.chdir(self.model_dir + "/" + ndir)
 
     def build(self, bc="problem.bc", cnf="problem.cnf"):
-        assert(type(bc) == str)
-        assert(type(cnf) == str)
+        assert type(bc) == str
+        assert type(cnf) == str
 
         ec = subprocess.call([self.bc_bin] + self.bc_args + [bc, cnf])
         count = 0
@@ -155,14 +157,14 @@ class models:
         if ec != 0 and not os.path.exists(cnf):
             print(os.getcwd())
             print([self.bc_bin] + self.bc_args + [bc, cnf])
-            assert(ec == 0)
+            assert ec == 0
 
     def results_json(self, algo, filename, prefixes=["h1", "h2"]):
-        objs = json.load(open(filename, 'r'))
-        assert(type(objs) == list)
+        objs = json.load(open(filename, "r"))
+        assert type(objs) == list
         r = []
         for result in objs:
-            assert(type(result) == dict)
+            assert type(result) == dict
             d = {}
             for prefix in prefixes:
                 e = prefix_keys(algo.sanitize(unprefix_keys(result, prefix)), prefix)
@@ -170,7 +172,14 @@ class models:
             r.append(d)
         return r
 
-    def results(self, algo, results=None, prefixes=["h1", "h2"], out="problem.out", cnf="problem.cnf"):
+    def results(
+        self,
+        algo,
+        results=None,
+        prefixes=["h1", "h2"],
+        out="problem.out",
+        cnf="problem.cnf",
+    ):
         if results == None:
             results = self.load_results(out=out, cnf=cnf)
         r = []
@@ -182,7 +191,14 @@ class models:
             r.append(d)
         return r
 
-    def results_generator(self, algo, results=None, prefixes=["h1", "h2"], out="problem.out", cnf="problem.cnf"):
+    def results_generator(
+        self,
+        algo,
+        results=None,
+        prefixes=["h1", "h2"],
+        out="problem.out",
+        cnf="problem.cnf",
+    ):
         for result in self.load_results_generator(out=out, cnf=cnf):
             d = {}
             for prefix in prefixes:
@@ -198,13 +214,22 @@ class models:
 
         os.system("ln -s " + bc + ".concat " + bc)
 
-    def run(self, count=10000, random=0, bc="problem.bc", cnf="problem.cnf", output="problem.out"):
+    def run(
+        self,
+        count=10000,
+        random=0,
+        bc="problem.bc",
+        cnf="problem.cnf",
+        output="problem.out",
+    ):
         if self.remote:
             return self.run_remote(count, random, bc, cnf, output)
 
         self.build(bc, cnf)
-        f_out = open(output, 'w')
-        n_p = subprocess.Popen([self.cms_bin, "--maxsol", str(count), cnf], stdout=f_out)
+        f_out = open(output, "w")
+        n_p = subprocess.Popen(
+            [self.cms_bin, "--maxsol", str(count), cnf], stdout=f_out
+        )
         r_c = n_p.wait()
         if r_c == 10:
             print("SAT")
@@ -216,7 +241,14 @@ class models:
             print("UNKNOWN: " + str(r_c))
             return False
 
-    def run_remote(self, count=10000, random=0, bc="problem.bc", cnf="problem.cnf", output="problem.out"):
+    def run_remote(
+        self,
+        count=10000,
+        random=0,
+        bc="problem.bc",
+        cnf="problem.cnf",
+        output="problem.out",
+    ):
         self.build(bc, cnf)
         return compute.perform_sat(cnf, output, count, random)
 
@@ -227,106 +259,136 @@ class models:
             f.flush()
             f.close()
 
-        def write_assign(vars, name="99-problem.txt", mode='w'):
+        def write_assign(vars, name="99-problem.txt", mode="w"):
             f = open(name, mode)
-            f.write("ASSIGN " + ','.join(vars) + ";\n")
+            f.write("ASSIGN " + ",".join(vars) + ";\n")
             f.flush()
             f.close()
 
-        def write_values(given_vars, prefix, name, mode='w'):
+        def write_values(given_vars, prefix, name, mode="w"):
             f = open(name, mode)
             i = 0
             for v in given_vars:
-                f.write(prefix + str(i) + ' := ' + v + ";\n")
+                f.write(prefix + str(i) + " := " + v + ";\n")
                 i += 1
             f.flush()
             f.close()
 
-        def write_dedupe(prefix_match=None, name="02-dedupe.txt", mode='w'):
+        def write_dedupe(prefix_match=None, name="02-dedupe.txt", mode="w"):
             global clause_dedupe_s
 
             f = open(name, mode)
 
             for k in clause_dedupe_s:
-                if prefix_match == None or (prefix_match != None and
-                                            len(prefix_match) > 0 and prefix == k[0:len(prefix)]):
+                if prefix_match == None or (
+                    prefix_match != None
+                    and len(prefix_match) > 0
+                    and prefix == k[0 : len(prefix)]
+                ):
                     f.write(k + " := " + translate(clause_dedupe_s[k]) + ";\n")
 
             f.flush()
             f.close()
 
-        def write_clauses(vars, prefix, name, mode='w'):
+        def write_clauses(vars, prefix, name, mode="w"):
             f = open(name, mode)
             i = 0
             for v in vars:
-                f.write(prefix + str(i) + ' := ' + translate(v) + ";\n")
+                f.write(prefix + str(i) + " := " + translate(v) + ";\n")
                 i += 1
             f.flush()
             f.close()
 
-        def write_clause(clause, value, name, mode='w'):
+        def write_clause(clause, value, name, mode="w"):
             f = open(name, mode)
-            f.write(clause + ' := ' + translate(value) + ";\n")
+            f.write(clause + " := " + translate(value) + ";\n")
             f.flush()
             f.close()
 
-        def write_range_clause(clause, min, max, value, name, mode='w'):
+        def write_range_clause(clause, min, max, value, name, mode="w"):
             f = open(name, mode)
 
             cv = translate(value)
-            assert(cv[0:3] == 'AND')
+            assert cv[0:3] == "AND"
             nv = "[" + str(min) + "," + str(max) + "]" + cv[3:]
 
-            f.write(clause + ' := ' + nv + ";\n")
+            f.write(clause + " := " + nv + ";\n")
             f.flush()
             f.close()
 
         def compute_ddelta(v1, v2):
-            assert(len(v1) == len(v2))
+            assert len(v1) == len(v2)
 
             d = ""
             for j in range(0, len(v1)):
                 if v1[j] == v2[j]:
-                    d += '.'
-                elif v1[j] == 'T' and v2[j] == 'F':
-                    d += '-'
-                elif v1[j] == 'F' and v2[j] == 'T':
-                    d += '+'
+                    d += "."
+                elif v1[j] == "T" and v2[j] == "F":
+                    d += "-"
+                elif v1[j] == "F" and v2[j] == "T":
+                    d += "+"
             return d
 
         def compute_rdelta(v1, v2):
-            assert(len(v1) == len(v2))
+            assert len(v1) == len(v2)
 
             d = ""
             for j in range(0, len(v1)):
                 if v1[j] == v2[j]:
-                    d += '.'
+                    d += "."
                 else:
-                    d += '*'
+                    d += "*"
             return d
 
         def differential(delta, avar, aoffset, bvar, boffset):
             r = ["and"]
             for i in range(0, len(delta)):
-                if delta[i] == '*':
-                    r.append(("not", ("equal", avar + str(aoffset + i), bvar + str(boffset + i))))
-                elif delta[i] == '.':
-                    r.append(("equal", avar + str(aoffset + i), bvar + str(boffset + i)))
-                elif delta[i] == '+':
-                    r.append(("and", ("equal", avar + str(aoffset + i), 'F'),
-                              ("equal", bvar + str(boffset + i), 'T')))
-                elif delta[i] == '-':
-                    r.append(("and", ("equal", avar + str(aoffset + i), 'T'),
-                              ("equal", bvar + str(boffset + i), 'F')))
-                elif delta[i] == 'T':
-                    r.append(("and", ("equal", avar + str(aoffset + i), 'T'),
-                              ("equal", bvar + str(boffset + i), 'T')))
-                elif delta[i] == 'F':
-                    r.append(("and", ("equal", avar + str(aoffset + i), 'F'),
-                              ("equal", bvar + str(boffset + i), 'F')))
+                if delta[i] == "*":
+                    r.append(
+                        (
+                            "not",
+                            ("equal", avar + str(aoffset + i), bvar + str(boffset + i)),
+                        )
+                    )
+                elif delta[i] == ".":
+                    r.append(
+                        ("equal", avar + str(aoffset + i), bvar + str(boffset + i))
+                    )
+                elif delta[i] == "+":
+                    r.append(
+                        (
+                            "and",
+                            ("equal", avar + str(aoffset + i), "F"),
+                            ("equal", bvar + str(boffset + i), "T"),
+                        )
+                    )
+                elif delta[i] == "-":
+                    r.append(
+                        (
+                            "and",
+                            ("equal", avar + str(aoffset + i), "T"),
+                            ("equal", bvar + str(boffset + i), "F"),
+                        )
+                    )
+                elif delta[i] == "T":
+                    r.append(
+                        (
+                            "and",
+                            ("equal", avar + str(aoffset + i), "T"),
+                            ("equal", bvar + str(boffset + i), "T"),
+                        )
+                    )
+                elif delta[i] == "F":
+                    r.append(
+                        (
+                            "and",
+                            ("equal", avar + str(aoffset + i), "F"),
+                            ("equal", bvar + str(boffset + i), "F"),
+                        )
+                    )
             if len(r) == 1:
-                r.append(("equal", 'T', 'T'))
-                r.append(("equal", 'T', 'T'))
+                r.append(("equal", "T", "T"))
+                r.append(("equal", "T", "T"))
             return tuple(r)
 
         def differentials(dlist):
@@ -348,7 +410,12 @@ class models:
                 aoffset = e[2]
                 bvar = e[3]
                 boffset = e[4]
-                r.append(('not', models.vars.differential(delta, avar, aoffset, bvar, boffset)))
+                r.append(
+                    (
+                        "not",
+                        models.vars.differential(delta, avar, aoffset, bvar, boffset),
+                    )
+                )
             return tuple(r)
 
         def choice_differentials(dlist):
@@ -362,8 +429,10 @@ class models:
                 r.append(models.vars.differential(delta, avar, aoffset, bvar, boffset))
             return tuple(r)
 
-        def any_difference(l, avar="h1b", aoffset=0, bvar="h2b", boffset=0, name="cdiff"):
+        def any_difference(
+            l, avar="h1b", aoffset=0, bvar="h2b", boffset=0, name="cdiff"
+        ):
             r = ["and"]
             for i in range(0, l):
-                r.append(('equal', avar + str(aoffset + i), bvar + str(boffset + i)))
-            return ('not', tuple(r))
+                r.append(("equal", avar + str(aoffset + i), bvar + str(boffset + i)))
+            return ("not", tuple(r))

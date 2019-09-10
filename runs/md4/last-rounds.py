@@ -4,6 +4,7 @@ import hash_framework.utils as hfu
 
 import itertools
 
+
 def model(differential=[]):
     model = cmsh.Model()
     hf = hfa.md4()
@@ -29,7 +30,7 @@ def model(differential=[]):
     model.add_assert(block_1 < block_2)
     model.add_assert(iv_1 == iv_2)
 
-    for i in range(48-4, 48):
+    for i in range(48 - 4, 48):
         bi = hf.block_schedule[i]
         model.add_assert(block_1s[bi] == block_2s[bi])
 
@@ -50,12 +51,15 @@ def model(differential=[]):
             dif.append(hex(int(element_1) ^ int(element_2)))
         print(dif, len(dif), dc)
 
+
 def args_gen():
     for i in range(16, 12, -1):
         for indices in itertools.combinations(range(0, 16), i):
             yield (indices,)
 
+
 def main():
     hfu.parallel_run(model, args_gen)
+
 
 main()

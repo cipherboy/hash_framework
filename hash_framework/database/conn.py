@@ -23,10 +23,9 @@ class Database:
         password = password if password is not None else config.psql_password
 
         self.type = "psql"
-        self.conn = psycopg2.connect(host=host,
-                                     user=user,
-                                     password=password,
-                                     database=database)
+        self.conn = psycopg2.connect(
+            host=host, user=user, password=password, database=database
+        )
 
     def sqlite_rowid(self, r, c, cursor):
         lastrowid = c.lastrowid
@@ -88,13 +87,7 @@ class Database:
                 c.close()
         return None
 
-    def prepared(self,
-                 q,
-                 values,
-                 commit=True,
-                 limit=20,
-                 rowid=False,
-                 cursor=False):
+    def prepared(self, q, values, commit=True, limit=20, rowid=False, cursor=False):
         for i in range(0, limit):
             c = None
             try:
@@ -123,12 +116,7 @@ class Database:
 
         return None
 
-    def prepared_many(self,
-                      q,
-                      values_list,
-                      commit=True,
-                      limit=20,
-                      cursor=False):
+    def prepared_many(self, q, values_list, commit=True, limit=20, cursor=False):
         for i in range(0, limit):
             c = None
             try:
@@ -159,23 +147,19 @@ class Database:
         return None
 
     def query(self, table, cols, rowid=0, tag="", limit=0):
-        assert (type(table) == str)
-        assert (type(cols) == list and len(cols) > 0)
-        assert (type(rowid) == int)
-        assert (type(tag) == str)
-        assert (type(limit) == int)
+        assert type(table) == str
+        assert type(cols) == list and len(cols) > 0
+        assert type(rowid) == int
+        assert type(tag) == str
+        assert type(limit) == int
 
-        q = "SELECT " + \
-            ','.join(cols) + " FROM " + table
+        q = "SELECT " + ",".join(cols) + " FROM " + table
         if rowid > 0:
-            q += " WHERE ROWID=" + \
-                str(rowid)
+            q += " WHERE ROWID=" + str(rowid)
         elif tag != "":
-            q += " WHERE tag='" + \
-                tag + "'"
+            q += " WHERE tag='" + tag + "'"
         if limit > 0:
-            q += " LIMIT " + \
-                str(limit)
+            q += " LIMIT " + str(limit)
         q += ";"
 
         c = self.conn.cursor()
@@ -184,7 +168,7 @@ class Database:
 
         data = []
         for raw_data in raw_datas:
-            assert (len(raw_data) == len(cols))
+            assert len(raw_data) == len(cols)
             d = {}
             for i in range(0, len(cols)):
                 d[cols[i]] = raw_data[i]

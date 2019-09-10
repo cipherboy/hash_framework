@@ -20,6 +20,7 @@ def prefix_keys(obj: dict, prefix: Optional[str]) -> dict:
 
     return result
 
+
 def unprefix_keys(obj: dict, prefix: Optional[str]) -> dict:
     """
     Strips a specified prefix from all keys in the dictionary.
@@ -32,10 +33,11 @@ def unprefix_keys(obj: dict, prefix: Optional[str]) -> dict:
     result = {}
     for key in obj:
         if key.startswith(prefix):
-            result[key[len(prefix):]] = obj[key]
+            result[key[len(prefix) :]] = obj[key]
         else:
             result[key] = obj[key]
     return result
+
 
 def print_dict(obj: dict, name: str):
     """
@@ -48,6 +50,7 @@ def print_dict(obj: dict, name: str):
     for key in obj:
         print("\t" + str(key) + ": " + str(obj[key]))
     print("===end " + name + "===")
+
 
 def merge_dict(objs: List[dict]) -> dict:
     """

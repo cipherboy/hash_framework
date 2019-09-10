@@ -6,6 +6,7 @@ def distance(algo, col1, col2):
             r += 1
     return r
 
+
 def delta(algo, col1, col2):
     r = []
     for i in range(0, algo.rounds):
@@ -14,6 +15,7 @@ def delta(algo, col1, col2):
             r.append((i, col1[k], col2[k]))
     return r
 
+
 def delta_alt(rounds, col1, col2):
     r = []
     for i in range(0, rounds):
@@ -21,17 +23,19 @@ def delta_alt(rounds, col1, col2):
             r.append(i)
     return r
 
+
 def abs(algo, col):
     r = []
     for i in range(0, algo.rounds):
         k = "ri" + str(i)
-        if col[k] != '.'*32:
+        if col[k] != "." * 32:
             r.append(i)
     return tuple(r)
+
 
 def abs_alt(rounds, col):
     r = []
     for i in range(0, rounds):
-        if col[i] != '.'*32:
+        if col[i] != "." * 32:
             r.append(i)
     return tuple(r)

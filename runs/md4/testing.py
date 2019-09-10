@@ -1,11 +1,13 @@
 import cmsh
 from hash_framework.algorithms import _md4
 
+
 def gen_blocks(model, count, width):
     result = []
     for i in range(0, count):
         result.append(model.vec(width))
     return result
+
 
 def split_hex(string, width=8):
     result = []
@@ -13,9 +15,10 @@ def split_hex(string, width=8):
         # Reverse each group of two within each block
         block = ""
         for j in range(0, width, 2):
-            block = string[i+j:i+j+2] + block
+            block = string[i + j : i + j + 2] + block
         result.append(int(block, 16))
     return result
+
 
 def main():
     model = cmsh.Model()
@@ -99,6 +102,7 @@ def main():
         model.solve()
 
     print(solutions)
+
 
 if __name__ == "__main__":
     main()

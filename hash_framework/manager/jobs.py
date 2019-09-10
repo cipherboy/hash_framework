@@ -1,6 +1,7 @@
 import hash_framework.config as config
 import hash_framework
 
+
 class Jobs:
     def __init__(self, db):
         self.db = db
@@ -26,15 +27,15 @@ class Jobs:
             if type(data) != dict:
                 return False
 
-            if 'task' not in data or type(data['task']) != int or data['task'] <= 0:
+            if "task" not in data or type(data["task"]) != int or data["task"] <= 0:
                 return False
-            if 'kernel' not in data or type(data['kernel']) != str:
+            if "kernel" not in data or type(data["kernel"]) != str:
                 return False
-            if 'algo' not in data or type(data['algo']) != str:
+            if "algo" not in data or type(data["algo"]) != str:
                 return False
-            if 'args' not in data or type(data['args']) != str:
+            if "args" not in data or type(data["args"]) != str:
                 return False
-            if 'result_table' not in data or type(data['result_table']) != str:
+            if "result_table" not in data or type(data["result_table"]) != str:
                 return False
 
         return True
@@ -49,31 +50,31 @@ class Jobs:
                 print("ndict")
                 return False
 
-            if 'id' not in data or type(data['id']) != int or data['id'] <= 0:
+            if "id" not in data or type(data["id"]) != int or data["id"] <= 0:
                 print("nid")
                 return False
-            if 'results' not in data or not self.verify_result(data['results']):
+            if "results" not in data or not self.verify_result(data["results"]):
                 print("nresults")
                 return False
-            if 'checked_out' not in data or type(data['checked_out']) != str:
+            if "checked_out" not in data or type(data["checked_out"]) != str:
                 print("nchecked_out")
                 return False
-            if 'compile_time' not in data or type(data['compile_time']) != int:
+            if "compile_time" not in data or type(data["compile_time"]) != int:
                 print("ncompile_time")
                 return False
-            if 'compile_return' not in data or type(data['compile_return']) != int:
+            if "compile_return" not in data or type(data["compile_return"]) != int:
                 print("ncompile_return")
                 return False
-            if 'run_time' not in data or type(data['run_time']) != int:
+            if "run_time" not in data or type(data["run_time"]) != int:
                 print("nrun_time")
                 return False
-            if 'run_return' not in data or type(data['run_return']) != int:
+            if "run_return" not in data or type(data["run_return"]) != int:
                 print("nrun_return")
                 return False
-            if 'finalize_time' not in data or type(data['finalize_time']) != int:
+            if "finalize_time" not in data or type(data["finalize_time"]) != int:
                 print("nfinalize_time")
                 return False
-            if 'checked_back' not in data or type(data['checked_back']) != str:
+            if "checked_back" not in data or type(data["checked_back"]) != str:
                 print("nchecked_back")
                 return False
 
@@ -89,10 +90,10 @@ class Jobs:
                 print("nrdict")
                 return False
 
-            if 'data' not in result or type(result['data']) != str:
+            if "data" not in result or type(result["data"]) != str:
                 print("nrdata")
                 return False
-            if 'row' not in result or type(result['row']) != dict:
+            if "row" not in result or type(result["row"]) != dict:
                 print("nrrow")
                 return False
 
@@ -109,14 +110,21 @@ class Jobs:
             q = "UPDATE jobs SET checked_out=%s, compile_time=%s, compile_return=%s,"
             q += " run_time=%s, run_return=%s, finalize_time=%s, checked_back=%s,"
             q += " state=2 WHERE id=%s"
-            values = [data['checked_out'], data['compile_time'], data['compile_return'],
-                      data['run_time'], data['run_return'], data['finalize_time'],
-                      data['checked_back'], data['id']]
+            values = [
+                data["checked_out"],
+                data["compile_time"],
+                data["compile_return"],
+                data["run_time"],
+                data["run_return"],
+                data["finalize_time"],
+                data["checked_back"],
+                data["id"],
+            ]
             self.db.prepared(q, values, commit=False)
 
         for data in datas:
             q = "SELECT task_id, result_table FROM jobs WHERE id=%s"
-            _, cur = self.db.prepared(q, [data['id']], cursor=True, commit=False)
+            _, cur = self.db.prepared(q, [data["id"]], cursor=True, commit=False)
             ret = cur.fetchall()
             if len(ret) != 1 and len(ret[0]) != 2:
                 continue
@@ -125,11 +133,11 @@ class Jobs:
 
             task_ids.add(task_id)
 
-            for result in data['results']:
-                columns = list(result['row'])
+            for result in data["results"]:
+                columns = list(result["row"])
                 values = []
                 for column in columns:
-                    values.append(result['row'][column])
+                    values.append(result["row"][column])
 
                 q = "WITH rtbid AS ("
                 q += "INSERT INTO " + result_table + " ("
@@ -138,7 +146,9 @@ class Jobs:
                 q += ") RETURNING id) "
                 q += "INSERT INTO results (job_id, result_table, result_id, data)"
                 q += " VALUES (%s, %s, (SELECT id FROM rtbid), %s)"
-                self.db.prepared(q, values + [data['id'], result_table, result['data']], commit=False)
+                self.db.prepared(
+                    q, values + [data["id"], result_table, result["data"]], commit=False
+                )
 
         for task_id in task_ids:
             q = "UPDATE tasks SET current_threads=(current_threads-1) WHERE id=%s"
@@ -151,12 +161,18 @@ class Jobs:
     def add_all(self, datas):
         tids = {}
         for i in range(0, len(datas)):
-            tid = datas[i]['task']
+            tid = datas[i]["task"]
             if tid not in tids:
                 tids[tid] = 0
             tids[tid] += 1
-            datas[i] = (datas[i]['task'], datas[i]['kernel'], datas[i]['algo'],
-                        datas[i]['args'], datas[i]['result_table'], 0)
+            datas[i] = (
+                datas[i]["task"],
+                datas[i]["kernel"],
+                datas[i]["algo"],
+                datas[i]["args"],
+                datas[i]["result_table"],
+                0,
+            )
 
         q = "INSERT INTO jobs (task_id, kernel, algo, args, result_table, state) VALUES %s"
 
@@ -174,6 +190,7 @@ class Jobs:
         self.db.commit()
 
         return True
+
 
 class Job:
     def __init__(self, db):
@@ -197,13 +214,23 @@ class Job:
         self.checked_back = None
 
     def to_dict(self):
-        o = {'id': self.id, 'task_id': self.task_id, 'owner': self.owner,
-             'kernel': self.kernel, 'algo': self.algo, 'args': self.args,
-             'result_table': self.result_table, 'timeout': self.timeout,
-             'state': self.state, 'checked_out': self.checked_out,
-             'compile_time': self.compile_time,
-             'compile_return': self.compile_return, 'run_time': self.run_time,
-             'finalize_time': self.finalize_time, 'checked_back': self.checked_back}
+        o = {
+            "id": self.id,
+            "task_id": self.task_id,
+            "owner": self.owner,
+            "kernel": self.kernel,
+            "algo": self.algo,
+            "args": self.args,
+            "result_table": self.result_table,
+            "timeout": self.timeout,
+            "state": self.state,
+            "checked_out": self.checked_out,
+            "compile_time": self.compile_time,
+            "compile_return": self.compile_return,
+            "run_time": self.run_time,
+            "finalize_time": self.finalize_time,
+            "checked_back": self.checked_back,
+        }
         return o
 
     def new(self, task, kernel, algo, args, result_table):
@@ -218,7 +245,7 @@ class Job:
         return self
 
     def load(self, jid):
-        assert(type(jid) == int)
+        assert type(jid) == int
         self.id = jid
 
         self.__load__()
@@ -230,8 +257,7 @@ class Job:
         q += " (task_id, kernel, algo, args, result_table, state)"
         q += " VALUES (%s, %s, %s, %s, %s, 0)"
         q += " RETURNING id;"
-        values = (self.task_id, self.kernel, self.algo, self.args,
-                  self.result_table)
+        values = (self.task_id, self.kernel, self.algo, self.args, self.result_table)
 
         r, rid = self.db.prepared(q, values, rowid=True)
         self.id = rid

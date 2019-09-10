@@ -3,6 +3,7 @@ import hash_framework
 
 import datetime, sys
 
+
 class Tasks:
     def __init__(self, db):
         self.db = db
@@ -29,27 +30,27 @@ class Tasks:
             if type(data) != dict:
                 sys.stderr.write("rdict\n")
                 return False
-            if 'name' not in data or type(data['name']) != str:
+            if "name" not in data or type(data["name"]) != str:
                 sys.stderr.write("rname\n")
                 return False
-            if 'algo' not in data or type(data['algo']) != str:
+            if "algo" not in data or type(data["algo"]) != str:
                 sys.stderr.write("ralgo\n")
                 return False
 
             keys = set(data)
-            all_keys = {'max_threads', 'priority', 'running', 'name', 'algo'}
+            all_keys = {"max_threads", "priority", "running", "name", "algo"}
 
             if len(keys.difference(all_keys)) != 0:
                 sys.stderr.write("rdiff\n")
                 return False
 
-            if 'max_threads' in data and type(data['max_threads']) != int:
+            if "max_threads" in data and type(data["max_threads"]) != int:
                 sys.stderr.write("rmax_threads\n")
                 return False
-            if 'priority' in data and type(data['priority']) != int:
+            if "priority" in data and type(data["priority"]) != int:
                 sys.stderr.write("rpriority\n")
                 return False
-            if 'running' in data and type(data['running']) != bool:
+            if "running" in data and type(data["running"]) != bool:
                 sys.stderr.write("rrunning\n")
                 return False
 
@@ -62,18 +63,26 @@ class Tasks:
         current_time = datetime.datetime.now()
 
         for i in range(len(datas)):
-            if 'max_threads' not in datas[i]:
-                datas[i]['max_threads'] = default_threads
+            if "max_threads" not in datas[i]:
+                datas[i]["max_threads"] = default_threads
 
-            if 'priority' not in datas[i]:
-                datas[i]['priority'] = default_priority
+            if "priority" not in datas[i]:
+                datas[i]["priority"] = default_priority
 
-            if 'running' not in datas[i]:
-                datas[i]['running'] = default_running
+            if "running" not in datas[i]:
+                datas[i]["running"] = default_running
 
-            datas[i] = (datas[i]['name'], datas[i]['algo'],
-                        datas[i]['max_threads'], 0, 0, 0, datas[i]['priority'],
-                        current_time, datas[i]['running'])
+            datas[i] = (
+                datas[i]["name"],
+                datas[i]["algo"],
+                datas[i]["max_threads"],
+                0,
+                0,
+                0,
+                datas[i]["priority"],
+                current_time,
+                datas[i]["running"],
+            )
 
         q = "INSERT INTO tasks (name, algo, max_threads, current_threads, total_jobs, remaining_jobs, priority, started, running) VALUES %s RETURNING id;"
 
@@ -125,9 +134,13 @@ class Tasks:
         r = []
         data = cur.fetchall()
         for d in data:
-            o = {'id': d[0], 'current_threads': d[1],
-                 'max_threads': d[2], 'total_jobs': d[3],
-                 'remaining_jobs': d[4]}
+            o = {
+                "id": d[0],
+                "current_threads": d[1],
+                "max_threads": d[2],
+                "total_jobs": d[3],
+                "remaining_jobs": d[4],
+            }
             r.append(o)
 
         cur.close()
@@ -188,7 +201,7 @@ class Tasks:
             tid = tids.pop()
             n_jids = self.get_task_free_jobs(cur, tid, count - len(jids))
             if n_jids == 0:
-               continue
+                continue
 
             jids = jids + n_jids
             if not tid in used_tids:
@@ -237,19 +250,26 @@ class Task:
 
         self.db.prepared(q, values)
 
-
     def to_dict(self):
-        return {'id': self.id, 'name': self.name, 'algo': self.algo,
-                'max_threads': self.max_threads, 'current_threads': self.current_threads,
-                'total_jobs': self.total_jobs, 'remaining_jobs': self.remaining_jobs,
-                'priority': self.priority, 'running': self.running, 'started': self.started}
+        return {
+            "id": self.id,
+            "name": self.name,
+            "algo": self.algo,
+            "max_threads": self.max_threads,
+            "current_threads": self.current_threads,
+            "total_jobs": self.total_jobs,
+            "remaining_jobs": self.remaining_jobs,
+            "priority": self.priority,
+            "running": self.running,
+            "started": self.started,
+        }
 
     def new(self, name, algo, max_threads=-1, priority=100, running=False):
-        assert(type(name) == str)
-        assert(type(algo) == str)
-        assert(type(max_threads) == int)
-        assert(type(priority) == int)
-        assert(type(running) == bool)
+        assert type(name) == str
+        assert type(algo) == str
+        assert type(max_threads) == int
+        assert type(priority) == int
+        assert type(running) == bool
 
         self.name = name
         self.algo = algo
@@ -270,14 +290,14 @@ class Task:
         return self
 
     def load_id(self, tid):
-        assert(type(tid) == int)
+        assert type(tid) == int
         self.id = tid
 
         self.__load__()
         return self
 
     def load(self, name):
-        assert(type(name) == str)
+        assert type(name) == str
         self.name = name
 
         self.__load__()
@@ -308,13 +328,20 @@ class Task:
         q += " remaining_jobs, priority, started, running)"
         q += " VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)"
         q += " RETURNING id;"
-        values = (self.name, self.algo, self.max_threads, self.current_threads,
-                  self.total_jobs, self.remaining_jobs, self.priority, self.started,
-                  self.running)
+        values = (
+            self.name,
+            self.algo,
+            self.max_threads,
+            self.current_threads,
+            self.total_jobs,
+            self.remaining_jobs,
+            self.priority,
+            self.started,
+            self.running,
+        )
 
         r, rid = self.db.prepared(q, values, rowid=True)
         self.id = rid
-
 
     def __load__(self):
         q = ""
@@ -334,9 +361,18 @@ class Task:
 
         data = cursor.fetchone()
         if data:
-            (self.id, self.name, self.algo, self.max_threads, self.current_threads,
-                self.total_jobs, self.remaining_jobs, self.priority, self.started,
-                self.running) = data
+            (
+                self.id,
+                self.name,
+                self.algo,
+                self.max_threads,
+                self.current_threads,
+                self.total_jobs,
+                self.remaining_jobs,
+                self.priority,
+                self.started,
+                self.running,
+            ) = data
         else:
             self.id = None
             self.name = None
@@ -350,7 +386,6 @@ class Task:
             self.running = None
 
         cursor.close()
-
 
     def __remove__(self):
         q = ""

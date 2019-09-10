@@ -5,15 +5,17 @@ from hash_framework.algorithms.sha3 import sha3
 from hash_framework.algorithms.siphash import siphash
 
 all_algorithms = {
-    'md4': md4,
-    'md5': md5,
-    'sha1': sha1,
-    'sha3': sha3,
-    'siphash': siphash,
+    "md4": md4,
+    "md5": md5,
+    "sha1": sha1,
+    "sha3": sha3,
+    "siphash": siphash,
 }
+
 
 def lookup(name):
     return all_algorithms[name]
+
 
 def resolve(name):
     if isinstance(name, str):

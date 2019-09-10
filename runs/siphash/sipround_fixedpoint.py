@@ -1,6 +1,7 @@
 import cmsh
 import hash_framework.algorithms._siphash as _siphash
 
+
 def main():
     m = cmsh.Model()
     v0 = m.vec(64)
@@ -26,7 +27,5 @@ def main():
         sat = m.solve()
 
 
-
 if __name__ == "__main__":
     main()
-

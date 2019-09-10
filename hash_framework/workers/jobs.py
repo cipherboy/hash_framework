@@ -6,6 +6,7 @@ import threading, os.path
 from hash_framework.workers.job import Job
 import hash_framework as hf
 
+
 class Jobs:
     def __init__(self, config):
         self.jobs = {}
@@ -51,7 +52,6 @@ class Jobs:
 
             time.sleep(0.05)
 
-
     def update(self):
         for jid in self.jq.copy():
             j = self.jobs[jid]
@@ -85,14 +85,14 @@ class Jobs:
         return None
 
     def add(self, j):
-        assert(type(j) == Job)
+        assert type(j) == Job
         if not j.id in self.jobs:
             self.jobs[j.id] = j
             self.wj.add(j.id)
         return j.id
 
     def status(self, j):
-        assert(type(j) == Job)
+        assert type(j) == Job
 
         ps = ""
         ps += "# Job Status\n\n"
@@ -112,7 +112,7 @@ class Jobs:
         return json.dumps(d)
 
     def result(self, j):
-        assert(type(j) == Job)
+        assert type(j) == Job
         return j.result(self.db, self.rids[j.id])
 
     def ready(self):

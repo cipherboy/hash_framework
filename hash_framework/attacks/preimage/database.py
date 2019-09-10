@@ -5,9 +5,11 @@ from hash_framework.utils import *
 
 import sqlite3
 
+
 def create_table(algo, db):
     q = create_table_query(algo, db_type=db.type)
     db.execute(q, limit=1)
+
 
 def table_cols(algo):
     cols = []
@@ -27,6 +29,7 @@ def table_cols(algo):
         cols.append("w")
 
     return cols
+
 
 def create_table_query(algo, name=None, db_type="sqlite3"):
     if name == None:

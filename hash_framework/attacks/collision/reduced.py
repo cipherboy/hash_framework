@@ -1,16 +1,17 @@
 from hash_framework import attacks
 from hash_framework.models import models
 
+
 def find_arbitrary_differential(algo, db, rounds, tag):
     algo.rounds = rounds
     m = models()
     m.start(tag, False)
     models.vars.write_header()
-    models.generate(algo, ['h1', 'h2'], rounds=rounds, bypass=True)
+    models.generate(algo, ["h1", "h2"], rounds=rounds, bypass=True)
     attacks.collision.write_same_state(algo)
     attacks.collision.write_constraints(algo)
     attacks.collision.write_optional_differential(algo)
-    models.vars.write_assign(['ccollision', 'cblocks', 'cstate'])
+    models.vars.write_assign(["ccollision", "cblocks", "cstate"])
     m.collapse()
     m.build()
     m.remote = False
@@ -19,42 +20,64 @@ def find_arbitrary_differential(algo, db, rounds, tag):
     ncols = attacks.collision.build_col_rows(algo, db, rs, tag)
     print(ncols)
 
+
 def only_one_differences(algo, name="07-differential.txt"):
-    differential = ['or']
+    differential = ["or"]
     for i in range(0, algo.rounds):
         dlist = []
         for j in range(0, algo.rounds):
             if i == j:
-                dlist.append(['i'*32, 'h1i', j*algo.int_size, "h2i", j*algo.int_size])
+                dlist.append(
+                    ["i" * 32, "h1i", j * algo.int_size, "h2i", j * algo.int_size]
+                )
             else:
-                dlist.append(['.'*32, 'h1i', j*algo.int_size, "h2i", j*algo.int_size])
+                dlist.append(
+                    ["." * 32, "h1i", j * algo.int_size, "h2i", j * algo.int_size]
+                )
         differential.append(models.vars.differentials(dlist))
-    models.vars.write_clause('cdifferentials', tuple(differential), name)
+    models.vars.write_clause("cdifferentials", tuple(differential), name)
+
 
 def only_two_differences(algo, name="07-differential.txt"):
-    differential = ['or']
+    differential = ["or"]
     for i in range(0, algo.rounds):
-        for k in range(i+1, algo.rounds):
+        for k in range(i + 1, algo.rounds):
             dlist = []
             for j in range(0, algo.rounds):
                 if i == j:
-                    dlist.append(['i'*32, 'h1i', j*algo.int_size, "h2i", j*algo.int_size])
+                    dlist.append(
+                        ["i" * 32, "h1i", j * algo.int_size, "h2i", j * algo.int_size]
+                    )
                 elif k == j:
-                    dlist.append(['i'*32, 'h1i', j*algo.int_size, "h2i", j*algo.int_size])
+                    dlist.append(
+                        ["i" * 32, "h1i", j * algo.int_size, "h2i", j * algo.int_size]
+                    )
                 else:
-                    dlist.append(['.'*32, 'h1i', j*algo.int_size, "h2i", j*algo.int_size])
+                    dlist.append(
+                        ["." * 32, "h1i", j * algo.int_size, "h2i", j * algo.int_size]
+                    )
             differential.append(models.vars.differentials(dlist))
-    models.vars.write_clause('cdifferentials', tuple(differential), name)
+    models.vars.write_clause("cdifferentials", tuple(differential), name)
+
 
 def specified_difference(algo, places, name="07-differential.txt"):
-    differential = ['and']
+    differential = ["and"]
     for i in range(0, algo.rounds):
         if i not in places:
-            differential.append(models.vars.differential('.'*32, 'h1i', i*algo.int_size, "h2i", i*algo.int_size))
+            differential.append(
+                models.vars.differential(
+                    "." * 32, "h1i", i * algo.int_size, "h2i", i * algo.int_size
+                )
+            )
         else:
-            differential.append(models.vars.any_difference(32, 'h1i', i*algo.int_size, "h2i", i*algo.int_size))
+            differential.append(
+                models.vars.any_difference(
+                    32, "h1i", i * algo.int_size, "h2i", i * algo.int_size
+                )
+            )
 
-    models.vars.write_clause('cdifferentials', tuple(differential), name)
+    models.vars.write_clause("cdifferentials", tuple(differential), name)
+
 
 def find_simplest_differential(algo, db, rounds, tag):
     algo.rounds = rounds
@@ -63,7 +86,7 @@ def find_simplest_differential(algo, db, rounds, tag):
 
     m.start(tag, False)
     models.vars.write_header()
-    models.generate(algo, ['h1', 'h2'], rounds=rounds, bypass=True)
+    models.generate(algo, ["h1", "h2"], rounds=rounds, bypass=True)
     attacks.collision.write_same_state(algo)
     attacks.collision.write_constraints(algo)
     attacks.collision.write_optional_differential(algo)
@@ -74,10 +97,14 @@ def find_simplest_differential(algo, db, rounds, tag):
     while True:
         print(len(found_collisions))
         if len(found_collisions) > 0:
-            found_differences = attacks.collision.intermediate.analyze(algo, found_collisions)
+            found_differences = attacks.collision.intermediate.analyze(
+                algo, found_collisions
+            )
             print(found_differences)
             attacks.collision.intermediate.write_negated(algo, found_differences)
-        models.vars.write_assign(['ccollision', 'cblocks', 'cstate', 'cdifferentials', 'cnegated'])
+        models.vars.write_assign(
+            ["ccollision", "cblocks", "cstate", "cdifferentials", "cnegated"]
+        )
         m.collapse()
         m.build()
         sat = m.run(count=1)
@@ -88,6 +115,7 @@ def find_simplest_differential(algo, db, rounds, tag):
         found_collisions.append(ncols[0])
     print(found_differences)
     return found_differences
+
 
 def parallel_simple_differentials(algo, db, rounds, sizes, tag_base):
     wq = []
@@ -100,18 +128,40 @@ def parallel_simple_differentials(algo, db, rounds, sizes, tag_base):
         tag = tag_base + "-r" + str(r)
         m.start(tag, False)
         models.vars.write_header()
-        models.generate(algo, ['h1', 'h2'], rounds=r, bypass=True)
+        models.generate(algo, ["h1", "h2"], rounds=r, bypass=True)
         attacks.collision.write_same_state(algo)
         attacks.collision.write_constraints(algo)
         attacks.collision.write_optional_differential(algo)
-        models.vars.write_assign(['ccollision', 'cblocks', 'cstate', 'cdifferentials', 'cnegated'])
+        models.vars.write_assign(
+            ["ccollision", "cblocks", "cstate", "cdifferentials", "cnegated"]
+        )
         for s in sizes:
             for e in itertools.combinations(list(range(0, r)), s):
                 algo.rounds = r
                 m = models()
-                tag = tag_base + "-r" + str(r) + "-s" + str(s) + "-e" + '-'.join(list(map(str, e)))
+                tag = (
+                    tag_base
+                    + "-r"
+                    + str(r)
+                    + "-s"
+                    + str(s)
+                    + "-e"
+                    + "-".join(list(map(str, e)))
+                )
                 m.start(tag, False)
-                os.system("cp -r " + m.model_dir + "/" + tag_base + "-r" + str(r) + "/* " + m.model_dir + "/" + tag + "/")
+                os.system(
+                    "cp -r "
+                    + m.model_dir
+                    + "/"
+                    + tag_base
+                    + "-r"
+                    + str(r)
+                    + "/* "
+                    + m.model_dir
+                    + "/"
+                    + tag
+                    + "/"
+                )
                 attacks.collision.reduced.specified_difference(algo, e)
                 wq.append((r, s, e))
                 found_differences[(r, s, e)] = []
@@ -128,14 +178,24 @@ def parallel_simple_differentials(algo, db, rounds, sizes, tag_base):
         e = w[2]
         algo.rounds = r
         m = models()
-        tag = tag_base + "-r" + str(r) + "-s" + str(s) + "-e" + '-'.join(list(map(str, e)))
+        tag = (
+            tag_base
+            + "-r"
+            + str(r)
+            + "-s"
+            + str(s)
+            + "-e"
+            + "-".join(list(map(str, e)))
+        )
         m.start(tag, False)
         if len(found_differences[w]) > 0:
             print(found_differences[w])
             attacks.collision.intermediate.write_negated(algo, found_differences[w])
         m.collapse()
         m.build()
-        j = compute.perform_sat("problem.cnf", "problem.out", count=1, no_wait=True, ident=(w))
+        j = compute.perform_sat(
+            "problem.cnf", "problem.out", count=1, no_wait=True, ident=(w)
+        )
         jq.append((w, j))
         print("Done handling job.")
 
@@ -156,13 +216,21 @@ def parallel_simple_differentials(algo, db, rounds, sizes, tag_base):
                     if fj_status:
                         w = fj_w
                         print(w)
-                        #wq.append(w)
+                        # wq.append(w)
                         r = fj_w[0]
                         s = fj_w[1]
                         e = fj_w[2]
                         algo.rounds = r
                         m = models()
-                        tag = tag_base + "-r" + str(r) + "-s" + str(s) + "-e" + '-'.join(list(map(str, e)))
+                        tag = (
+                            tag_base
+                            + "-r"
+                            + str(r)
+                            + "-s"
+                            + str(s)
+                            + "-e"
+                            + "-".join(list(map(str, e)))
+                        )
                         m.start(tag, False)
                         rs = m.results(algo)
                         ncols = attacks.collision.build_col_rows(algo, db, rs, tag)
@@ -181,12 +249,12 @@ def parallel_simple_differentials(algo, db, rounds, sizes, tag_base):
                     jq.remove(jq[j])
                     break
 
-
             if not found:
                 print("Did not find job..." + str(jq) + " || " + str(fj))
             print("Done waiting for work.")
 
     print(found_differences)
+
 
 def generate_test_delta(d, n, r):
     if n <= 0:
@@ -201,6 +269,7 @@ def generate_test_delta(d, n, r):
             res.append(tuple(n))
     return res
 
+
 def find_extended(algo, db, delta_set, rounds, tag_base):
     nd = []
     wq = []
@@ -214,11 +283,13 @@ def find_extended(algo, db, delta_set, rounds, tag_base):
     tag = tag_base + "-r" + str(r)
     m.start(tag, False)
     models.vars.write_header()
-    models.generate(algo, ['h1', 'h2'], rounds=r, bypass=True)
+    models.generate(algo, ["h1", "h2"], rounds=r, bypass=True)
     attacks.collision.write_same_state(algo)
     attacks.collision.write_constraints(algo)
     attacks.collision.write_optional_differential(algo)
-    models.vars.write_assign(['ccollision', 'cblocks', 'cstate', 'cdifferentials', 'cnegated'])
+    models.vars.write_assign(
+        ["ccollision", "cblocks", "cstate", "cdifferentials", "cnegated"]
+    )
 
     print("Generating work queue...")
     for deltas in delta_set:
@@ -229,9 +300,29 @@ def find_extended(algo, db, delta_set, rounds, tag_base):
             for e in wd:
                 m = models()
                 s = len(e)
-                tag = tag_base + "-r" + str(r) + "-s" + str(s) + "-e" + '-'.join(list(map(str, e)))
+                tag = (
+                    tag_base
+                    + "-r"
+                    + str(r)
+                    + "-s"
+                    + str(s)
+                    + "-e"
+                    + "-".join(list(map(str, e)))
+                )
                 m.start(tag, False)
-                os.system("cp -r " + m.model_dir + "/" + tag_base + "-r" + str(r) + "/* " + m.model_dir + "/" + tag + "/")
+                os.system(
+                    "cp -r "
+                    + m.model_dir
+                    + "/"
+                    + tag_base
+                    + "-r"
+                    + str(r)
+                    + "/* "
+                    + m.model_dir
+                    + "/"
+                    + tag
+                    + "/"
+                )
                 attacks.collision.reduced.specified_difference(algo, e)
                 wq.append((r, s, e))
                 found_differences[(r, s, e)] = []
@@ -251,9 +342,19 @@ def find_extended(algo, db, delta_set, rounds, tag_base):
         e = w[2]
         algo.rounds = r
         m = models()
-        tag = tag_base + "-r" + str(r) + "-s" + str(s) + "-e" + '-'.join(list(map(str, e)))
+        tag = (
+            tag_base
+            + "-r"
+            + str(r)
+            + "-s"
+            + str(s)
+            + "-e"
+            + "-".join(list(map(str, e)))
+        )
         m.start(tag, False)
-        j = compute.perform_sat("problem.cnf", "problem.out", count=1, no_wait=True, ident=(w))
+        j = compute.perform_sat(
+            "problem.cnf", "problem.out", count=1, no_wait=True, ident=(w)
+        )
         jq.append((w, j))
         print("Done handling job.")
 
@@ -276,13 +377,21 @@ def find_extended(algo, db, delta_set, rounds, tag_base):
                     found = True
                     if fj_status:
                         w = fj_w
-                        #wq.append(w)
+                        # wq.append(w)
                         r = fj_w[0]
                         s = fj_w[1]
                         e = fj_w[2]
                         algo.rounds = r
                         m = models()
-                        tag = tag_base + "-r" + str(r) + "-s" + str(s) + "-e" + '-'.join(list(map(str, e)))
+                        tag = (
+                            tag_base
+                            + "-r"
+                            + str(r)
+                            + "-s"
+                            + str(s)
+                            + "-e"
+                            + "-".join(list(map(str, e)))
+                        )
                         m.start(tag, False)
                         rs = m.results(algo)
                         ncols = attacks.collision.build_col_rows(algo, db, rs, tag)
@@ -301,12 +410,12 @@ def find_extended(algo, db, delta_set, rounds, tag_base):
                     jq.remove(jq[j])
                     break
 
-
             if not found:
                 print("Did not find job..." + str(jq) + " || " + str(fj))
             print("Done waiting for work.")
 
     print(found_differences)
+
 
 def find_neighbors(algo, db, start, rounds, tag):
     r = rounds
@@ -324,14 +433,14 @@ def find_neighbors(algo, db, start, rounds, tag):
         i = wq.pop(0)
 
         m = models()
-        m.start(tag+"-r" + str(i), False)
+        m.start(tag + "-r" + str(i), False)
         models.vars.write_header()
-        models.generate(algo, ['h1', 'h2'], rounds=r, bypass=True)
+        models.generate(algo, ["h1", "h2"], rounds=r, bypass=True)
         attacks.collision.connected.loose.constraints_new_neighbor(algo, cols, i)
         attacks.collision.write_same_state(algo)
         attacks.collision.write_constraints(algo)
         attacks.collision.write_optional_differential(algo)
-        models.vars.write_assign(['cstate', 'ccollision', 'cblocks', 'cdifferentials'])
+        models.vars.write_assign(["cstate", "ccollision", "cblocks", "cdifferentials"])
         m.collapse()
         m.build()
         jqj = compute.perform_sat("problem.cnf", "problem.out", count=1, no_wait=True)

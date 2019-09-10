@@ -1,11 +1,13 @@
 import cmsh
 from hash_framework.algorithms.md4 import md4
 
+
 def gen_blocks(model, count, width):
     result = []
     for i in range(0, count):
         result.append(model.vec(width))
     return result
+
 
 def split_hex(string, width=8):
     result = []
@@ -13,9 +15,10 @@ def split_hex(string, width=8):
         # Reverse each group of two within each block
         block = ""
         for j in range(0, width, 2):
-            block = string[i+j:i+j+2] + block
+            block = string[i + j : i + j + 2] + block
         result.append(int(block, 16))
     return result
+
 
 def test_known_value():
     model = cmsh.Model()
@@ -128,7 +131,6 @@ def test_md4_find_ivs():
     blocks_2 = gen_blocks(model, 16, 32)
     b1 = model.join_vec(blocks_1)
     b2 = model.join_vec(blocks_2)
-
 
     iv_1_arr = gen_blocks(model, 4, 32)
     iv_2_arr = gen_blocks(model, 4, 32)

@@ -1,10 +1,13 @@
 import hash_framework
 import datetime, time, sys, json
 
+
 def run():
     data = []
 
-    c = hash_framework.manager.api.Client(hash_framework.config.manager_uri, hash_framework.config.scheduler_uri)
+    c = hash_framework.manager.api.Client(
+        hash_framework.config.manager_uri, hash_framework.config.scheduler_uri
+    )
     c.register()
 
     while True:
@@ -23,22 +26,21 @@ def run():
                 print("[get_job] Error: " + str(error))
                 continue
 
-            kernel_name = ji['kernel']
-            kernel_args = json.loads(ji['args'])
-            c_count = len(kernel_args['rounds'])//4
-            w = kernel_args['w']
-            j = hash_framework.workers.Job(jid, kernel_name, kernel_args,
-                                           ji['timeout'],
-                                           datetime.datetime.now())
+            kernel_name = ji["kernel"]
+            kernel_args = json.loads(ji["args"])
+            c_count = len(kernel_args["rounds"]) // 4
+            w = kernel_args["w"]
+            j = hash_framework.workers.Job(
+                jid, kernel_name, kernel_args, ji["timeout"], datetime.datetime.now()
+            )
 
             j.run()
             result = j.to_dict(datetime.datetime.now())
-            data.append((c_count, w, result['run_return']))
+            data.append((c_count, w, result["run_return"]))
             print(data)
             # r.append(result)
 
     print(data)
-
 
     # error = c.send_results(r)
     # if error != None:

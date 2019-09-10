@@ -1,18 +1,20 @@
 import hash_framework
 import sys
 
+
 def get_rowid_count(db, algo):
     q = "SELECT COUNT(ROWID) from c_" + algo.name
     q += " WHERE tag='' or tag is null;"
     datas = db.execute(q).fetchall()
     return datas[0][0]
 
+
 def get_rows(db, algo):
     cols = hash_framework.attacks.collision.table_cols(algo)
     cols.append("tag")
     cols.append("ROWID")
 
-    q = "SELECT " + ','.join(cols) + " FROM c_" + algo.name
+    q = "SELECT " + ",".join(cols) + " FROM c_" + algo.name
     q += " WHERE ROWID in ("
     q += "    SELECT ROWID from c_" + algo.name
     q += "    WHERE tag='' or tag is null LIMIT 10000);"
@@ -29,23 +31,24 @@ def get_rows(db, algo):
 
 def determine_tag(algo, row):
     rounds = 0
-    base = '.'*32
+    base = "." * 32
     deltas = []
     for i in range(0, algo.rounds):
         k = "ri" + str(i)
         if k in row and row[k] != None:
-            rounds = i+1
+            rounds = i + 1
             if row[k] != base:
                 deltas.append(i)
-    tag = "md4-r" + str(rounds) + "-e" + '-'.join(map(str, deltas))
+    tag = "md4-r" + str(rounds) + "-e" + "-".join(map(str, deltas))
     return tag
+
 
 def retag(db, algo, r):
     tag = determine_tag(algo, r)
-    rowid = r['ROWID']
+    rowid = r["ROWID"]
 
     q = "UPDATE c_" + algo.name
-    q += " SET tag='" + tag + "' WHERE ROWID="+str(rowid) + ";"
+    q += " SET tag='" + tag + "' WHERE ROWID=" + str(rowid) + ";"
     db.execute(q, commit=False, rowid=False)
 
 

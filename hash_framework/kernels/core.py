@@ -14,21 +14,22 @@ from hash_framework.kernels.sha3output import SHA3Output
 from hash_framework.kernels.test import Test
 
 all_kernels = {
-    'abstract': Kernel,
-    'families': Families,
-    'neighborhood': Neighborhood,
-    'zeros': Zeros,
-    'ones': Ones,
-    'ascii': ASCII,
-    'multicollision': Multicollision,
-    'minimal': Minimal,
-    'test': Test,
-    'sha3margins': SHA3Margins,
-    'sha3differences': SHA3Differences,
-    'sha3distributivity': SHA3Distributivity,
-    'sha3bijectivity': SHA3Bijectivity,
-    'sha3output': SHA3Output
+    "abstract": Kernel,
+    "families": Families,
+    "neighborhood": Neighborhood,
+    "zeros": Zeros,
+    "ones": Ones,
+    "ascii": ASCII,
+    "multicollision": Multicollision,
+    "minimal": Minimal,
+    "test": Test,
+    "sha3margins": SHA3Margins,
+    "sha3differences": SHA3Differences,
+    "sha3distributivity": SHA3Distributivity,
+    "sha3bijectivity": SHA3Bijectivity,
+    "sha3output": SHA3Output,
 }
+
 
 def lookup(name):
     return all_kernels[name]

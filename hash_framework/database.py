@@ -5,6 +5,7 @@ import time, sys
 
 from hash_framework.config import config
 
+
 class database:
     def __init__(self, path=None):
         if path == None:
@@ -21,7 +22,9 @@ class database:
         password = password if password != None else config.psql_password
 
         self.type = "psql"
-        self.conn = psycopg2.connect(host=host, user=user, password=password, database=database)
+        self.conn = psycopg2.connect(
+            host=host, user=user, password=password, database=database
+        )
 
     def sqlite_rowid(self, r, c, cursor):
         lastrowid = c.lastrowid
@@ -75,7 +78,7 @@ class database:
                 print("Database Error (" + self.type + "):", file=sys.stderr)
                 print(e, file=sys.stderr)
 
-                if i < limit-1:
+                if i < limit - 1:
                     time.sleep(1)
                 self.conn.rollback()
                 pass
@@ -101,7 +104,7 @@ class database:
                 print("Database Error (" + self.type + "):", file=sys.stderr)
                 print(e, file=sys.stderr)
 
-                if i < limit-1:
+                if i < limit - 1:
                     time.sleep(1)
 
                 self.conn.rollback()
@@ -131,7 +134,7 @@ class database:
                 print("Database Error (" + self.type + "):", file=sys.stderr)
                 print(e, file=sys.stderr)
 
-                if i < limit-1:
+                if i < limit - 1:
                     time.sleep(1)
 
                 self.conn.rollback()
@@ -143,13 +146,13 @@ class database:
         return None
 
     def query(self, table, cols, rowid=0, tag="", limit=0):
-        assert(type(table) == str)
-        assert(type(cols) == list and len(cols) > 0)
-        assert(type(rowid) == int)
-        assert(type(tag) == str)
-        assert(type(limit) == int)
+        assert type(table) == str
+        assert type(cols) == list and len(cols) > 0
+        assert type(rowid) == int
+        assert type(tag) == str
+        assert type(limit) == int
 
-        q = "SELECT " + ','.join(cols) + " FROM " + table
+        q = "SELECT " + ",".join(cols) + " FROM " + table
         if rowid > 0:
             q += " WHERE ROWID=" + str(rowid)
         elif tag != "":
@@ -164,7 +167,7 @@ class database:
 
         data = []
         for raw_data in raw_datas:
-            assert(len(raw_data) == len(cols))
+            assert len(raw_data) == len(cols)
             d = {}
             for i in range(0, len(cols)):
                 d[cols[i]] = raw_data[i]

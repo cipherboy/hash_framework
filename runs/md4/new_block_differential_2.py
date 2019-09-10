@@ -2,9 +2,11 @@ import cmsh
 from hash_framework.algorithms import _md4
 from hash_framework.algorithms import md4
 
+
 def gen_blocks(mod, count, width):
-    result = mod.vec(count*width)
+    result = mod.vec(count * width)
     return mod.split_vec(result, width)
+
 
 def split_hex(string, width=8):
     result = []
@@ -12,9 +14,10 @@ def split_hex(string, width=8):
         # Reverse each group of two within each block
         block = ""
         for j in range(0, width, 2):
-            block = string[i+j:i+j+2] + block
+            block = string[i + j : i + j + 2] + block
         result.append(int(block, 16))
     return result
+
 
 def main():
     mod = cmsh.Model()
@@ -30,7 +33,12 @@ def main():
     r_value_2, r_rounds_2 = _md4.md4(mod, blocks_value_2)
 
     assert r_rounds_1[0] == r_rounds_2[0]
-    a, b, c, d = mod.vec(32), md4.md4.default_state[1], md4.md4.default_state[2], md4.md4.default_state[3]
+    a, b, c, d = (
+        mod.vec(32),
+        md4.md4.default_state[1],
+        md4.md4.default_state[2],
+        md4.md4.default_state[3],
+    )
     x_a, x_b, x_c, x_d = 0, 0, 0, 0
     new_d_1, new_d_2 = r_rounds_1[1], r_rounds_2[1]
     x_new_d = new_d_1 ^ new_d_2
@@ -53,13 +61,15 @@ def main():
     sat = mod.solve()
     assert sat
     while sat:
-        print(bin(int(i_a) ^ int(j_a)), bin(int(new_x_1) ^ int(new_x_2)), bin(int(x_new_d)))
+        print(
+            bin(int(i_a) ^ int(j_a)),
+            bin(int(new_x_1) ^ int(new_x_2)),
+            bin(int(x_new_d)),
+        )
         negated = mod.negate_solution(new_x_1 ^ new_x_2)
 
         mod.add_assert(negated)
         sat = mod.solve()
-
-
 
 
 if __name__ == "__main__":

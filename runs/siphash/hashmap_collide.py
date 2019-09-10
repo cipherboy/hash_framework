@@ -3,8 +3,9 @@ import random
 import cmsh
 import hash_framework.algorithms._siphash as _siphash
 
+
 def main():
-    #m = cmsh.Model(cnf_mode=3)
+    # m = cmsh.Model(cnf_mode=3)
     m = cmsh.Model()
     cr = 1
     dr = 1
@@ -23,7 +24,7 @@ def main():
         known_128 = m.join_vec([m.to_vec(known, key_bits), m.to_vec(0, 128 - key_bits)])
     else:
         known_128 = m.to_vec(known, 128)
-    print(bin(known).count('0'))
+    print(bin(known).count("0"))
 
     guess = m.vec(128)
 
@@ -32,7 +33,9 @@ def main():
     values_64 = [m.to_vec(values[i], 64) for i in range(0, num_values)]
 
     for value_64 in values_64:
-        r_known = _siphash.siphash(m, known_128, value_64, outlen=8, cROUNDS=cr, dROUNDS=dr)
+        r_known = _siphash.siphash(
+            m, known_128, value_64, outlen=8, cROUNDS=cr, dROUNDS=dr
+        )
         r_guess = _siphash.siphash(m, guess, value_64, outlen=8, cROUNDS=cr, dROUNDS=dr)
 
         if max_delta == 0:
@@ -52,10 +55,29 @@ def main():
     guess_value = m.to_vec(int(guess), 128)
 
     others = [random.randint(0, 1 << 64) for i in range(0, num_others)]
-    rs_known = [_siphash.siphash(m, known_128, m.to_vec(others[i], 64), outlen=8, cROUNDS=cr, dROUNDS=dr) for i in range(0, num_others)]
-    rs_guess = [_siphash.siphash(m, guess_value, m.to_vec(others[i], 64), outlen=8, cROUNDS=cr, dROUNDS=dr) for i in range(0, num_others)]
+    rs_known = [
+        _siphash.siphash(
+            m, known_128, m.to_vec(others[i], 64), outlen=8, cROUNDS=cr, dROUNDS=dr
+        )
+        for i in range(0, num_others)
+    ]
+    rs_guess = [
+        _siphash.siphash(
+            m, guess_value, m.to_vec(others[i], 64), outlen=8, cROUNDS=cr, dROUNDS=dr
+        )
+        for i in range(0, num_others)
+    ]
 
-    print(len(list(filter(lambda x: int(x[0][-m_bits:]) == int(x[1][-m_bits:]), zip(rs_known, rs_guess)))))
+    print(
+        len(
+            list(
+                filter(
+                    lambda x: int(x[0][-m_bits:]) == int(x[1][-m_bits:]),
+                    zip(rs_known, rs_guess),
+                )
+            )
+        )
+    )
     print(num_others)
 
 

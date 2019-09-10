@@ -2,9 +2,11 @@ import cmsh
 from hash_framework.algorithms import _md4
 from hash_framework.algorithms import md4
 
+
 def gen_blocks(mod, count, width):
-    result = mod.vec(count*width)
+    result = mod.vec(count * width)
     return mod.split_vec(result, width)
+
 
 def split_hex(string, width=8):
     result = []
@@ -12,9 +14,10 @@ def split_hex(string, width=8):
         # Reverse each group of two within each block
         block = ""
         for j in range(0, width, 2):
-            block = string[i+j:i+j+2] + block
+            block = string[i + j : i + j + 2] + block
         result.append(int(block, 16))
     return result
+
 
 def main():
     mod = cmsh.Model()
@@ -76,14 +79,23 @@ def main():
             x_c == ixc,
             x_d == ixd,
             (naa ^ nab) == ina,
-            (nba ^ nbb) == inb
+            (nba ^ nbb) == inb,
         ]
 
         for constraint in this_sol:
             mod.add_assume(constraint)
 
         while sat:
-            print(bin(int(xaa ^ xab)), bin(int(xba ^ xbb)), bin(ixa), bin(ixb), bin(ixc), bin(ixd), bin(ina), bin(inb))
+            print(
+                bin(int(xaa ^ xab)),
+                bin(int(xba ^ xbb)),
+                bin(ixa),
+                bin(ixb),
+                bin(ixc),
+                bin(ixd),
+                bin(ina),
+                bin(inb),
+            )
             x_j = mod.join_vec([xaa ^ xab, xba ^ xbb])
             neg = mod.negate_solution(x_j)
             mod.add_assert(neg)
@@ -95,7 +107,6 @@ def main():
         mod.add_assert((nba ^ nbb) != inb)
 
         sat = mod.solve()
-
 
 
 if __name__ == "__main__":

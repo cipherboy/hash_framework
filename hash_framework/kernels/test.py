@@ -6,6 +6,7 @@ import json, subprocess
 import itertools, time
 import random
 
+
 class Test(Kernel):
     def __init__(self, jid, args):
         self.jid = jid
@@ -23,16 +24,18 @@ class Test(Kernel):
         pass
 
     def pre_run(self):
-        if 'test_install' in self.args:
-            self.data['config.bc_path'] = config.bc_bin
-            self.data['config.bc_path.valid'] = os.path.exists(config.bc_bin)
-            self.data['config.cms_path'] = config.cms_bin
-            self.data['config.cms_path.valid'] = os.path.exists(config.cms_bin)
-            self.data['config.manager_uri'] = config.manager_uri
-            self.data['config.scheduler_uri'] = config.scheduler_uri
-            self.data['config.job_count'] = config.job_count
+        if "test_install" in self.args:
+            self.data["config.bc_path"] = config.bc_bin
+            self.data["config.bc_path.valid"] = os.path.exists(config.bc_bin)
+            self.data["config.cms_path"] = config.cms_bin
+            self.data["config.cms_path.valid"] = os.path.exists(config.cms_bin)
+            self.data["config.manager_uri"] = config.manager_uri
+            self.data["config.scheduler_uri"] = config.scheduler_uri
+            self.data["config.job_count"] = config.job_count
 
-        compile_sleep = random.uniform(self.args['compile.min'], self.args['compile.max'])
+        compile_sleep = random.uniform(
+            self.args["compile.min"], self.args["compile.max"]
+        )
         time.sleep(compile_sleep)
 
         return 0
@@ -44,15 +47,19 @@ class Test(Kernel):
         return ""
 
     def run_cmd(self):
-        self.data['test.sleep_time'] = random.uniform(self.args['cmd.min'], self.args['cmd.max'])
-        return "sleep " + str(self.data['test.sleep_time'])
+        self.data["test.sleep_time"] = random.uniform(
+            self.args["cmd.min"], self.args["cmd.max"]
+        )
+        return "sleep " + str(self.data["test.sleep_time"])
 
     def post_run(self, return_code):
-        results_sleep = random.uniform(self.args['results.min'], self.args['results.max'])
+        results_sleep = random.uniform(
+            self.args["results.min"], self.args["results.max"]
+        )
         time.sleep(results_sleep)
 
-        row_test = {'name': self.args['row_name'], 'value': self.args['row_value']}
-        return [{'data': json.dumps(self.data), 'row': row_test}]
+        row_test = {"name": self.args["row_name"], "value": self.args["row_value"]}
+        return [{"data": json.dumps(self.data), "row": row_test}]
 
     def clean(self):
         pass

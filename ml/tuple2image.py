@@ -3,10 +3,19 @@
 import hash_framework as hf
 import json, png, sys
 
-def write_tuple(rounds, places, run_return):
-    out_name = "images/" + run_return + "-r" + str(rounds) + "-p" + '-'.join(map(str, places)) + ".png"
 
-    #7C2529
+def write_tuple(rounds, places, run_return):
+    out_name = (
+        "images/"
+        + run_return
+        + "-r"
+        + str(rounds)
+        + "-p"
+        + "-".join(map(str, places))
+        + ".png"
+    )
+
+    # 7C2529
     difference = (0xFF, 0x00, 0x00)
     no_difference = (0x00, 0x00, 0xFF)
     background_color = (0xFF, 0xFF, 0xFF)
@@ -14,8 +23,8 @@ def write_tuple(rounds, places, run_return):
     box_height = 1
     image_width = 16
     image_height = 3
-    width = box_width*image_width
-    height = box_height*image_height
+    width = box_width * image_width
+    height = box_height * image_height
     arr = []
     for i in range(0, height):
         na = []
@@ -26,18 +35,18 @@ def write_tuple(rounds, places, run_return):
     for i in range(0, rounds):
         bx = i % image_width
         by = i // image_width
-        for x in range(box_width*bx, box_width*bx + box_width):
-            for y in range(box_height*by, box_height*by + box_height):
+        for x in range(box_width * bx, box_width * bx + box_width):
+            for y in range(box_height * by, box_height * by + box_height):
                 arr[y][x] = no_difference
 
     for i in places:
         bx = i % image_width
         by = i // image_width
-        for x in range(box_width*bx, box_width*bx + box_width):
-            for y in range(box_height*by, box_height*by + box_height):
+        for x in range(box_width * bx, box_width * bx + box_width):
+            for y in range(box_height * by, box_height * by + box_height):
                 arr[y][x] = no_difference
 
-    png.from_array(arr, 'RGB').save(out_name)
+    png.from_array(arr, "RGB").save(out_name)
 
 
 def __main__():
@@ -45,10 +54,14 @@ def __main__():
     db.close()
     db.init_psql()
 
-    assert(len(sys.argv) == 2)
+    assert len(sys.argv) == 2
     tid = int(sys.argv[1])
 
-    q = "SELECT id, run_return, run_time, args FROM jobs WHERE task_id=" + str(tid) + " AND state=2 ORDER BY run_time DESC;"
+    q = (
+        "SELECT id, run_return, run_time, args FROM jobs WHERE task_id="
+        + str(tid)
+        + " AND state=2 ORDER BY run_time DESC;"
+    )
     r, cur = db.execute(q, cursor=True)
 
     results = []
@@ -57,17 +70,16 @@ def __main__():
     while row != None:
         jid, run_return, run_time, args = row
         obj = json.loads(args)
-        algo = obj['algo']
-        rounds = obj['rounds']
-        places = obj['places']
+        algo = obj["algo"]
+        rounds = obj["rounds"]
+        places = obj["places"]
 
         if run_return == 10:
-            write_tuple(rounds, places, 'sat')
+            write_tuple(rounds, places, "sat")
         elif run_return == 20:
-            write_tuple(rounds, places, 'unsat')
+            write_tuple(rounds, places, "unsat")
 
         row = cur.fetchone()
-
 
 
 __main__()

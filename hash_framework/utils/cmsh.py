@@ -1,7 +1,9 @@
 import cmsh
 
+
 def print_cmsh(obj):
     print(repr_cmsh(obj))
+
 
 def repr_cmsh(obj) -> str:
     if isinstance(obj, (list, tuple)):

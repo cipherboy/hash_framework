@@ -5,6 +5,7 @@ from multiprocessing.pool import ThreadPool
 from multiprocessing import Pool
 import hash_framework.kernels
 
+
 def build_client_set(uris):
     if type(uris) == str:
         uris = [uris]
@@ -15,10 +16,12 @@ def build_client_set(uris):
 
     return cs
 
+
 def _add_sats_client(arg):
     c_uri, post_data = arg
     c = Client(c_uri)
     return c.add_sats(post_data)
+
 
 def _send_sats(client_list, work_list, kernel_name):
     csi = 0
@@ -59,7 +62,7 @@ def wait_results(client_list, c_jids, on_results):
 
             all_finished = False
 
-            #try:
+            # try:
             j_results = c.bulk_result(c_jids[i])
             if len(j_results) == 0:
                 print("Received no results from " + c.uri)

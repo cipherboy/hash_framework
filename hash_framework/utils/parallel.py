@@ -1,6 +1,7 @@
 import multiprocessing
 import time
 
+
 def block_until_slots(queue, max_threads, granularity):
     while all(map(lambda x: not x.ready(), queue)) and len(queue) >= max_threads:
         time.sleep(granularity)
@@ -8,8 +9,9 @@ def block_until_slots(queue, max_threads, granularity):
     return list(filter(lambda x: not x.ready(), queue))
 
 
-
-def parallel_run(func, generator, processes=multiprocessing.cpu_count(), granularity=0.1):
+def parallel_run(
+    func, generator, processes=multiprocessing.cpu_count(), granularity=0.1
+):
     pool = multiprocessing.Pool(processes)
     proc_queue: list = []
 

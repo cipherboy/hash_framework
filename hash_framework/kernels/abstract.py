@@ -2,6 +2,7 @@ from hash_framework.config import config
 import os, random
 import json, time
 
+
 class Kernel:
     def __init__(self, jid, args):
         self.jid = jid
@@ -27,13 +28,13 @@ class Kernel:
         s = str(random.randint(100000000000000, 999999999999999))
 
         while True:
-            f = open(dir_path + '/lock', 'w')
+            f = open(dir_path + "/lock", "w")
             f.write(s)
             f.close()
 
             time.sleep(0.01 * random.randint(1, 10))
 
-            contents = open(dir_path + '/lock', 'r').read()
+            contents = open(dir_path + "/lock", "r").read()
             if len(contents) == len(s):
                 if contents == s:
                     return True
