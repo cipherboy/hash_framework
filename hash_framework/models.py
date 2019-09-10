@@ -1,7 +1,10 @@
 from hash_framework.config import config
 from hash_framework.utils import *
 
-import os, collections, subprocess
+import os
+import collections
+import subprocess
+
 
 class models:
     def __init__(self):
@@ -139,7 +142,6 @@ class models:
         os.system("mkdir -p " + self.model_dir + "/" + ndir)
         os.chdir(self.model_dir + "/" + ndir)
 
-
     def build(self, bc="problem.bc", cnf="problem.cnf"):
         assert(type(bc) == str)
         assert(type(cnf) == str)
@@ -231,7 +233,6 @@ class models:
             f.flush()
             f.close()
 
-
         def write_values(given_vars, prefix, name, mode='w'):
             f = open(name, mode)
             i = 0
@@ -248,7 +249,7 @@ class models:
 
             for k in clause_dedupe_s:
                 if prefix_match == None or (prefix_match != None and
-                       len(prefix_match) > 0 and prefix == k[0:len(prefix)]):
+                                            len(prefix_match) > 0 and prefix == k[0:len(prefix)]):
                     f.write(k + " := " + translate(clause_dedupe_s[k]) + ";\n")
 
             f.flush()
@@ -312,13 +313,17 @@ class models:
                 elif delta[i] == '.':
                     r.append(("equal", avar + str(aoffset + i), bvar + str(boffset + i)))
                 elif delta[i] == '+':
-                    r.append(("and", ("equal", avar + str(aoffset + i), 'F'), ("equal", bvar + str(boffset + i), 'T')))
+                    r.append(("and", ("equal", avar + str(aoffset + i), 'F'),
+                              ("equal", bvar + str(boffset + i), 'T')))
                 elif delta[i] == '-':
-                    r.append(("and", ("equal", avar + str(aoffset + i), 'T'), ("equal", bvar + str(boffset + i), 'F')))
+                    r.append(("and", ("equal", avar + str(aoffset + i), 'T'),
+                              ("equal", bvar + str(boffset + i), 'F')))
                 elif delta[i] == 'T':
-                    r.append(("and", ("equal", avar + str(aoffset + i), 'T'), ("equal", bvar + str(boffset + i), 'T')))
+                    r.append(("and", ("equal", avar + str(aoffset + i), 'T'),
+                              ("equal", bvar + str(boffset + i), 'T')))
                 elif delta[i] == 'F':
-                    r.append(("and", ("equal", avar + str(aoffset + i), 'F'), ("equal", bvar + str(boffset + i), 'F')))
+                    r.append(("and", ("equal", avar + str(aoffset + i), 'F'),
+                              ("equal", bvar + str(boffset + i), 'F')))
             if len(r) == 1:
                 r.append(("equal", 'T', 'T'))
                 r.append(("equal", 'T', 'T'))
@@ -328,10 +333,10 @@ class models:
             r = ["and"]
             for e in dlist:
                 delta = e[0]
-                avar=e[1]
-                aoffset=e[2]
-                bvar=e[3]
-                boffset=e[4]
+                avar = e[1]
+                aoffset = e[2]
+                bvar = e[3]
+                boffset = e[4]
                 r.append(models.vars.differential(delta, avar, aoffset, bvar, boffset))
             return tuple(r)
 
@@ -339,10 +344,10 @@ class models:
             r = ["and"]
             for e in dlist:
                 delta = e[0]
-                avar=e[1]
-                aoffset=e[2]
-                bvar=e[3]
-                boffset=e[4]
+                avar = e[1]
+                aoffset = e[2]
+                bvar = e[3]
+                boffset = e[4]
                 r.append(('not', models.vars.differential(delta, avar, aoffset, bvar, boffset)))
             return tuple(r)
 
@@ -350,10 +355,10 @@ class models:
             r = ["or"]
             for e in dlist:
                 delta = e[0]
-                avar=e[1]
-                aoffset=e[2]
-                bvar=e[3]
-                boffset=e[4]
+                avar = e[1]
+                aoffset = e[2]
+                bvar = e[3]
+                boffset = e[4]
                 r.append(models.vars.differential(delta, avar, aoffset, bvar, boffset))
             return tuple(r)
 

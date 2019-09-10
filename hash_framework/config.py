@@ -1,24 +1,12 @@
 from os.path import expanduser
+from multiprocessing import cpu_count
+
 
 class config:
     base_path = expanduser("~")
-    threads = 1
-
-    tools = base_path + "/tools"
-
-    cms_bin = tools + "/cryptominisat5"
-    cms_args = []
-
-    bc_bin = tools + "/bc2cnf"
-    bc_args = ["-nots", "-nocoi", "-nosimplify"]
-
-    model_dir = base_path + "/models"
-    cache_dir = base_path + "/kernel_cache"
-    sat_dir = base_path + "/sats"
+    threads = cpu_count()
 
     results_dir = base_path + "/results"
-
-    default_adder = [{"chaining": None, "type": "rca"}]
 
     # Change during deploy
     psql_host = "localhost"
@@ -29,10 +17,4 @@ class config:
     job_count = 1
     manager_uri = "http://10.1.30.250:8000"
     scheduler_uri = "http://10.1.30.250:8001"
-
-    def update_basepath(base_path):
-        config.base_path = base_path
-        config.tools = base_path + "/tools"
-        cms_bin = tools + "/cryptominisat5"
-        bc_bin = tools + "/bc2cnf"
-        model_dir = base_path + "/tmpmodels"
+    gatherer_uri = "http://192.168.1.18:8002"
