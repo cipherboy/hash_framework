@@ -122,3 +122,7 @@ Session.vim
 tags
 
 ml/images/
+
+# Random stuff
+runs/*.txt
+runs/**/*.txt
