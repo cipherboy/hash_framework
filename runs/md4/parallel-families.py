@@ -4,7 +4,9 @@ import itertools
 import multiprocessing
 
 import cmsh
+
 from hash_framework.algorithms import md4
+import hash_framework.utils as hfu
 
 def build_collision(family, rounds):
     model = cmsh.Model()
@@ -43,20 +45,14 @@ def build_collision(family, rounds):
 
     model.cleanup()
 
+def args_gen():
+    for rounds in range(20, 33, 4):
+        for fs in range(1, rounds//4):
+            for family in itertools.combinations(range(0, rounds-4), fs):
+                yield(family, rounds)
 
 def main():
-    rounds = 16
-
-    pool = multiprocessing.Pool(processes=4)
-
-    for rounds in range(16, 33, 4):
-        for fs in range(1, rounds):
-            for family in itertools.permutations(range(0, rounds-4), fs):
-                # build_collision(family, rounds)
-                pool.apply_async(build_collision, args=(family, rounds))
-
-    pool.close()
-    pool.join()
+    hfu.parallel_run(build_collision, args_gen)
 
 if __name__ == "__main__":
     main()

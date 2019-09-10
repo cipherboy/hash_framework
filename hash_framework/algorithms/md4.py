@@ -1,6 +1,9 @@
 import hash_framework.algorithms._md4 as _md4
 import functools, collections
 
+import cmsh
+from hash_framework.algorithms.utils import reshape
+
 class md4:
     def r1(a, b, c, d, x, l):
         return _md4.md4r1(a, b, c, d, x, l)
@@ -45,6 +48,28 @@ class md4:
             cols.append("round" + str(i))
         cols.append("result");
         return cols
+
+    def eval(self, model, block, iv=None, rounds=None):
+        if rounds is None:
+            rounds = self.rounds
+        if isinstance(rounds, int):
+            rounds = range(0, rounds)
+        if iv is None:
+            iv = self.default_state[:]
+
+        block = reshape(model, block, 16, 32)
+        state = reshape(model, iv[:], 4, 32)
+        intermediate = []
+
+        for r_index in rounds:
+            a, b, c, d = state
+            element = block[self.block_schedule[r_index]]
+            new_a = self.round_funcs[r_index](a, b, c, d, element)
+            intermediate.append(new_a)
+            state = d, new_a, b, c
+
+        return state, intermediate
+
 
     def compute(self, model, block, iv=None, rounds=None):
         if iv == None:
