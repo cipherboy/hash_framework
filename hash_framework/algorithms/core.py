@@ -20,5 +20,5 @@ def lookup(name):
 def resolve(name):
     if isinstance(name, str):
         name = lookup(name)
-
-    return name()
+        return name()
+    return name

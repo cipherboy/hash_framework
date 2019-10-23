@@ -48,6 +48,14 @@ class md4:
         cols.append("result")
         return cols
 
+    def type(self, column):
+        if column in ('iv', 'result'):
+            return 'hex|128'
+        elif column == 'block':
+            return 'hex|512'
+        else:
+            return 'hex|32'
+
     def eval(self, model, block, iv=None, rounds=None):
         if rounds is None:
             rounds = self.rounds
@@ -70,8 +78,8 @@ class md4:
         return state, intermediate
 
     def compute(self, model, block, iv=None, rounds=None):
-        if iv == None:
+        if iv is None:
             iv = self.default_state[:]
-        if rounds == None:
+        if rounds is None:
             rounds = self.rounds
         return _md4.md4(model, block, iv=iv, rounds=rounds)

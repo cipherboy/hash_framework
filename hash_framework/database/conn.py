@@ -27,6 +27,24 @@ class Database:
             host=host, user=user, password=password, database=database
         )
 
+    def to_type(col_type):
+        if col_type.startswith('hex'):
+            # Use a TEXT field of size |bits (if specified after the type
+            # identifier). Encode and decode to/from hex, transparently
+            # returning an integer to the caller.
+            if self.type == "sqlite3":
+                # sqlite3 doesn't enforce varchar lengths
+                return 'TEXT'
+            # Postgres enforces widths; handle the optional bits specifier
+            width = 0
+            if '|' in col_type:
+                p_index = col_type.index('|')
+                width = int(col_type[p_index+1:])
+
+            if width == 0:
+                return 'TEXT'
+            return 'CHAR(' + str(width) + ')'
+
     def sqlite_rowid(self, r, c, cursor):
         lastrowid = c.lastrowid
 

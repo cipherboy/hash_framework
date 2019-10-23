@@ -1,3 +1,6 @@
+check:
+	pytest-3
+
 install:
 	pip3 install --user -e .
 
