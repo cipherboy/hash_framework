@@ -1,4 +1,4 @@
-from hash_framework.config import config
+from hash_framework.config import Config
 import requests, socket, psutil, subprocess
 
 

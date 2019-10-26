@@ -2,7 +2,7 @@ from os.path import expanduser
 from multiprocessing import cpu_count
 
 
-class config:
+class Config:
     base_path = expanduser("~")
     threads = cpu_count()
 

@@ -3,7 +3,7 @@ import base64, json
 import subprocess, sys, random
 
 from hash_framework.workers.utils import *
-from hash_framework.config import config
+from hash_framework.config import Config
 import hash_framework.kernels as kernels
 from multiprocessing import Process
 

@@ -28,11 +28,11 @@ class sha1:
 
     def type(self, column):
         if column in ('iv', 'result'):
-            return 'hex|' + str(state_size)
+            return 'hex|' + str(self.state_size)
         elif column == 'block':
-            return 'hex|' + str(block_size)
+            return 'hex|' + str(self.block_size)
         else:
-            return 'hex|' + str(int_size)
+            return 'hex|' + str(self.int_size)
 
     def block_schedule(self, model, block):
         return _sha1.sha1_blockschedule(model, block)

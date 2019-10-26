@@ -1,4 +1,5 @@
 check:
+	python3 -c 'import hash_framework'
 	pytest-3
 
 install:

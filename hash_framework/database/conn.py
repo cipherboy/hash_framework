@@ -4,23 +4,23 @@ import psycopg2.extras
 import time
 import sys
 
-from hash_framework.config import config
+from hash_framework.config import Config
 
 
 class Database:
     def __init__(self, path=None):
         if path is None:
-            path = config.results_dir + "/framework_results.db"
+            path = Config.results_dir + "/framework_results.db"
 
         self.type = "sqlite3"
         self.path = path
         self.conn = sqlite3.connect(self.path)
 
     def init_psql(self, database=None, host=None, user=None, password=None):
-        database = database if database is not None else config.psql_database
-        host = host if host is not None else config.psql_host
-        user = user if user is not None else config.psql_user
-        password = password if password is not None else config.psql_password
+        database = database if database is not None else Config.psql_database
+        host = host if host is not None else Config.psql_host
+        user = user if user is not None else Config.psql_user
+        password = password if password is not None else Config.psql_password
 
         self.type = "psql"
         self.conn = psycopg2.connect(

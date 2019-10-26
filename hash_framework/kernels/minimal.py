@@ -2,7 +2,7 @@ from hash_framework.kernels.abstract import Kernel
 import hash_framework.attacks as attacks
 import hash_framework.algorithms as algorithms
 from hash_framework.models import models
-from hash_framework.config import config
+from hash_framework.config import Config
 
 import os.path, shutil
 import json, subprocess

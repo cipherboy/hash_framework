@@ -1,5 +1,5 @@
 from hash_framework.kernels.abstract import Kernel
-from hash_framework.config import config
+from hash_framework.config import Config
 
 import os.path, shutil
 import json, subprocess

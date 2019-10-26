@@ -1,5 +1,5 @@
 import requests, json
-from hash_framework.config import config
+from hash_framework.config import Config
 
 
 class Client:
