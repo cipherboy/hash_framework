@@ -34,6 +34,20 @@ def test_known_value():
     assert list(map(int, res_known)) == list(map(int, res))
 
 
+def test_md4_eval():
+    iv = [0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476]
+    rounds = 16
+    block = [0x00000080] + [0x00000000] * 15
+
+    model = cmsh.Model()
+    h = md4()
+
+    output_state, intermediate = h.eval(model, block, iv, rounds)
+    actual_state = list(map(int, output_state))
+    expected_state = [0xaddcb303, 0x3665f296, 0x8ee8f245, 0xa483a664]
+
+    assert actual_state == expected_state
+
 def test_md4_known_collision():
     model = cmsh.Model()
     h = md4()
