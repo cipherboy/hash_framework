@@ -10,11 +10,12 @@ def print_usage():
 
 
 def __main__():
-    db = hash_framework.database()
+    db = hash_framework.database.Database()
+    config = hash_framework.Config()
 
     if len(sys.argv) >= 2:
         if sys.argv[1] == "sqlite" or sys.argv[1] == "sqlite3":
-            db_path = config.results_dir + "/worker_results.db"
+            db_path = config.results_dir + "/framework_results.db"
             if len(sys.argv) == 3:
                 db_path = sys.argv[2]
 
@@ -27,13 +28,16 @@ def __main__():
             print_usage()
             return
 
-    for name in hash_framework.algorithms.all_algorithms:
-        algo = hash_framework.algorithms.lookup(name)
-
+    for name in ['md4', 'md5', 'sha1']:
         try:
-            hash_framework.attacks.collision.create_table(algo, db)
-        except:
-            pass
+            algo = hash_framework.algorithms.resolve(name)
+            additional = []
+            additional.append("tag TEXT")
+            additional.append("generated TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+            query = hash_framework.database.tables.create_table_collision(db, algo, f"{name}_collision")
+            db.execute(query)
+        except Exception as e:
+            print(e, file=sys.stderr)
 
 
 if __name__ == "__main__":
