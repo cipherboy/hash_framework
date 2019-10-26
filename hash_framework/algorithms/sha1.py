@@ -26,8 +26,37 @@ class sha1:
         cols.append("result")
         return cols
 
+    def type(self, column):
+        if column in ('iv', 'result'):
+            return 'hex|' + str(state_size)
+        elif column == 'block':
+            return 'hex|' + str(block_size)
+        else:
+            return 'hex|' + str(int_size)
+
     def block_schedule(self, model, block):
         return _sha1.sha1_blockschedule(model, block)
+
+    def eval(self, model, block, iv=None, rounds=None):
+        if rounds is None:
+            rounds = self.rounds
+        if isinstance(rounds, int):
+            rounds = range(0, rounds)
+        if iv is None:
+            iv = self.default_state[:]
+
+        block = reshape(model, block, 16, 32)
+        block_schedule = self.block_schedule(self, model, block)
+        state = reshape(model, iv[:], 4, 32)
+        intermediate = []
+
+        for r_index in rounds:
+            element = block_schedule[r_index]
+            new_state = self.round_funcs[r_index](state, w)
+            intermediate.append(new_state)
+            state = new_state[:]
+
+        return state, intermediate
 
     def compute(self, model, block, iv=None, rounds=None):
         if iv == None:
