@@ -27,7 +27,7 @@ class Database:
             host=host, user=user, password=password, database=database
         )
 
-    def to_type(col_type):
+    def to_type(self, col_type, binary=False):
         if col_type.startswith('hex'):
             # Use a TEXT field of size |bits (if specified after the type
             # identifier). Encode and decode to/from hex, transparently
@@ -41,9 +41,14 @@ class Database:
                 p_index = col_type.index('|')
                 width = int(col_type[p_index+1:])
 
+                if not binary:
+                    assert (width % 4) == 0
+                    width = width//4
+
             if width == 0:
                 return 'TEXT'
             return 'CHAR(' + str(width) + ')'
+        assert False
 
     def sqlite_rowid(self, r, c, cursor):
         lastrowid = c.lastrowid
