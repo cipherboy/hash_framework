@@ -20,6 +20,7 @@ class md4:
     name = "md4"
     rounds = 48
     block_size = 512
+    blocks = 16
     state_size = 128
     int_size = 32
     round_size = 32

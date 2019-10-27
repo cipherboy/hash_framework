@@ -22,3 +22,9 @@ def resolve(name):
         name = lookup(name)
         return name()
     return name
+
+def fresh(name):
+    if isinstance(name, str):
+        name = lookup(name)
+        return name()
+    return fresh(name.name)
