@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 import hash_framework
 import sys
 
@@ -20,7 +22,7 @@ def __main__():
                 db_path = sys.argv[2]
 
             db.close()
-            db = hash_framework.database(path=db_path)
+            db = hash_framework.database.Database(path=db_path)
         elif sys.argv[1] == "psql":
             db.close()
             db.init_psql()
@@ -34,7 +36,8 @@ def __main__():
             additional = []
             additional.append("tag TEXT")
             additional.append("generated TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
-            query = hash_framework.database.tables.create_table_collision(db, algo, f"{name}_collision")
+            additional.append("rounds INTEGER")
+            query = hash_framework.database.tables.create_table_collision(db, algo, f"{name}_collision", additional=additional)
             db.execute(query)
         except Exception as e:
             print(e, file=sys.stderr)
