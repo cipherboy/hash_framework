@@ -61,6 +61,27 @@ class md4:
         else:
             return 'hex|32'
 
+    def format(self, model, prefix: str, block=None, iv=None, output=None, rounds=None):
+        result = {}
+        if block is not None:
+            block = reshape(model, block, 1, 512)
+            result[prefix + 'block'] = hex(int(block))[2:]
+
+        if state is not None:
+            state = reshape(model, iv, 1, 128)
+            result[prefix + 'state'] = hex(int(state))[2:]
+
+        if output is not None:
+            output = reshape(model, output, 1, 128)
+            result[prefix + 'state'] = hex(int(state))[2:]
+
+        if rounds is not None:
+            rounds = reshape(model, output, self.rounds, 32)
+            for index, round_value in enumerate(rounds):
+                result[prefix + f'round{index}'] = hex(int(round_value))[2:]
+
+        return result
+
     def eval(self, model, block, iv=None, rounds=None):
         if rounds is None:
             rounds = self.rounds

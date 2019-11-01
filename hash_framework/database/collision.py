@@ -43,5 +43,43 @@ def validate_collision(algo, o_model, block_1, iv_1, block_2, iv_2):
             return True
         return False
 
-def save_collision(algo, model, block_1, iv_1, output_1, rounds_1, block_2, iv_2, output_2, rounds_2):
+def validate_output(algo, o_model, block, iv, output, rounds):
+    hf: hfa.md4 = hfa.fresh(algo)
+    block  = _normalize_(o_model,  block)
+    iv     = _normalize_(o_model,    iv)
+    output = _normalize_(o_model, output)
+    rounds = _normalize_(o_model, rounds)
+
+    with cmsh.Model() as model:
+        output_a, rounds_a = hf.compute(model, block, iv=iv, rounds=algo.rounds)
+
+        output_a = _normalize_(model, output_a)
+        rounds_a = _normalize_(model, rounds_a)
+
+        assert output_a == output
+        assert rounds_a == rounds
+
+def save_collision(algo, model, block_1, iv_1, output_1, rounds_1, block_2, iv_2, output_2, rounds_2, tag=None):
     swap = validate_collision(algo, model, block_1, iv_1, block_2, iv_2)
+    validate_output(algo, model, block_1, iv_1, output_1, rounds_1)
+    validate_output(algo, model, block_2, iv_2, output_2, rounds_2)
+
+    if swap:
+        tmp = (block_2, iv_2, output_2, rounds_2)
+        block_2, iv_2, output_2, rounds_2 = (block_1, iv_1, output_1, rounds_1)
+        block_1, iv_1, output_1, rounds_1 = tmp
+
+    cols = ['rounds']
+    values = [algo.rounds]
+
+    algo_columns = set()
+
+    for column, value in enumerate(algo.format(model, block_1, iv_1, output_1, rounds_1)):
+        algo_columns.add(column)
+        cols['h1' + column] = value
+
+    for column, value in enumerate(algo.format(model, block_2, iv_2, output_2, rounds_2)):
+        cols['h2' + column] = value
+
+    for column in algo_columns:
+        # pass
