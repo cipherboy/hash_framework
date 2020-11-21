@@ -1,6 +1,6 @@
 check:
 	python3 -c 'import hash_framework'
-	pytest-3
+	python3 -m pytest
 
 install:
 	pip3 install --user -e .
