@@ -52,3 +52,13 @@ def reshape(model: cmsh.Model, vec, num_elements: int, width: int):
         return reshape(model, new_vec, num_elements, width)
 
     raise ValueError(f"Object was of unknown type: {type(vec)}")
+
+def split_hex(string, width=8):
+    result = []
+    for i in range(0, len(string), width):
+        # Reverse each group of two within each block
+        block = ""
+        for j in range(0, width, 2):
+            block = string[i + j : i + j + 2] + block
+        result.append(int(block, 16))
+    return result

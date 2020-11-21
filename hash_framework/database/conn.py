@@ -105,6 +105,8 @@ class Database:
                 if i < limit - 1:
                     time.sleep(1)
                 self.conn.rollback()
+                if i == limit - 1:
+                    raise
                 pass
             if c:
                 c.close()
@@ -132,6 +134,8 @@ class Database:
                     time.sleep(1)
 
                 self.conn.rollback()
+                if i == limit - 1:
+                    raise
                 pass
 
             if c:
@@ -162,6 +166,8 @@ class Database:
                     time.sleep(1)
 
                 self.conn.rollback()
+                if i == limit - 1:
+                    raise
                 pass
 
         if c:

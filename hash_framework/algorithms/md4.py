@@ -47,10 +47,10 @@ class md4:
             self.block_map[self.block_schedule[i]].append(i)
 
     def columns(self):
-        cols = ["iv", "block"]
+        cols = ["state", "block"]
         for i in range(0, self.rounds):
             cols.append("round" + str(i))
-        cols.append("result")
+        cols.append("output")
         return cols
 
     def type(self, column):
@@ -67,16 +67,16 @@ class md4:
             block = reshape(model, block, 1, 512)
             result[prefix + 'block'] = hex(int(block))[2:]
 
-        if state is not None:
-            state = reshape(model, iv, 1, 128)
-            result[prefix + 'state'] = hex(int(state))[2:]
+        if iv is not None:
+            iv = reshape(model, iv, 1, 128)
+            result[prefix + 'state'] = hex(int(iv))[2:]
 
         if output is not None:
             output = reshape(model, output, 1, 128)
-            result[prefix + 'state'] = hex(int(state))[2:]
+            result[prefix + 'output'] = hex(int(output))[2:]
 
         if rounds is not None:
-            rounds = reshape(model, output, self.rounds, 32)
+            rounds = reshape(model, rounds, self.rounds, 32)
             for index, round_value in enumerate(rounds):
                 result[prefix + f'round{index}'] = hex(int(round_value))[2:]
 
@@ -91,7 +91,7 @@ class md4:
             iv = self.default_state[:]
 
         block = reshape(model, block, 16, 32)
-        state = reshape(model, iv[:], 4, 32)
+        state = reshape(model, iv, 4, 32)
         intermediate = []
 
         for r_index in rounds:
