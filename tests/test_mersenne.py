@@ -37,3 +37,26 @@ def test_mersenne_reverse_seed():
 
     assert model.solve()
     assert int(seed) == 1131464071
+
+def test_mersenne_double_seed():
+    model = cmsh.Model()
+    left_seed = model.vec(32)
+    left_state = _mersenne.seed_rand(model, left_seed)
+    left_index = -1
+
+    right_seed = model.vec(32)
+    right_state = _mersenne.seed_rand(model, right_seed)
+    right_index = -1
+
+    model.add_assert(left_seed != right_seed)
+
+    left_value, left_index = _mersenne.gen_rand_long(model, left_state, left_index)
+    right_value, right_index = _mersenne.gen_rand_long(model, right_state, right_index)
+    model.add_assert(left_value == right_value)
+
+    left_value, left_index = _mersenne.gen_rand_long(model, left_state, left_index)
+    right_value, right_index = _mersenne.gen_rand_long(model, right_state, right_index)
+    model.add_assert(left_value == right_value)
+
+    assert model.solve()
+    assert int(left_seed) == int(right_seed)

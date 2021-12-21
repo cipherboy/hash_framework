@@ -54,5 +54,6 @@ def test_save_collision():
                 hf.default_state
             )
         )
+        hfd.create_table(db, hf)
         hfd.save_collision(db, hf, model, block_1, default_state, output_1, rounds_1, block_2, default_state, output_2, rounds_2)
         db.close()
