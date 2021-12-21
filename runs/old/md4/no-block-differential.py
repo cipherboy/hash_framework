@@ -7,15 +7,18 @@ import cmsh
 import hash_framework.algorithms as hfa
 import hash_framework.utils as hfu
 
-def find_differential(state_differential):
+def find_differential(num_block_bits, state_differential):
     with cmsh.Model() as model:
         model.solver.config_timeout(30)
 
         hf: hfa.md4 = hfa.resolve('md4')
 
-        block_1 = model.vec(hf.block_size)
-        block_2 = model.vec(hf.block_size)
-        model.add_assert(block_1 == block_2)
+        raw_block_1 = model.vec(32)
+        raw_block_2 = model.vec(32)
+        model.add_assert((raw_block_1 ^ raw_block_2).bit_sum() == num_block_bits)
+
+        block_1 = [ raw_block_1 ] * (hf.block_size // 32)
+        block_2 = [ raw_block_1 ] * (hf.block_size // 32)
 
         for round_index in range(0, hf.rounds):
             iv_1 = model.vec(hf.state_size)
@@ -44,12 +47,14 @@ def find_differential(state_differential):
 
 
 def args_gen():
-    for num_diff_bits in range(0, 33):
-        for state_diffs in itertools.combinations(range(0, 32), num_diff_bits):
-            differential = 0
-            for bit in state_diffs:
-                differential |= (1 << bit)
-            yield (differential,)
+    for num_block_bits in range(0, 33):
+        for num_diff_bits in range(1, 3):
+            print(num_diff_bits)
+            for state_diffs in itertools.combinations(range(0, 32), num_diff_bits):
+                differential = 0
+                for bit in state_diffs:
+                    differential |= (1 << bit)
+                yield (num_block_bits,differential,)
 
 def main():
     hfu.parallel_run(find_differential, args_gen)
