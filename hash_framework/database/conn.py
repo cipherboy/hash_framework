@@ -2,6 +2,7 @@ import sqlite3
 import psycopg2
 import psycopg2.extras
 import time
+import os
 import sys
 
 from hash_framework.config import Config
@@ -13,7 +14,7 @@ class Database:
             path = Config.results_dir + "/framework_results.db"
 
         self.type = "sqlite3"
-        self.path = path
+        self.path = os.path.expanduser(path)
         self.conn = sqlite3.connect(self.path)
 
     def init_psql(self, database=None, host=None, user=None, password=None):

@@ -40,6 +40,20 @@ def validate_collision(algo, o_model, block_1, iv_1, block_2, iv_2):
             return True
         return False
 
+def validate_order(o_model, block_1, iv_1, block_2, iv_2):
+    block_1 = _normalize_(o_model, block_1)
+    iv_1    = _normalize_(o_model,    iv_1)
+    block_2 = _normalize_(o_model, block_2)
+    iv_2    = _normalize_(o_model,    iv_2)
+
+    assert not (block_1 == block_2 and iv_1 == iv_2)
+
+    if block_1 > block_2:
+        return True
+    if block_1 == block_2 and iv_1 > iv_2:
+        return True
+    return False
+
 def validate_output(algo, o_model, block, iv, output, rounds):
     hf: hfa.md4 = hfa.fresh(algo)
     block  = _normalize_(o_model,  block)
@@ -101,9 +115,40 @@ def save_collision(db, algo, model, block_1, iv_1, output_1, rounds_1, block_2, 
 
     assert len(cols) == len(values)
 
-    create_table(db, algo)
-
     query = "INSERT INTO " + algo.name + "_collisions ("
+    query += ", ".join(cols) + ") VALUES ("
+    query += ", ".join(["?"] * len(cols))
+    query += ")"
+    return db.prepared(query, values)
+
+def save_piece(db, algo, model, round_num, block_1, iv_1, output_1, block_2, iv_2, output_2, tag=None):
+    swap = validate_order(algo, model, block_1, iv_1, block_2, iv_2)
+
+    if swap:
+        tmp = (block_2, iv_2, output_2)
+        block_2, iv_2, output_2 = (block_1, iv_1, output_1)
+        block_1, iv_1, output_1 = tmp
+
+    block_1  = _normalize_(model,  block_1)
+    iv_1     = _normalize_(model,     iv_1)
+    output_1 = _normalize_(model, output_1)
+
+    block_2  = _normalize_(model,  block_2)
+    iv_2     = _normalize_(model,     iv_2)
+    output_2 = _normalize_(model, output_2)
+
+    block_d = block_1 ^ block_2
+    iv_d = iv_1 ^ iv_2
+    output_d = output_1 ^ output_2
+
+    cols = ["round", "h1_block", "h2_block", "d_block", "h1_state",
+            "h2_state", "d_state", "h1_output", "h2_output", "d_output"]
+    values = [round_num, block_1, block_2, block_d, iv_1, iv_2, iv_d,
+              output_1, output_2, output_d]
+
+    assert len(cols) == len(values)
+
+    query = "INSERT INTO " + algo.name + "_collision_pieces ("
     query += ", ".join(cols) + ") VALUES ("
     query += ", ".join(["?"] * len(cols))
     query += ")"
@@ -118,5 +163,13 @@ def create_table(db, algo):
     query = "CREATE TABLE IF NOT EXISTS " + algo.name + "_collisions ("
     query += ", ".join(map(lambda x: x + " TEXT", cols))
     query += ")"
-    return db.execute(query)
+    db.execute(query, commit=True)
 
+    # Differential path pieces, working towards a collision.
+    cols = ["round", "h1_block", "h2_block", "d_block", "h1_state",
+            "h2_state", "d_state", "h1_output", "h2_output", "d_output"]
+
+    query = "CREATE TABLE IF NOT EXISTS " + algo.name + "_collision_pieces ("
+    query += ", ".join(map(lambda x: x + " TEXT", cols))
+    query += ")"
+    db.execute(query, commit=True)
