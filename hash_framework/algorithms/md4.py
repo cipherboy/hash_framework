@@ -54,7 +54,7 @@ class md4:
         return cols
 
     def type(self, column):
-        if column in ('iv', 'result'):
+        if column in ('state', 'output'):
             return 'hex|128'
         elif column == 'block':
             return 'hex|512'
@@ -88,7 +88,7 @@ class md4:
         if isinstance(rounds, int):
             rounds = range(0, rounds)
         if iv is None:
-            iv = self.default_state[:]
+            iv = self.default_state
 
         block = reshape(model, block, 16, 32)
         state = reshape(model, iv, 4, 32)
@@ -105,7 +105,7 @@ class md4:
 
     def compute(self, model, block, iv=None, rounds=None):
         if iv is None:
-            iv = self.default_state[:]
+            iv = self.default_state
         if rounds is None:
             rounds = self.rounds
         return _md4.md4(model, block, iv=iv, rounds=rounds)
